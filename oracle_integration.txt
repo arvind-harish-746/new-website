@@ -1,0 +1,297 @@
+# Oracle Cloud Infrastructure (OCI) Deployment Guide for Cybotz
+
+A step-by-step guide to setting up an Always Free Ubuntu VM on Oracle Cloud, configuring security, domain/DNS, reverse proxy, and deploying the **Cybotz** full-stack platform.
+
+---
+
+## 1. Create & Sign In to Oracle Cloud
+1. Navigate to [Oracle Cloud Free Tier](https://www.oracle.com/cloud/free/).
+2. Click **Start for free** / **Try Oracle Cloud Free Tier**.
+3. Complete account registration (Email, Country, Mobile Verification, and Identity Payment Verification).
+   > *Note: A credit/debit card is required for identity verification. You will not be charged as long as you use Always Free resources.*
+4. After approval, log in to the **Oracle Cloud Console**.
+
+---
+
+## 2. Select Your Home Region
+* Check the region selector in the top-right console header (e.g., `AP-Mumbai`, `EU-Frankfurt`, `US-Ashburn`).
+* Choose a region geographically closest to your primary user base in India (e.g., `ap-mumbai-1` or `ap-hyderabad-1`).
+
+---
+
+## 3. Provision an "Always Free" Ubuntu Compute Instance
+1. In the left navigation menu, go to **Compute** &rarr; **Instances**.
+2. Click **Create instance**.
+3. **Placement**: Keep root compartment defaults.
+4. **Image and Shape**:
+   * Click **Change image** &rarr; Choose **Ubuntu** &rarr; Select **Ubuntu 22.04 LTS** or **Ubuntu 24.04 LTS**.
+   * Click **Change shape** &rarr; Choose **Ampere (ARM Processor)** &rarr; Select **VM.Standard.A1.Flex**.
+   * Set **OCPUs**: `2` to `4` (within the 4 OCPU Always Free allowance).
+   * Set **Memory**: `12 GB` to `24 GB` (within the 24 GB Always Free allowance).
+5. **Networking**:
+   * Select your Virtual Cloud Network (VCN) and ensure the subnet is **Public**.
+   * Ensure **Assign a public IPv4 address** is checked/enabled.
+6. **Add SSH Keys**:
+   * Choose **Generate a key pair for me** and download both the **Private Key** (`.key` / `.pem`) and **Public Key**.
+7. **Boot Volume**: Keep default (50 GB – 100 GB, eligible for Always Free).
+8. Click **Create** and wait 1–2 minutes for the status to turn green (**Running**).
+9. Copy the **Public IP address** displayed on the instance details page.
+10. Attach an **OCI Reserved Public IP** (Elastic Static IP) under *Networking* &rarr; *IP Management* &rarr; *Reserved Public IPs* so the IP never changes on server reboot.
+
+---
+
+## 4. Open Network Ports in OCI Security List
+1. On your Instance Details page, click your **Subnet** link under *Primary VNIC*.
+2. Click the **Default Security List for [VCN]**.
+3. Click **Add Ingress Rules** and configure the following:
+
+| Source CIDR | IP Protocol | Destination Port Range   | Description               |
+| :---        | :---        | :---                     | :---                      |
+| `0.0.0.0/0` | TCP         | `22`                     | SSH Access                |
+| `0.0.0.0/0` | TCP         | `80`                     | HTTP Web Traffic          |
+| `0.0.0.0/0` | TCP         | `443`                    | HTTPS Secure Web Traffic  |
+
+---
+
+## 5. SSH into the Virtual Machine
+On your local machine, open a terminal:
+
+```bash
+# Secure the private key permissions (Linux/macOS)
+chmod 600 oracle_key.pem
+
+# SSH into the VM (Default username is ubuntu)
+ssh -i oracle_key.pem ubuntu@<YOUR_ORACLE_PUBLIC_IP>
+```
+
+---
+
+## 6. Install Base Dependencies on the VM
+Run the following commands once connected to the VM:
+
+```bash
+# 1. Update OS packages
+sudo apt update && sudo apt upgrade -y
+
+# 2. Configure Host Firewalls (UFW & OCI iptables)
+sudo ufw allow OpenSSH
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw --force enable
+
+# Ensure default OCI iptables rules do not drop inbound HTTP/HTTPS traffic
+sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 80 -j ACCEPT
+sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 443 -j ACCEPT
+sudo netfilter-persistent save 2>/dev/null || true
+
+# 3. Install Node.js 20 LTS, Docker, Nginx, and Certbot
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs git nginx certbot python3-certbot-nginx docker.io docker-compose-v2 || sudo apt install -y docker-compose
+
+# 4. Enable Docker for the ubuntu user
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+
+# 5. Install global CLI utilities (PNPM and PM2)
+sudo npm install -g pnpm pm2
+```
+
+> *Tip: Log out (`exit`) and reconnect via SSH so your user joins the `docker` group without needing `sudo`.*
+
+---
+
+## 7. Clone & Configure the Cybotz Application
+```bash
+# Create application root directory
+sudo mkdir -p /var/www/cybotz
+sudo chown -R $USER:$USER /var/www/cybotz
+cd /var/www/cybotz
+
+# Clone repository
+git clone <YOUR_GIT_REPO_URL> .
+cd Cybotz-landing
+
+# Install dependencies
+pnpm install
+```
+
+Create your production environment file:
+```bash
+nano /var/www/cybotz/Cybotz-landing/.env
+```
+
+Paste your production `.env` configuration:
+```env
+NODE_ENV=production
+PORT=5000
+MONGO_URI=mongodb://admin:secretpassword@127.0.0.1:27017/cybotz?authSource=admin
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+JWT_SECRET=super_secure_cybotz_jwt_production_key_2026
+WHATSAPP_TARGET_NUMBER=120363433941861599@g.us
+OPENWA_SERVER_URL=http://localhost:8080/sendText
+WHATSAPP_API_KEY=cybotz_wa_production_key_2026
+WHATSAPP_PORT=8080
+```
+
+---
+
+## 8. Initialize Database Containers & Build the Application
+```bash
+cd /var/www/cybotz/Cybotz-landing
+
+# 1. Start MongoDB and Redis containers
+docker compose up -d || docker-compose up -d
+
+# 2. Build production frontend (dist/public) & backend (dist/index.js)
+pnpm run build
+
+# 3. Seed initial master user into MongoDB
+npx tsx server/seedUsers.ts
+```
+
+---
+
+## 9. Process Management (PM2) & WhatsApp QR Authorization
+
+In the Cybotz architecture, three background processes run concurrently:
+1. `cybotz-web`: Express server (Port 5000) serving the React SPA and `/api/*` endpoints.
+2. `cybotz-worker`: BullMQ background worker consuming WhatsApp jobs from Redis.
+3. `cybotz-wa-runner`: Baileys WhatsApp REST automation engine (Port 8080).
+
+### Step 1: Verify PM2 Configuration
+The repository already contains `ecosystem.config.cjs`:
+```javascript
+module.exports = {
+  apps: [
+    {
+      name: "cybotz-web",
+      script: "dist/index.js",
+      instances: 1,
+      autorestart: true,
+      watch: false,
+      max_memory_restart: "500M",
+      env: { NODE_ENV: "production", PORT: 5000 }
+    },
+    {
+      name: "cybotz-worker",
+      script: "npx",
+      args: "tsx server/worker.ts",
+      autorestart: true,
+      watch: false,
+      max_memory_restart: "300M",
+      env: { NODE_ENV: "production" }
+    },
+    {
+      name: "cybotz-wa-runner",
+      script: "npx",
+      args: "tsx server/run-whatsapp.ts",
+      autorestart: true,
+      watch: false,
+      max_memory_restart: "400M",
+      env: { NODE_ENV: "production" }
+    }
+  ]
+};
+```
+
+### Step 2: Link WhatsApp via Terminal QR Code
+Run the WhatsApp engine in the foreground once to display the terminal QR code:
+```bash
+npx tsx server/run-whatsapp.ts
+```
+1. Open WhatsApp on your smartphone &rarr; **Linked Devices** &rarr; **Link a Device**.
+2. Scan the ASCII QR code printed directly in your terminal.
+3. Once the message `✅ WHATSAPP CONNECTED & READY TO SEND MESSAGES!` appears, press `CTRL + C`.
+4. The authentication credentials will automatically be saved into the `baileys_auth_session/` folder.
+
+### Step 3: Start All Services Under PM2
+```bash
+pm2 start ecosystem.config.cjs
+pm2 save
+sudo env PATH=$PATH:/usr/bin pm2 startup systemd -u $USER --hp /home/$USER
+```
+
+---
+
+## 10. Configure Nginx Reverse Proxy
+```bash
+sudo nano /etc/nginx/sites-available/cybotz.tech
+```
+
+Paste the Nginx virtual host configuration:
+```nginx
+server {
+    listen 80;
+    listen [::]:80;
+    server_name cybotz.tech www.cybotz.tech;
+
+    client_max_body_size 25M;
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript image/svg+xml;
+
+    location / {
+        proxy_pass http://127.0.0.1:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+Enable the configuration:
+```bash
+sudo ln -sf /etc/nginx/sites-available/cybotz.tech /etc/nginx/sites-enabled/
+sudo rm -f /etc/nginx/sites-enabled/default
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+---
+
+## 11. Connect Domain (Hostinger / Cloudflare) & Obtain SSL
+
+### Option A: Via Cloudflare (Recommended)
+1. In Cloudflare DNS, add an **A Record**:
+   * Name: `@` &rarr; Content: `<YOUR_ORACLE_PUBLIC_IP>` (Proxied)
+   * Name: `www` &rarr; Content: `<YOUR_ORACLE_PUBLIC_IP>` (Proxied)
+2. In Cloudflare SSL/TLS settings, set mode to **Full** or **Full (strict)**.
+
+### Option B: Directly in Hostinger DNS Zone
+1. In Hostinger hPanel &rarr; **DNS Zone Editor**:
+   * Change **A Record (`@`)** &rarr; Point to `<YOUR_ORACLE_PUBLIC_IP>`
+   * Change **A Record (`www`)** &rarr; Point to `<YOUR_ORACLE_PUBLIC_IP>`
+
+### Obtain Free Let's Encrypt SSL Certificate:
+Once DNS points to your Oracle VM IP:
+```bash
+sudo certbot --nginx -d cybotz.tech -d www.cybotz.tech --non-interactive --agree-tos -m admin@cybotz.tech
+```
+
+---
+
+## 12. Post-Deployment Verification & Maintenance
+
+### Verification Checklist:
+* **Website Access**: Visit `https://cybotz.tech` &rarr; Verify 3D animations, hero, and theme toggle.
+* **SPA Direct Links**: Refresh `https://cybotz.tech/workshops` &rarr; Must return HTTP 200 (no 404s).
+* **Booking Submission**: Submit a trial session &rarr; Verify WhatsApp message delivery, Google Calendar generation, and MongoDB entry.
+* **Master Login**: Access `https://cybotz.tech` &rarr; Open Bossman Portal &rarr; Log in with initial Master credentials:
+  * **Username:** `Superman`
+  * **Password:** `Ww!32NjjF@1509`
+* **Team Accounts**: Create team accounts (Admin / Editor / Viewer) via the Users tab using WhatsApp OTP verification.
+
+### Updating the Live Website:
+To deploy updates in the future:
+```bash
+cd /var/www/cybotz/Cybotz-landing
+git pull
+pnpm install
+pnpm run build
+pm2 restart all
+```

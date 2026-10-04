@@ -1,0 +1,299 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+}
+
+:root {
+  /* Cyberpunk Dark Theme */
+  --primary: #00F0FF;
+  --primary-foreground: #0F172A;
+  --chart-1: #00F0FF;
+  --chart-2: #38BDF8;
+  --chart-3: #1E293B;
+  --chart-4: #334155;
+  --chart-5: #64748B;
+  --radius: 0.5rem;
+  --background: #0F172A;
+  --foreground: #FFFFFF;
+  --card: #1E293B;
+  --card-foreground: #FFFFFF;
+  --popover: #1E293B;
+  --popover-foreground: #FFFFFF;
+  --secondary: #00F0FF;
+  --secondary-foreground: #0F172A;
+  --muted: #334155;
+  --muted-foreground: #94A3B8;
+  --accent: #00F0FF;
+  --accent-foreground: #0F172A;
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+  --border: #1E293B;
+  --input: #1E293B;
+  --ring: #00F0FF;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
+  }
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [type="button"]:not(:disabled),
+  [type="submit"]:not(:disabled),
+  [type="reset"]:not(:disabled),
+  a[href],
+  select:not(:disabled),
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled) {
+    @apply cursor-pointer;
+  }
+
+  /* Typography */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl;
+  }
+
+  h3 {
+    @apply text-xl md:text-2xl;
+  }
+
+  p {
+    @apply text-base md:text-lg leading-relaxed;
+  }
+
+  /* Scroll offset for fixed header */
+  section[id] {
+    scroll-margin-top: 6rem;
+  }
+}
+
+@layer components {
+  /* Container */
+  .container {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .flex {
+    min-height: 0;
+    min-width: 0;
+  }
+
+  @media (min-width: 640px) {
+    .container {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container {
+      padding-left: 2rem;
+      padding-right: 2rem;
+      max-width: 1280px;
+    }
+  }
+
+  /* Cyberpunk utilities */
+  .glow-cyan {
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+  }
+
+  .text-slate-dark {
+    color: #0F172A;
+  }
+
+  /* Skeleton Shimmer (Task 6) */
+  @keyframes shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  /* Liquid Glass Skeleton Effects */
+  @keyframes liquid-shimmer {
+    0% {
+      transform: translateX(-150%) skewX(-15deg);
+    }
+    50% {
+      transform: translateX(50%) skewX(-15deg);
+    }
+    100% {
+      transform: translateX(200%) skewX(-15deg);
+    }
+  }
+
+  @keyframes liquid-glass-pulse {
+    0%, 100% {
+      opacity: 0.85;
+      box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.2), 0 8px 32px 0 rgba(0, 0, 0, 0.35);
+    }
+    50% {
+      opacity: 1;
+      box-shadow: inset 0 1px 2px 0 rgba(0, 240, 255, 0.35), 0 8px 32px 0 rgba(0, 240, 255, 0.15);
+    }
+  }
+
+  @keyframes liquid-caustic {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  .liquid-glass-base {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(6, 182, 212, 0.04) 50%, rgba(15, 23, 42, 0.65) 100%);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.22), inset 0 -1px 1px 0 rgba(0, 240, 255, 0.08), 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  }
+
+  .liquid-glass-shimmer {
+    background: linear-gradient(
+      105deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.03) 20%,
+      rgba(6, 182, 212, 0.12) 38%,
+      rgba(255, 255, 255, 0.35) 50%,
+      rgba(0, 240, 255, 0.25) 54%,
+      rgba(6, 182, 212, 0.12) 62%,
+      rgba(255, 255, 255, 0.03) 80%,
+      transparent 100%
+    );
+    animation: liquid-shimmer 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+}
+
+/* ==========================================================================
+   PRINT STYLESHEET (Task 8)
+   Optimized for high-contrast, ink-friendly document and article printing.
+   ========================================================================== */
+@media print {
+  /* Hide non-printable and interactive web elements */
+  header,
+  footer,
+  aside,
+  #sec-hero,
+  [aria-label="Cookie consent banner"],
+  [aria-label="Page reading scroll progress"],
+  [aria-label="Scroll back to top of page"],
+  [role="progressbar"],
+  canvas,
+  button,
+  .fixed,
+  .mouse-trail-container {
+    display: none !important;
+  }
+
+  /* Reset colors to clean paper-friendly contrast */
+  html, body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 11pt !important;
+    line-height: 1.5 !important;
+  }
+
+  /* Ensure text and headings are readable black/dark slate */
+  h1, h2, h3, h4, h5, h6, p, span, li, td, th {
+    color: #0f172a !important;
+    text-shadow: none !important;
+  }
+
+  h1 {
+    font-size: 20pt !important;
+    margin-bottom: 12pt !important;
+  }
+
+  h2 {
+    font-size: 16pt !important;
+    margin-top: 14pt !important;
+    margin-bottom: 8pt !important;
+  }
+
+  h3 {
+    font-size: 13pt !important;
+    margin-top: 10pt !important;
+    margin-bottom: 6pt !important;
+  }
+
+  /* Ensure cards, blog articles, and curriculums print cleanly with thin borders */
+  article, .card, .p-8, .p-6, .rounded-2xl, .rounded-xl {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+    margin-bottom: 14pt !important;
+    padding: 12pt !important;
+  }
+
+  /* Code blocks formatting in print */
+  pre, code {
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+    font-size: 9pt !important;
+    white-space: pre-wrap !important;
+    page-break-inside: avoid;
+  }
+
+  /* Clean URLs for outbound links */
+  a {
+    color: #0284c7 !important;
+    text-decoration: underline !important;
+  }
+}

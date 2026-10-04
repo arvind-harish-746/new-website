@@ -1,0 +1,302 @@
+================================================================================
+                    CYBOTZ STEM LANDING PAGE & WHATSAPP API
+                            OPERATIONAL INSTRUCTIONS
+================================================================================
+
+--------------------------------------------------------------------------------
+1. ARCHITECTURE OVERVIEW & PORTS
+--------------------------------------------------------------------------------
+- Frontend Web App:        http://localhost:3000   (Vite + React 19 SPA)
+- Backend Express API:     http://localhost:5000   (Handles /api, JWT Auth, Mongoose)
+- WhatsApp Engine:         http://localhost:8080   (Baileys REST API Runner)
+- Background Worker:       BullMQ Queue            (Consumes WhatsApp jobs from Redis)
+- Database (MongoDB):      mongodb://localhost:27017/cybotz (Mongoose ODM)
+- Cache & Queue (Redis):   redis://localhost:6379  (BullMQ queue backend)
+- Image Compression:       Sharp & Auto-Watcher    (Automatic WebP compression on dev)
+- Calendar Sync:           Google Calendar Engine  (1-Click Add-to-Calendar for clients)
+- Direct Route Portals:
+  * Student Portal:        http://localhost:5000/student (or :3000/student)
+  * Management Portal:     http://localhost:5000/portal  (or /admin)
+
+
+--------------------------------------------------------------------------------
+2. PREREQUISITES & DEPENDENCY SETUP
+--------------------------------------------------------------------------------
+1. Start Database & Message Queue Containers (Docker):
+   cd Cybotz-landing
+   docker compose up -d || docker-compose up -d
+
+2. Install Project Dependencies (pnpm):
+   pnpm install
+
+   *Note: Team accounts (Admin, Editor, Viewer) are generated dynamically
+   via the Admin Portal "Users" tab using secure WhatsApp OTP verification.*
+   *Student accounts can be provisioned in bulk via the automated Excel/CSV sync.*
+
+
+--------------------------------------------------------------------------------
+3. HOW TO START THE APPLICATION (MANUAL 5-TAB METHOD)
+--------------------------------------------------------------------------------
+
+[TAB 1: DOCKER SERVICES (MONGODB + REDIS)]
+Run once in the background:
+  cd Cybotz-landing
+  docker compose up -d
+
+[TAB 2: WHATSAPP SERVER - PORT 8080]
+Runs the WhatsApp Baileys automation engine. Generates QR code in terminal for linking.
+Command:
+  cd Cybotz-landing
+  npx tsx server/run-whatsapp.ts
+
+[TAB 3: BULLMQ WORKER]
+Processes asynchronous message queues dispatched from booking operations.
+Command:
+  cd Cybotz-landing
+  npx tsx server/worker.ts
+
+[TAB 4: BACKEND API SERVER - PORT 5000]
+Handles bookings, clash prevention, JWT authentication, blogs, comments, student sync, and curriculums.
+Command:
+  cd Cybotz-landing
+  npx tsx server/index.ts
+
+[TAB 5: FRONTEND WEB SERVER - PORT 3000]
+Launches the interactive Cybotz website and image auto-compression watcher in dev mode.
+Command:
+  cd Cybotz-landing
+  pnpm run dev
+
+
+--------------------------------------------------------------------------------
+4. ENVIRONMENT CONFIGURATION (.env)
+--------------------------------------------------------------------------------
+Located in `Cybotz-landing/.env`:
+
+  PORT=5000
+  MONGO_URI=mongodb://127.0.0.1:27017/cybotz
+  REDIS_HOST=127.0.0.1
+  REDIS_PORT=6379
+  JWT_SECRET=cybotz_super_secret_jwt_key_2026
+  WHATSAPP_TARGET_NUMBER=##################@g.us
+  OPENWA_SERVER_URL=http://localhost:8080/sendText
+  WHATSAPP_API_KEY=cybotz_wa_key_2026
+  WHATSAPP_PORT=8080
+
+*(Note: Open http://localhost:8080/groups?apiKey=cybotz_wa_key_2026 to find group ID.)
+
+*(Note: When running MongoDB in Docker with auth enabled, use:
+MONGO_URI=mongodb://admin:secretpassword@localhost:27017/cybotz?authSource=admin)*
+
+
+--------------------------------------------------------------------------------
+5. WHATSAPP AUTOMATION & QR AUTHENTICATION PROCEDURE
+--------------------------------------------------------------------------------
+
+- How to Authenticate WhatsApp Session (QR Code):
+  1. Start the WhatsApp Server (`npx tsx server/run-whatsapp.ts`).
+  2. If not logged in, an ASCII QR code will display directly in your terminal console.
+  3. Open WhatsApp on your smartphone -> Settings / Menu -> Linked Devices -> Link a Device.
+  4. Point your phone camera at the terminal QR code to scan and authorize.
+  5. Once authenticated, the terminal logs: "✅ WHATSAPP CONNECTED & READY TO SEND MESSAGES!".
+  6. Credentials persist automatically inside the `baileys_auth_session/` directory.
+
+- WhatsApp API Key Authentication:
+  - All endpoints (/sendText and /groups) require header 'x-api-key' matching WHATSAPP_API_KEY in .env.
+  - The Express backend and BullMQ worker automatically attach this header.
+
+- Session Reset & Re-authentication:
+  If credentials corrupt or you switch numbers:
+  1. Stop the WhatsApp runner (Ctrl+C).
+  2. Delete the `baileys_auth_session` directory.
+  3. Restart `npx tsx server/run-whatsapp.ts` and scan the newly generated QR code.
+
+- Health Check & Group IDs:
+  - Health check endpoint: http://localhost:8080/status (Public)
+  - Group IDs endpoint:   http://localhost:8080/groups?apiKey=cybotz_wa_key_2026
+
+
+--------------------------------------------------------------------------------
+6. ACCESS PORTALS, ROLES & STUDENT ENGINE
+--------------------------------------------------------------------------------
+
+- Access URLs:
+  * Admin / Staff Portal:    http://localhost:5000/portal (or /admin or footer link)
+  * Student Learning Portal: http://localhost:5000/student
+
+- Role Hierarchy & Permissions:
+  * `admin`: Full operations management (Bookings, Blogs, Curriculums, Gallery, Team Management, Student Sync).
+  * `editor`: Content & event management (Blogs, Curriculums, Rescheduling bookings, Gallery, Comment Moderation).
+  * `viewer`: Read-only access to view reservations and dashboard.
+  * `student`: Dedicated Student Learning Portal (`/student`), post and edit own comments on blog articles. Cannot access administrative controls.
+
+- Security Authentication:
+  - Authenticates via JWT Bearer Token issued by `/api/admin/login` or `/api/student/verify-reset-otp`.
+  - Token expires in 12 hours (admin/editor) or 30 days (student).
+
+- Dedicated Student Learning Portal (/student):
+  1. Section 1: My Blog Comments & Discussion Threads:
+     - Lists all comments the student posted across all articles.
+     - 1-Click direct redirect button ("Open Article") to that specific blog post.
+     - Shows all reply interactions from other students/instructors with direct conversation deep links.
+  2. Section 2: Active Curriculum Status & The Next Move:
+     - Live progress percentage across enrolled STEM tracks (Drone Engineering, Robotics, IoT).
+     - Active module milestone details (Step X of Y).
+     - "The Next Move" callout box with target dates, required preparation tasks, and prep guide links.
+
+- Blog Discussion & In-UI Conduct Policy:
+  - Embedded directly below blog articles (no floating window required).
+  - In-UI Conduct Notice: Displayed prominently above the comment box prohibiting vulgarity.
+  - Real-Time Profanity Filtering on both client and server before database persistence.
+  - Clean display: No "Student" badges/labels are shown next to comment author names.
+  - Editors/Admins/Master can delete any comment; students can edit their own.
+
+- Automated Excel / CSV Student Account Synchronizer:
+  - Place `students.xlsx` or `students.csv` in `server/data/`.
+  - Click "Sync Students" in the Admin Portal User Management tab (or `POST /api/admin/students/sync`).
+  - Auto-normalizes phone numbers, generates clean usernames, and sets `mustChangePassword: true`.
+  - Dispatches clean, emoji-free WhatsApp welcome notifications with portal access instructions.
+  - Students set their permanent password on first login via a 6-digit WhatsApp OTP.
+
+- Admin Portal Tabs & Features:
+  1. Reservations Tab: View active bookings, reschedule session times, cancel reservations, batch clear, Google Calendar sync.
+  2. Manage Blogs Tab: Create, edit, and publish rich markdown blog articles with code syntax highlighting.
+  3. Curriculums Tab: Add, edit, or delete modular courses.
+  4. Users Tab: Manage team accounts, OTP account creation, and 1-click "Sync Students" from Excel.
+  5. Changelogs Tab: Comprehensive administrative audit trail.
+  6. Gallery Tab: Upload and manage workshop/lab showcase photos with Sharp WebP compression.
+
+
+--------------------------------------------------------------------------------
+7. BUILD & PRODUCTION DEPLOYMENT COMMANDS
+--------------------------------------------------------------------------------
+
+- Production Build:
+  pnpm run build
+  (Compiles frontend into `dist/public` and backend bundle into `dist/index.js`)
+
+- Type Check:
+  pnpm run check
+  (Runs `tsc --noEmit` to verify type safety with zero errors)
+
+- Start Production Node Server:
+  pnpm run start
+  (Serves both static SPA and Express API from `dist/index.js` on port 5000)
+
+
+--------------------------------------------------------------------------------
+8. ONE-CLICK EXECUTABLE SCRIPTS & ORACLE DEPLOYMENT
+--------------------------------------------------------------------------------
+
+- Make Shell Scripts Executable (Linux / macOS):
+  chmod +x *.sh
+
+- Local One-Click Development Launchers (Starts Docker DBs, Worker, WhatsApp, Backend, Frontend):
+  * Linux / macOS:  ./start-dev.sh
+  * Windows:        Double-click `start-dev.bat`
+
+- Local One-Click Production Launchers (Builds and runs all production services):
+  * Linux / macOS:  ./start-prod.sh
+  * Windows:        Double-click `start-prod.bat`
+
+- Oracle Cloud Always Free Automated Provisioning:
+  * Run on fresh Ubuntu 22.04/24.04 VM:
+    ./setup-oracle.sh
+  * Full step-by-step documentation:
+    See `ORACLE_HOSTING_AND_DEPLOYMENT_GUIDE.md` and `oracle_integration.txt`
+
+
+--------------------------------------------------------------------------------
+9. BLOG POST FORMATTING SAMPLES (ADMIN PORTAL / CONTENT CHEATSHEET)
+--------------------------------------------------------------------------------
+
+The Cybotz blog reader engine automatically parses Markdown into interactive UI
+components. Below are samples for each supported format:
+
+--------------------------------------------------
+A. HEADERS (Renders with glowing cyan dot & divider)
+--------------------------------------------------
+Use `## ` for main sections or `### ` for sub-sections.
+
+Sample:
+## 1. What Are Loops? The Repetition Superpower!
+Loops let you execute repetitive tasks without writing redundant code.
+
+### Step 1: Setting Up the Counter
+We start by declaring an initial iteration value.
+
+
+--------------------------------------------------
+B. CODE BLOCKS (Renders in dark IDE terminal with "Copy Code" button)
+--------------------------------------------------
+Wrap code between triple backticks (```python, ```bash, or ```javascript)
+and closing backticks (```).
+
+Sample:
+```python
+import time
+
+def countdown(seconds):
+    print("Initiating sequence...")
+    for i in range(seconds, 0, -1):
+        print(f"T-minus {i} seconds")
+        time.sleep(1)
+    print("Blastoff!")
+
+countdown(5)
+```
+
+
+--------------------------------------------------
+C. BULLET & NUMBERED LISTS (Renders with styled bullet icons)
+--------------------------------------------------
+Start lines with `- `, `* `, or a numbered format `1. `, `2. `, etc.
+
+Bullet List Sample:
+- Raspberry Pi 4 Model B
+- HC-SR04 Ultrasonic Distance Sensor
+- Breadboard & Jumper Wires
+- SG90 Micro Servo Motor
+
+Numbered List Sample:
+1. Connect the VCC pin of the sensor to the 5V rail on your breadboard.
+2. Connect the GND pin to the common ground rail.
+3. Attach the Echo and Trigger pins to GPIO pins 23 and 24.
+4. Execute the Python script to verify distance readings in the terminal.
+
+
+--------------------------------------------------
+D. COMPLETE COMBINED SAMPLE TEMPLATE (COPY-PASTE READY)
+--------------------------------------------------
+Hey future coders! In this lesson, we will build an automated obstacle-avoidance
+robot using Python and distance sensors.
+
+## Required Hardware Components
+Before writing any code, gather the following hardware:
+- 1x Arduino Uno or Raspberry Pi
+- 1x HC-SR04 Ultrasonic Sensor
+- 1x L298N Motor Driver Module
+- 4x DC Gear Motors and Wheels
+
+## Step 1: Reading Sensor Data
+Here is the script to measure distance in centimeters:
+
+```python
+import time
+
+def read_sensor():
+    trigger_pulse = True
+    echo_time_ms = 12.5
+    distance_cm = (echo_time_ms * 34.3) / 2
+    return round(distance_cm, 1)
+
+current_distance = read_sensor()
+print(f"Current distance to obstacle: {current_distance} cm")
+```
+
+## Challenge for You
+1. Try adjusting the obstacle trigger threshold from 15 cm to 30 cm.
+2. Program a buzzer alarm whenever an object gets closer than 10 cm.
+3. Test your robot in a maze environment!
+
+================================================================================

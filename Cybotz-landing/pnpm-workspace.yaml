@@ -1,0 +1,10 @@
+allowBuilds:
+  '@tailwindcss/oxide': true
+  '@whiskeysockets/baileys': true
+  bcrypt: true
+  cloudflared: true
+  esbuild: true
+  msgpackr-extract: true
+  protobufjs: true
+  puppeteer: true
+  unix-dgram: true

@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://cybotz.tech/sitemap.xml
+
+# Cybotz — Empowering Young Minds with Real-World STEM Skills
+# https://cybotz.tech
