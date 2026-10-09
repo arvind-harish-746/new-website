@@ -7,16 +7,40 @@ export default function CookieBanner() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    let consent: string | null = null;
     try {
-      const consent = localStorage.getItem(COOKIE_CONSENT_KEY);
-      if (!consent) {
-        // Delay slightly for smooth page entry
-        const timer = setTimeout(() => setIsVisible(true), 1200);
-        return () => clearTimeout(timer);
-      }
+      consent = localStorage.getItem(COOKIE_CONSENT_KEY);
     } catch {
-      // Ignore storage errors
+      return;
     }
+    if (consent) return;
+
+    let timer = 0;
+    let observer: MutationObserver | null = null;
+    const showLater = (delay: number) => {
+      timer = window.setTimeout(() => setIsVisible(true), delay);
+    };
+
+    if (document.documentElement.dataset.splash === "on") {
+      observer = new MutationObserver(() => {
+        if (document.documentElement.dataset.splash !== "on") {
+          observer?.disconnect();
+          observer = null;
+          showLater(700);
+        }
+      });
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["data-splash"],
+      });
+    } else {
+      showLater(1200);
+    }
+
+    return () => {
+      window.clearTimeout(timer);
+      observer?.disconnect();
+    };
   }, []);
 
   const handleAccept = () => {

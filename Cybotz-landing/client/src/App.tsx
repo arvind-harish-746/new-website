@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -18,7 +18,8 @@ import OfflinePage from "./pages/OfflinePage";
 import Portal from "./pages/Portal";
 import StudentPortal from "./pages/StudentPortal";
 import { captureUtmParams } from "./lib/utm";
-import { useState } from "react";
+import { shouldPlaySplash } from "./lib/splash";
+import SplashScreen, { SplashGateProvider } from "./components/SplashScreen";
 
 function Router() {
   return (
@@ -42,6 +43,10 @@ function App() {
   const [isOffline, setIsOffline] = useState(
     typeof navigator !== "undefined" ? !navigator.onLine : false
   );
+  const [splashMounted, setSplashMounted] = useState(() =>
+    typeof window !== "undefined" && shouldPlaySplash(window.location.pathname)
+  );
+  const [suspendBackground, setSuspendBackground] = useState(splashMounted);
 
   useEffect(() => {
     // Capture UTM tracking params across all entry routes (Task 10)
@@ -62,14 +67,30 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark">
-        <div className="relative min-h-screen">
-          {isOffline && <OfflineOverlay onRetry={() => setIsOffline(!navigator.onLine)} />}
-          <ScrollProgressBar />
-          <MouseEffects showLabel={false} color="#00F0FF" effectSize={60} />
-          <Router />
-          <ScrollToTop />
-          <CookieBanner />
-        </div>
+        <SplashGateProvider value={{ suspendBackground }}>
+          <div className="relative min-h-screen" inert={splashMounted ? true : undefined}>
+            {isOffline && <OfflineOverlay onRetry={() => setIsOffline(!navigator.onLine)} />}
+            <ScrollProgressBar />
+            <MouseEffects showLabel={false} color="#00F0FF" effectSize={60} />
+            <Router />
+            <ScrollToTop />
+            <CookieBanner />
+          </div>
+          {splashMounted && (
+            <SplashScreen
+              onExitStart={() => setSuspendBackground(false)}
+              onComplete={() => {
+                setSplashMounted(false);
+                const hash = window.location.hash;
+                if (hash.length > 1) {
+                  requestAnimationFrame(() => {
+                    document.getElementById(hash.slice(1))?.scrollIntoView();
+                  });
+                }
+              }}
+            />
+          )}
+        </SplashGateProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );

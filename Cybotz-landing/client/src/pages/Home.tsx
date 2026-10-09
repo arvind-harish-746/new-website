@@ -4,7 +4,7 @@ import AetherFlowHero from "@/elements/ather_bg";
 import { Calendar } from "@/elements/calendar";
 import CybotzTerminal from "@/components/CybotzTerminal";
 import { useLocation } from "wouter";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import {
   Cpu,
@@ -25,6 +25,7 @@ import { INSTITUTIONS } from "@/data";
 import { captureUtmParams } from "@/lib/utm";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { LiquidGlassImage, LiquidGlassSlowNetworkBanner } from "@/components/ui/SkeletonLoader";
+import { useSplashGate } from "@/components/SplashScreen";
 
 interface ContactFormData {
   name: string;
@@ -35,6 +36,8 @@ interface ContactFormData {
 
 export default function Home() {
   const [, setLocation] = useLocation();
+  const { suspendBackground } = useSplashGate();
+  const splashCoveredOnLoad = useRef(suspendBackground).current;
 
   usePageMeta(
     "Cybotz | Empowering Young Minds with Real-World STEM Skills",
@@ -117,7 +120,7 @@ export default function Home() {
     <div className="relative text-white min-h-screen flex flex-col font-sans selection:bg-cyan-500 selection:text-slate-900 bg-transparent">
       {/* Fixed background animating AetherFlowHero behind all content */}
       <div className="fixed inset-0 z-0 pointer-events-none w-full h-full">
-        <AetherFlowHero showContent={false} densityMultiplier={2.8} />
+        <AetherFlowHero showContent={false} densityMultiplier={2.8} suspended={suspendBackground} />
         {/* Transparent overlays to ensure text readability while letting dense aether shine through */}
         <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A]/40 via-transparent to-[#0F172A]/70" />
         <div className="absolute inset-0 bg-radial-at-c from-transparent via-[#0F172A]/20 to-[#0F172A]/70" />
@@ -139,9 +142,9 @@ export default function Home() {
 
           <div className="container px-4 md:px-8 relative z-10 mx-auto">
             <motion.div
-              initial={{ opacity: 0, y: 16, scale: 0.96, filter: "blur(12px)" }}
+              initial={splashCoveredOnLoad ? false : { opacity: 0, y: 16, scale: 0.96, filter: "blur(12px)" }}
               animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-              transition={{
+              transition={splashCoveredOnLoad ? { duration: 0 } : {
                 duration: 1.1,
                 delay: 1.0,
                 ease: [0.16, 1, 0.3, 1]

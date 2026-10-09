@@ -7,12 +7,15 @@ import { ArrowRight, Zap } from 'lucide-react';
 interface AetherFlowHeroProps {
     showContent?: boolean;
     densityMultiplier?: number;
+    /** Pause the constellation while the intro splash is covering the page. */
+    suspended?: boolean;
 }
 
-const AetherFlowHero = ({ showContent = true, densityMultiplier = 2.4 }: AetherFlowHeroProps) => {
+const AetherFlowHero = ({ showContent = true, densityMultiplier = 2.4, suspended = false }: AetherFlowHeroProps) => {
     const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
 
     React.useEffect(() => {
+        if (suspended) return;
         const canvas = canvasRef.current;
         if (!canvas) return;
 
@@ -225,7 +228,7 @@ const AetherFlowHero = ({ showContent = true, densityMultiplier = 2.4 }: AetherF
             window.removeEventListener('mouseout', handleMouseOut);
             cancelAnimationFrame(animationFrameId);
         };
-    }, []);
+    }, [suspended]);
 
     const fadeUpVariants: any = {
         hidden: { opacity: 0, y: 20 },
