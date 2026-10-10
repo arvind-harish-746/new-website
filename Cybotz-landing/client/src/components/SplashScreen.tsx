@@ -3,9 +3,23 @@ import { createPortal } from "react-dom";
 import { gsap } from "gsap";
 import { SPLASH_COLORS, SPLASH_TIMING, markSplashSeen } from "@/lib/splash";
 
-type SplashGateValue = { suspendBackground: boolean };
+export type IntroMode = "none" | "pending" | "video" | "reduced" | "classic";
 
-const SplashGateContext = createContext<SplashGateValue>({ suspendBackground: false });
+type SplashGateValue = {
+  suspendBackground: boolean;
+  intro: IntroMode;
+  notifyModelReady: () => void;
+  finishIntro: () => void;
+  abortToClassic: () => void;
+};
+
+const SplashGateContext = createContext<SplashGateValue>({
+  suspendBackground: false,
+  intro: "none",
+  notifyModelReady: () => {},
+  finishIntro: () => {},
+  abortToClassic: () => {},
+});
 
 export function SplashGateProvider({
   value,

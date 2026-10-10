@@ -81,3 +81,14 @@ export function markSplashSeen(): void {
     /* Private mode and blocked storage still get the in-memory guard. */
   }
 }
+
+/** False when the browser cannot create a WebGL context. The hero then stays empty. */
+export function webglAvailable(): boolean {
+  if (typeof document === "undefined") return false;
+  try {
+    const canvas = document.createElement("canvas");
+    return !!(canvas.getContext("webgl2") || canvas.getContext("webgl"));
+  } catch {
+    return false;
+  }
+}

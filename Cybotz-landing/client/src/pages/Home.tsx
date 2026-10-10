@@ -26,7 +26,6 @@ import { captureUtmParams } from "@/lib/utm";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { LiquidGlassImage, LiquidGlassSlowNetworkBanner } from "@/components/ui/SkeletonLoader";
 import { useSplashGate } from "@/components/SplashScreen";
-import { DroneHud } from "@/components/home/DroneHud";
 
 const HeroCraft = lazy(() =>
   import("@/components/home/HeroCraft").then((mod) => ({ default: mod.HeroCraft }))
@@ -189,8 +188,8 @@ export default function Home() {
               </div>
 
               <div className="hero-craft w-full">
-                <Suspense fallback={<DroneHud paused={suspendBackground} />}>
-                  <HeroCraft paused={suspendBackground} />
+                <Suspense fallback={<div className="hero-flight-slot hero-flight-shimmer" aria-hidden="true" />}>
+                  <HeroCraft />
                 </Suspense>
               </div>
 

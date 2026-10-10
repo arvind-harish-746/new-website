@@ -17,17 +17,22 @@ import {
 import { createPortal } from "react-dom";
 import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
-import { DroneHud } from "./DroneHud";
+import { useSplashGate, type IntroMode } from "@/components/SplashScreen";
+import { ReducedSplash, VideoSplash, type SplashHandoff } from "@/components/home/VideoSplash";
 
 gsap.registerPlugin(ScrollTrigger);
 
 const MODEL = "/models/drone.glb";
 
 useGLTF.setDecoderPath("/draco/");
+useGLTF.preload(MODEL, "/draco/", false);
 
 /**
  * Production DJI FPV (SDC PERFORMANCE, CC BY 4.0). Materials stay as authored.
  * See client/public/models/LICENSE.txt.
+ *
+ * Scroll stays native. An underdamped spring chases the scroll target so the
+ * drone glides, overshoots, and settles. Hijacking scroll would fight ScrollTrigger.
  */
 function StudioLights() {
   const { gl, scene } = useThree();
@@ -59,25 +64,24 @@ const VIEW_DIR = new THREE.Vector3(1.02, 0.4, 1.18).normalize();
 /** Unit sphere at the origin stays inside this NDC half-extent. */
 const NDC_LIMIT = 0.76;
 
-type Pose = { x: number; y: number; s: number; yaw: number; pitch: number; roll: number };
+type Key = { x: number; y: number; s: number };
 
-/** Desktop flight, NDC x right / y up. Edges and gaps, then a settle beside contact. */
-const DESKTOP_PATH: Pose[] = [
-  { x: 0.42, y: 0.1, s: 0.38, yaw: 0.48, pitch: 0.12, roll: 0.05 },
-  { x: 0.84, y: 0.02, s: 0.24, yaw: 1.35, pitch: 0.36, roll: -0.7 },
-  { x: -0.82, y: -0.02, s: 0.2, yaw: 2.55, pitch: -0.18, roll: 0.7 },
-  { x: -0.86, y: -0.42, s: 0.18, yaw: 3.55, pitch: 0.42, roll: -0.22 },
-  { x: 0.86, y: -0.48, s: 0.2, yaw: 4.6, pitch: 0.08, roll: 0.48 },
-  { x: 0.88, y: 0.22, s: 0.2, yaw: 5.55, pitch: -0.3, roll: -0.6 },
-  { x: 0.84, y: -0.08, s: 0.24, yaw: 6.2, pitch: 0.1, roll: 0.05 },
+/** Big left / right / left sweeps. Rotation comes from spring velocity, not these keys. */
+const DESKTOP_PATH: Key[] = [
+  { x: 0.46, y: 0.02, s: 0.76 },
+  { x: -0.78, y: 0.48, s: 0.5 },
+  { x: 0.82, y: -0.5, s: 0.58 },
+  { x: -0.74, y: 0.4, s: 0.46 },
+  { x: 0.78, y: -0.36, s: 0.44 },
+  { x: 0.52, y: -0.5, s: 0.4 },
 ];
 
-/** Mobile stays smaller and rides the right edge instead of crossing the copy. */
-const MOBILE_PATH: Pose[] = [
-  { x: 0.0, y: -0.05, s: 0.36, yaw: 0.42, pitch: 0.1, roll: 0.04 },
-  { x: 0.7, y: -0.58, s: 0.16, yaw: 1.2, pitch: 0.24, roll: -0.42 },
-  { x: 0.74, y: -0.5, s: 0.15, yaw: 2.05, pitch: 0.04, roll: 0.26 },
-  { x: 0.66, y: -0.6, s: 0.17, yaw: 2.75, pitch: 0.08, roll: 0.02 },
+/** Mobile still crosses the screen, with the hero pose large under the headline. */
+const MOBILE_PATH: Key[] = [
+  { x: 0.0, y: -0.08, s: 0.62 },
+  { x: 0.7, y: 0.36, s: 0.44 },
+  { x: -0.64, y: -0.32, s: 0.4 },
+  { x: 0.46, y: -0.58, s: 0.36 },
 ];
 
 function posedCorners(box: THREE.Box3) {
@@ -111,13 +115,13 @@ function frameCamera(camera: THREE.PerspectiveCamera, points: THREE.Vector3[], a
   const hHalf = Math.atan(Math.tan(vHalf) * Math.max(aspect, 0.35));
   let dist = radius / Math.sin(Math.min(vHalf, hHalf));
   camera.near = 0.01;
-  camera.far = dist * 20;
+  camera.far = dist * 30;
   for (let attempt = 0; attempt < 12; attempt += 1) {
     camera.position.copy(VIEW_DIR).multiplyScalar(dist);
     camera.lookAt(0, 0, 0);
     camera.updateMatrixWorld();
     camera.near = Math.max(0.01, dist / 90);
-    camera.far = dist * 12;
+    camera.far = dist * 30;
     camera.updateProjectionMatrix();
     let maxAbs = 0;
     for (const point of points) {
@@ -130,13 +134,14 @@ function frameCamera(camera: THREE.PerspectiveCamera, points: THREE.Vector3[], a
 }
 
 function FramingCamera({ points }: { points: THREE.Vector3[] }) {
-  const { camera, size } = useThree();
+  const { camera, size, invalidate } = useThree();
 
   useLayoutEffect(() => {
     const persp = camera as THREE.PerspectiveCamera;
     const aspect = size.width / Math.max(size.height, 1);
     frameCamera(persp, points, aspect);
-  }, [camera, points, size]);
+    invalidate();
+  }, [camera, points, size, invalidate]);
 
   return null;
 }
@@ -158,7 +163,12 @@ function shadowTexture() {
   return texture;
 }
 
-function catmull(keys: Pose[], t: number, field: keyof Pose) {
+function smooth(t: number) {
+  const x = THREE.MathUtils.clamp(t, 0, 1);
+  return x * x * (3 - 2 * x);
+}
+
+function catmull(keys: Key[], t: number, field: keyof Key) {
   const n = keys.length - 1;
   const x = THREE.MathUtils.clamp(t, 0, 1) * n;
   const i = Math.min(Math.floor(x), n - 1);
@@ -179,31 +189,16 @@ function catmull(keys: Pose[], t: number, field: keyof Pose) {
   );
 }
 
-function samplePath(keys: Pose[], t: number): Pose {
+function samplePath(keys: Key[], t: number): Key {
   return {
     x: catmull(keys, t, "x"),
     y: catmull(keys, t, "y"),
-    s: Math.max(0.08, catmull(keys, t, "s")),
-    yaw: catmull(keys, t, "yaw"),
-    pitch: catmull(keys, t, "pitch"),
-    roll: catmull(keys, t, "roll"),
+    s: Math.max(0.12, catmull(keys, t, "s")),
   };
 }
 
-function blendPose(a: Pose, b: Pose, t: number): Pose {
-  const k = t * t * (3 - 2 * t);
-  return {
-    x: THREE.MathUtils.lerp(a.x, b.x, k),
-    y: THREE.MathUtils.lerp(a.y, b.y, k),
-    s: THREE.MathUtils.lerp(a.s, b.s, k),
-    yaw: THREE.MathUtils.lerp(a.yaw, b.yaw, k),
-    pitch: THREE.MathUtils.lerp(a.pitch, b.pitch, k),
-    roll: THREE.MathUtils.lerp(a.roll, b.roll, k),
-  };
-}
-
-/** Hero cell in viewport NDC, plus a scale that keeps the framed sphere inside it. */
-function measureSlot(): Pose | null {
+/** Hero cell in viewport NDC. Scale fits the framed sphere inside the slot. */
+function measureSlot(): Key | null {
   const el = document.querySelector(".hero-flight-slot");
   if (!el) return null;
   const rect = el.getBoundingClientRect();
@@ -215,10 +210,21 @@ function measureSlot(): Pose | null {
     x: (cx / window.innerWidth) * 2 - 1,
     y: -((cy / window.innerHeight) * 2 - 1) + 0.045,
     s: half / NDC_LIMIT,
-    yaw: 0.48,
-    pitch: 0.12,
-    roll: 0.05,
   };
+}
+
+function flightTarget(progress: number, mobile: boolean, reduce: boolean): Key {
+  const slot = measureSlot();
+  if (reduce) {
+    return slot ?? (mobile ? MOBILE_PATH[0] : DESKTOP_PATH[0]);
+  }
+  const keys = (mobile ? MOBILE_PATH : DESKTOP_PATH).map((key) => ({ ...key }));
+  if (slot) {
+    const cap = mobile ? 0.68 : 0.86;
+    const gain = mobile ? 1.7 : 2;
+    keys[0] = { x: slot.x, y: slot.y, s: Math.min(cap, slot.s * gain) };
+  }
+  return samplePath(keys, progress);
 }
 
 function contactFade() {
@@ -229,20 +235,65 @@ function contactFade() {
   return THREE.MathUtils.clamp(rect.bottom / (window.innerHeight * 0.42), 0, 1);
 }
 
+function integrate(pos: number, vel: number, target: number, dt: number) {
+  const omega = 7.5;
+  const zeta = 0.68;
+  const steps = Math.max(1, Math.ceil(dt / 0.016));
+  const h = dt / steps;
+  let p = pos;
+  let v = vel;
+  for (let i = 0; i < steps; i += 1) {
+    const acc = omega * omega * (target - p) - 2 * zeta * omega * v;
+    v += acc * h;
+    p += v * h;
+  }
+  return [p, v] as const;
+}
+
+function placeOnView(
+  craft: THREE.Group,
+  camera: THREE.PerspectiveCamera,
+  pose: Key,
+  bobY: number,
+  right: THREE.Vector3,
+  up: THREE.Vector3,
+) {
+  camera.updateMatrixWorld();
+  right.setFromMatrixColumn(camera.matrixWorld, 0);
+  up.setFromMatrixColumn(camera.matrixWorld, 1);
+  const dist = Math.max(camera.position.length(), 0.001);
+  const halfH = dist * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
+  const halfW = halfH * Math.max(camera.aspect, 0.35);
+  craft.position.set(0, 0, 0).addScaledVector(right, pose.x * halfW).addScaledVector(up, (pose.y + bobY) * halfH);
+  craft.scale.setScalar(Math.max(0.001, pose.s));
+}
+
 function DroneModel({
   reduce,
   progressRef,
   layerRef,
+  introRef,
+  handoffRef,
 }: {
   reduce: boolean;
   progressRef: MutableRefObject<number>;
   layerRef: RefObject<HTMLDivElement | null>;
+  introRef: MutableRefObject<IntroMode>;
+  handoffRef: MutableRefObject<SplashHandoff>;
 }) {
   const { scene } = useGLTF(MODEL, "/draco/", false);
   const flight = useRef<THREE.Group>(null);
   const rig = useRef<THREE.Group>(null);
+  const shadowRef = useRef<THREE.Mesh>(null);
   const spins = useRef<THREE.Object3D[]>([]);
   const { camera, size } = useThree();
+  const notifyModelReady = useSplashGate().notifyModelReady;
+  const spring = useRef({ x: 0, y: 0, s: 0.7, vx: 0, vy: 0, vs: 0, ready: false });
+  const axes = useRef({ right: new THREE.Vector3(), up: new THREE.Vector3() });
+
+  useEffect(() => {
+    notifyModelReady();
+  }, [notifyModelReady]);
 
   const fitted = useMemo(() => {
     const root = scene.clone(true);
@@ -277,52 +328,95 @@ function DroneModel({
 
   const shadowMap = useMemo(() => shadowTexture(), []);
 
-  useFrame((state, dt) => {
+  useFrame((state, rawDt) => {
     const craft = flight.current;
     const body = rig.current;
     if (!craft || !body) return;
-
+    const dt = Math.min(rawDt, 0.05);
+    const persp = camera as THREE.PerspectiveCamera;
+    const mode = introRef.current;
     const mobile = size.width < 768;
-    const progress = reduce ? 0 : progressRef.current;
-    const slot = measureSlot();
-    const path = samplePath(mobile ? MOBILE_PATH : DESKTOP_PATH, progress);
-    let pose = path;
-    if (reduce) {
-      pose = slot ?? path;
-    } else if (slot && progress < 0.14) {
-      pose = blendPose(slot, path, progress / 0.14);
+    const { right, up } = axes.current;
+    body.rotation.order = "YXZ";
+
+    const blend = mode === "video" ? THREE.MathUtils.clamp(handoffRef.current.blend, 0, 1) : 0;
+    const showShadow = mode === "none" || mode === "reduced" || (mode === "video" && blend > 0.35);
+    if (shadowRef.current) shadowRef.current.visible = showShadow;
+
+    if (mode === "pending" || mode === "classic" || (mode === "video" && blend <= 0)) {
+      craft.scale.setScalar(0.001);
+      if (layerRef.current) layerRef.current.style.opacity = "0";
+      return;
     }
 
-    const time = state.clock.elapsedTime;
-    const bob = reduce ? 0 : Math.sin(time * 2.5) * 0.03;
-    const driftYaw = reduce ? 0 : Math.sin(time * 0.55) * 0.22;
-    const driftRoll = reduce ? 0 : Math.sin(time * 0.9) * 0.1;
-    pose = { ...pose, y: pose.y + bob, yaw: pose.yaw + driftYaw, roll: pose.roll + driftRoll };
+    if (mode === "video") {
+      const k = smooth(blend);
+      const pose = flightTarget(0, mobile, false);
+      const now = {
+        x: THREE.MathUtils.lerp(0, pose.x, k),
+        y: THREE.MathUtils.lerp(0.04, pose.y, k),
+        s: THREE.MathUtils.lerp(Math.min(0.98, pose.s * 1.42), pose.s, k),
+      };
+      const spr = spring.current;
+      spr.x = now.x;
+      spr.y = now.y;
+      spr.s = now.s;
+      spr.vx = 0;
+      spr.vy = 0;
+      spr.vs = 0;
+      spr.ready = true;
+      placeOnView(craft, persp, now, 0, right, up);
+      body.rotation.y = THREE.MathUtils.damp(body.rotation.y, 0.48, 6, dt);
+      body.rotation.x = THREE.MathUtils.damp(body.rotation.x, 0.1, 6, dt);
+      body.rotation.z = THREE.MathUtils.damp(body.rotation.z, 0, 6, dt);
+      const step = dt * 52;
+      for (const node of spins.current) node.rotateY(step);
+      if (layerRef.current) {
+        layerRef.current.style.backgroundColor = "transparent";
+        layerRef.current.style.opacity = k.toFixed(3);
+      }
+      return;
+    }
 
-    const persp = camera as THREE.PerspectiveCamera;
-    persp.updateMatrixWorld();
-    const right = new THREE.Vector3().setFromMatrixColumn(persp.matrixWorld, 0);
-    const up = new THREE.Vector3().setFromMatrixColumn(persp.matrixWorld, 1);
-    const dist = persp.position.length();
-    const halfH = dist * Math.tan(THREE.MathUtils.degToRad(persp.fov) / 2);
-    const halfW = halfH * Math.max(persp.aspect, 0.35);
-    craft.position.set(0, 0, 0).addScaledVector(right, pose.x * halfW).addScaledVector(up, pose.y * halfH);
-    craft.scale.setScalar(pose.s);
+    if (layerRef.current) layerRef.current.style.backgroundColor = "transparent";
 
-    body.rotation.order = "YXZ";
-    body.rotation.y = THREE.MathUtils.damp(body.rotation.y, pose.yaw, 6, dt);
-    body.rotation.x = THREE.MathUtils.damp(body.rotation.x, pose.pitch, 6, dt);
-    body.rotation.z = THREE.MathUtils.damp(body.rotation.z, pose.roll, 6, dt);
+    const target = flightTarget(reduce ? 0 : progressRef.current, mobile, reduce);
+    const spr = spring.current;
+    if (!spr.ready || reduce) {
+      spr.x = target.x;
+      spr.y = target.y;
+      spr.s = target.s;
+      spr.vx = 0;
+      spr.vy = 0;
+      spr.vs = 0;
+      spr.ready = true;
+    }
+    if (!reduce) {
+      [spr.x, spr.vx] = integrate(spr.x, spr.vx, target.x, dt);
+      [spr.y, spr.vy] = integrate(spr.y, spr.vy, target.y, dt);
+      [spr.s, spr.vs] = integrate(spr.s, spr.vs, target.s, dt);
+    }
+
+    const speed = Math.hypot(spr.vx, spr.vy);
+    const idle = 1 - THREE.MathUtils.clamp(speed * 5, 0, 1);
+    const bob = reduce ? 0 : Math.sin(state.clock.elapsedTime * 2.6) * (0.012 + 0.03 * idle);
+    placeOnView(craft, persp, { x: spr.x, y: spr.y, s: Math.max(0.12, spr.s) }, bob, right, up);
+
+    const roll = reduce ? 0.05 : THREE.MathUtils.clamp(-spr.vx * 0.62, -0.95, 0.95);
+    const pitch = reduce ? 0.12 : THREE.MathUtils.clamp(0.1 - speed * 0.24, -0.5, 0.12);
+    const yaw = reduce ? 0.48 : 0.48 + THREE.MathUtils.clamp(-spr.vx * 0.36, -0.55, 0.55);
+    const damp = reduce ? 1 : 8;
+    body.rotation.y = THREE.MathUtils.damp(body.rotation.y, yaw, damp, dt);
+    body.rotation.x = THREE.MathUtils.damp(body.rotation.x, pitch, damp, dt);
+    body.rotation.z = THREE.MathUtils.damp(body.rotation.z, roll, damp, dt);
 
     if (!reduce) {
       const step = dt * 52;
       for (const node of spins.current) node.rotateY(step);
     }
 
-    const edge = THREE.MathUtils.clamp(Math.abs(pose.x) / 0.48, 0, 1);
-    const crossing = progress > 0.1 && progress < 0.92 ? 0.62 + 0.38 * edge : 1;
-    const fade = contactFade();
-    const opacity = reduce ? (slot ? 1 : 0) : crossing * fade;
+    const cover = 1 - THREE.MathUtils.smoothstep(Math.abs(spr.x), 0.2, 0.68);
+    const opacity = reduce ? 1 : (1 - cover * 0.42) * contactFade();
     if (layerRef.current) layerRef.current.style.opacity = opacity.toFixed(3);
   });
 
@@ -330,7 +424,7 @@ function DroneModel({
     <group ref={flight}>
       <FramingCamera points={fitted.points} />
       {shadowMap && (
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, fitted.shadow.y, 0]} renderOrder={-1}>
+        <mesh ref={shadowRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, fitted.shadow.y, 0]} renderOrder={-1}>
           <planeGeometry args={[fitted.shadow.w, fitted.shadow.d]} />
           <meshBasicMaterial map={shadowMap} transparent depthWrite={false} toneMapped={false} />
         </mesh>
@@ -347,11 +441,15 @@ function markHeroWebgl(on: boolean) {
   else delete document.documentElement.dataset.heroWebgl;
 }
 
-function HeroCanvas({ paused, reduce }: { paused: boolean; reduce: boolean }) {
+function HeroCanvas({ reduce }: { reduce: boolean }) {
+  const { intro, finishIntro } = useSplashGate();
   const layerRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef(0);
+  const introRef = useRef(intro);
+  const handoffRef = useRef<SplashHandoff>({ blend: 0 });
   const [hidden, setHidden] = useState(false);
-  const live = !paused && !hidden;
+  introRef.current = intro;
+  const live = !hidden && intro !== "classic";
 
   useEffect(() => {
     const onVis = () => setHidden(document.hidden);
@@ -365,13 +463,13 @@ function HeroCanvas({ paused, reduce }: { paused: boolean; reduce: boolean }) {
   }, [live]);
 
   useEffect(() => {
-    if (reduce) return;
+    if (reduce || intro !== "none") return;
     const trigger = ScrollTrigger.create({
       trigger: "#sec-hero",
       start: "top top",
       endTrigger: "#sec-contact",
       end: "center center",
-      scrub: 0.45,
+      scrub: 0,
       invalidateOnRefresh: true,
       onUpdate: (self) => {
         progressRef.current = self.progress;
@@ -382,23 +480,30 @@ function HeroCanvas({ paused, reduce }: { paused: boolean; reduce: boolean }) {
       window.clearTimeout(refresh);
       trigger.kill();
     };
-  }, [reduce]);
+  }, [reduce, intro]);
 
   const mobile = typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches;
+  const frameloop = !live || reduce ? "demand" : "always";
 
   const canvas = (
     <div ref={layerRef} className="flight-canvas" aria-hidden="true">
       <Canvas
-        dpr={mobile ? [1, 1.15] : [1, 1.35]}
-        frameloop={live ? "always" : "demand"}
-        camera={{ position: [1.6, 0.9, 2.1], fov: 32, near: 0.05, far: 40 }}
-        gl={{ alpha: true, antialias: true, powerPreference: "high-performance" }}
+        dpr={mobile ? [1, 1.1] : [1, 1.25]}
+        frameloop={frameloop}
+        camera={{ position: [1.6, 0.9, 2.1], fov: 32, near: 0.05, far: 80 }}
+        gl={{ alpha: true, antialias: !mobile, powerPreference: "high-performance" }}
         onCreated={({ gl }) => {
           gl.setClearColor(0x000000, 0);
         }}
       >
         <StudioLights />
-        <DroneModel reduce={reduce} progressRef={progressRef} layerRef={layerRef} />
+        <DroneModel
+          reduce={reduce}
+          progressRef={progressRef}
+          layerRef={layerRef}
+          introRef={introRef}
+          handoffRef={handoffRef}
+        />
       </Canvas>
     </div>
   );
@@ -407,15 +512,24 @@ function HeroCanvas({ paused, reduce }: { paused: boolean; reduce: boolean }) {
     <>
       <div className="hero-flight-slot" />
       {createPortal(canvas, document.body)}
+      {intro === "video" && <VideoSplash handoffRef={handoffRef} onDone={finishIntro} />}
+      {intro === "reduced" && <ReducedSplash onDone={finishIntro} />}
     </>
   );
 }
 
-class HeroErrorBoundary extends Component<{ children: ReactNode; fallback: ReactNode }, { failed: boolean }> {
+class HeroErrorBoundary extends Component<
+  { children: ReactNode; fallback: ReactNode; onFail: () => void },
+  { failed: boolean }
+> {
   state = { failed: false };
 
   static getDerivedStateFromError() {
     return { failed: true };
+  }
+
+  componentDidCatch() {
+    this.props.onFail();
   }
 
   render() {
@@ -424,28 +538,34 @@ class HeroErrorBoundary extends Component<{ children: ReactNode; fallback: React
   }
 }
 
-function webglAvailable() {
-  try {
-    const canvas = document.createElement("canvas");
-    const gl = canvas.getContext("webgl2") || canvas.getContext("webgl");
-    return !!gl;
-  } catch {
-    return false;
-  }
-}
-
-export function HeroCraft({ paused = false }: { paused?: boolean }) {
+export function HeroCraft() {
   const reduce =
     typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const [glOk] = useState(() => (typeof window === "undefined" ? false : webglAvailable()));
+  const [glOk] = useState(() => (typeof window === "undefined" ? false : webglOk()));
+  const { intro, abortToClassic, finishIntro } = useSplashGate();
 
-  if (!glOk) return <DroneHud paused />;
+  if (!glOk) return <div className="hero-flight-slot" aria-hidden="true" />;
 
   return (
-    <HeroErrorBoundary fallback={<DroneHud paused />}>
-      <Suspense fallback={<DroneHud paused />}>
-        <HeroCanvas paused={paused} reduce={reduce} />
+    <HeroErrorBoundary
+      fallback={<div className="hero-flight-slot" aria-hidden="true" />}
+      onFail={() => {
+        if (intro === "pending") abortToClassic();
+        else if (intro === "video" || intro === "reduced") finishIntro();
+      }}
+    >
+      <Suspense fallback={<div className="hero-flight-slot hero-flight-shimmer" aria-hidden="true" />}>
+        <HeroCanvas reduce={reduce} />
       </Suspense>
     </HeroErrorBoundary>
   );
+}
+
+function webglOk() {
+  try {
+    const canvas = document.createElement("canvas");
+    return !!(canvas.getContext("webgl2") || canvas.getContext("webgl"));
+  } catch {
+    return false;
+  }
 }

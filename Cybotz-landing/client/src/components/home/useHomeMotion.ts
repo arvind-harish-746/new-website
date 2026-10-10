@@ -83,21 +83,6 @@ export function useHomeMotion(active: boolean) {
 
     const mm = gsap.matchMedia();
     mm.add("(min-width: 1024px) and (prefers-reduced-motion: no-preference)", () => {
-      const craft = root.querySelector(".drone-rig");
-      if (craft) {
-        gsap.to(craft, {
-          y: -28,
-          rotate: 5,
-          ease: "none",
-          scrollTrigger: {
-            trigger: "#sec-hero",
-            start: "top top",
-            end: "bottom top",
-            scrub: 0.4,
-          },
-        });
-      }
-
       const scans = gsap.utils.toArray<HTMLElement>(".service-card .card-scan");
       if (scans.length) {
         const sequence = gsap.timeline({
