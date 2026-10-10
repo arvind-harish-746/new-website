@@ -26,6 +26,9 @@ import { captureUtmParams } from "@/lib/utm";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { LiquidGlassImage, LiquidGlassSlowNetworkBanner } from "@/components/ui/SkeletonLoader";
 import { useSplashGate } from "@/components/SplashScreen";
+import { DroneHud } from "@/components/home/DroneHud";
+import { FlightRail, SectionTrace } from "@/components/home/SectionTrace";
+import { useHomeMotion } from "@/components/home/useHomeMotion";
 
 interface ContactFormData {
   name: string;
@@ -38,6 +41,16 @@ export default function Home() {
   const [, setLocation] = useLocation();
   const { suspendBackground } = useSplashGate();
   const splashCoveredOnLoad = useRef(suspendBackground).current;
+  const [accentPlay, setAccentPlay] = useState(false);
+
+  useHomeMotion(!suspendBackground);
+
+  useEffect(() => {
+    if (suspendBackground) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const id = window.setTimeout(() => setAccentPlay(true), splashCoveredOnLoad ? 160 : 80);
+    return () => window.clearTimeout(id);
+  }, [suspendBackground, splashCoveredOnLoad]);
 
   usePageMeta(
     "Cybotz | Empowering Young Minds with Real-World STEM Skills",
@@ -117,7 +130,7 @@ export default function Home() {
   };
 
   return (
-    <div className="relative text-white min-h-screen flex flex-col font-sans selection:bg-cyan-500 selection:text-slate-900 bg-transparent">
+    <div className="home-stage relative text-white min-h-screen flex flex-col font-sans selection:bg-cyan-500 selection:text-slate-900 bg-transparent">
       {/* Fixed background animating AetherFlowHero behind all content */}
       <div className="fixed inset-0 z-0 pointer-events-none w-full h-full">
         <AetherFlowHero showContent={false} densityMultiplier={2.8} suspended={suspendBackground} />
@@ -129,6 +142,7 @@ export default function Home() {
       <Header />
 
       <main className="flex-grow relative z-10">
+        <FlightRail />
         {/* HERO SECTION */}
         <section id="sec-hero" className="relative min-h-[100dvh] flex items-center justify-center pt-16 pb-8 sm:pt-20 sm:pb-12 overflow-hidden">
           {/* Subtle overlay over hero section */}
@@ -142,31 +156,39 @@ export default function Home() {
 
           <div className="container px-4 md:px-8 relative z-10 mx-auto">
             <motion.div
-              initial={splashCoveredOnLoad ? false : { opacity: 0, y: 16, scale: 0.96, filter: "blur(12px)" }}
-              animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+              initial={splashCoveredOnLoad ? false : { opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={splashCoveredOnLoad ? { duration: 0 } : {
-                duration: 1.1,
-                delay: 1.0,
+                duration: 0.85,
+                delay: 0.12,
                 ease: [0.16, 1, 0.3, 1]
               }}
-              className="max-w-4xl mx-auto text-center flex flex-col items-center justify-center gap-5 sm:gap-6"
+              className="hero-layout"
             >
-
+              <div className="hero-lead">
               {/* Tagline Badge */}
-              <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full bg-cyan-950/70 sm:bg-cyan-500/10 border border-cyan-400/40 sm:border-cyan-500/30 text-cyan-300 sm:text-cyan-400 font-mono text-xs sm:text-sm md:text-base uppercase tracking-wider animate-pulse shadow-[0_0_15px_rgba(0,240,255,0.2)] sm:shadow-none">
-                <span className="w-2 h-2 rounded-full bg-cyan-400" />
+              <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full bg-cyan-950/70 sm:bg-cyan-500/10 border border-cyan-400/40 sm:border-cyan-500/30 text-cyan-300 sm:text-cyan-400 font-mono text-xs sm:text-sm md:text-base uppercase tracking-wider shadow-[0_0_15px_rgba(0,240,255,0.2)] sm:shadow-none">
+                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
                 No shortcuts, Just Hands-on Learning!
               </div>
 
               {/* Headline (Responsive sizing & no awkward hyphen breakage on mobile) */}
               <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight sm:tracking-wider leading-tight sm:leading-tight font-mono text-white max-w-3xl">
-                Empower Young Minds with <span className="inline-block text-cyan-400 glow-cyan-text">Real-World STEM Skills</span>
+                Empower Young Minds with{" "}
+                <KineticAccent text="Real-World STEM Skills" play={accentPlay} />
               </h1>
 
               {/* Sub-headline */}
-              <p className="text-gray-300 sm:text-gray-400 text-base sm:text-lg md:text-xl max-w-2xl leading-relaxed px-2">
+              <p className="text-gray-300 sm:text-gray-400 text-base sm:text-lg md:text-xl max-w-2xl leading-relaxed lg:px-0 px-2">
                 Give your students the edge they deserve by mastering raw engineering fundamentals from the ground up.
               </p>
+              </div>
+
+              <div className="hero-craft w-full">
+                <DroneHud paused={suspendBackground} />
+              </div>
+
+              <div className="hero-actions">
 
               {/* Mobile-Only Feature / Stat Pills */}
               <div className="flex sm:hidden flex-wrap items-center justify-center gap-2 max-w-sm mt-1">
@@ -249,13 +271,27 @@ export default function Home() {
                 </div>
               </div>
 
+              </div>
             </motion.div>
           </div>
         </section>
 
-        {/* SERVICES ("Glimpse Of What We Do") */}
-        <section className="py-20 bg-[#0B101D]/20 backdrop-blur-sm border-t border-[#1E293B]/60">
+        <section id="sec-telemetry" aria-label="Cybotz at a glance" className="relative z-10 pb-4">
           <div className="container px-4 md:px-8 mx-auto">
+            <dl className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+              <Stat value={400} suffix="+" label="Students mentored" />
+              <Stat value={INSTITUTIONS.length} label="Partner institutions" />
+              <Stat value={12} prefix="5–" label="Grades in the lab" />
+              <Stat value={100} suffix="%" label="Hands-on curriculum" />
+            </dl>
+          </div>
+        </section>
+
+        <SectionTrace />
+
+        {/* SERVICES ("Glimpse Of What We Do") */}
+        <section id="sec-services" className="py-16 md:py-20 bg-[#0B101D]/20 backdrop-blur-sm border-t border-[#1E293B]/60">
+          <div className="services-pin container px-4 md:px-8 mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold font-mono tracking-wider mb-4">Glimpse Of What We Do</h2>
               <p className="text-gray-400 max-w-2xl mx-auto">
@@ -265,7 +301,8 @@ export default function Home() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {/* Drone Workshop */}
-              <div className="p-8 rounded-xl bg-slate-950/25 border border-slate-800/60 backdrop-blur-md hover:border-cyan-500/50 transition-all duration-300 group flex flex-col justify-between">
+              <div className="flight-card service-card p-8 rounded-xl bg-slate-950/25 border border-slate-800/60 backdrop-blur-md hover:border-cyan-500/50 transition-colors duration-300 group flex flex-col justify-between">
+                <span className="card-scan" aria-hidden="true" />
                 <div>
                   <div className="w-12 h-12 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 mb-6 group-hover:scale-110 transition-transform">
                     <Zap size={24} />
@@ -284,7 +321,8 @@ export default function Home() {
               </div>
 
               {/* STEM Education */}
-              <div className="p-8 rounded-xl bg-slate-950/25 border border-slate-800/60 backdrop-blur-md hover:border-cyan-500/50 transition-all duration-300 group flex flex-col justify-between">
+              <div className="flight-card service-card p-8 rounded-xl bg-slate-950/25 border border-slate-800/60 backdrop-blur-md hover:border-cyan-500/50 transition-colors duration-300 group flex flex-col justify-between">
+                <span className="card-scan" aria-hidden="true" />
                 <div>
                   <div className="w-12 h-12 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 mb-6 group-hover:scale-110 transition-transform">
                     <Cpu size={24} />
@@ -303,7 +341,8 @@ export default function Home() {
               </div>
 
               {/* Robotics Training */}
-              <div className="p-8 rounded-xl bg-slate-950/25 border border-slate-800/60 backdrop-blur-md hover:border-cyan-500/50 transition-all duration-300 group flex flex-col justify-between">
+              <div className="flight-card service-card p-8 rounded-xl bg-slate-950/25 border border-slate-800/60 backdrop-blur-md hover:border-cyan-500/50 transition-colors duration-300 group flex flex-col justify-between">
+                <span className="card-scan" aria-hidden="true" />
                 <div>
                   <div className="w-12 h-12 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 mb-6 group-hover:scale-110 transition-transform">
                     <Layers size={24} />
@@ -324,16 +363,20 @@ export default function Home() {
           </div>
         </section>
 
+        <SectionTrace />
+
         {/* SOCIAL PROOF / TRUSTED BY */}
-        <section className="py-24 relative overflow-hidden bg-[#070C16] border-t border-b border-[#1E293B]">
+        <section id="sec-network" className="py-24 relative overflow-hidden bg-[#070C16] border-t border-b border-[#1E293B]">
           {/* Glowing Ambient Background Lights */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-cyan-500/10 rounded-full blur-[140px] pointer-events-none z-0" />
-          <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none z-0" />
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none z-0" />
+          <div className="home-parallax absolute inset-0 pointer-events-none z-0">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-cyan-500/10 rounded-full blur-[140px]" />
+            <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-[120px]" />
+            <div className="absolute bottom-0 left-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-[120px]" />
+          </div>
 
           <div className="container px-4 md:px-8 mx-auto relative z-10">
             {/* Header */}
-            <div className="max-w-3xl mx-auto text-center mb-16 space-y-3">
+            <div className="max-w-3xl mx-auto text-center mb-16 space-y-3 scroll-in">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 font-mono text-xs uppercase tracking-widest shadow-[0_0_15px_rgba(0,240,255,0.15)]">
                 <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
                 Premier Academic Network
@@ -351,7 +394,7 @@ export default function Home() {
               {INSTITUTIONS.map((inst, index) => (
                 <div
                   key={index}
-                  className="group relative p-6 rounded-2xl bg-gradient-to-b from-[#0F172A]/40 via-[#0B101D]/40 to-[#0B101D]/50 border border-slate-800/60 hover:border-cyan-500/50 shadow-xl transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_12px_35px_rgba(0,240,255,0.15)] backdrop-blur-md flex flex-col justify-between overflow-hidden"
+                  className="flight-card scroll-in group relative p-6 rounded-2xl bg-gradient-to-b from-[#0F172A]/40 via-[#0B101D]/40 to-[#0B101D]/50 border border-slate-800/60 hover:border-cyan-500/50 shadow-xl transition-colors duration-300 hover:shadow-[0_12px_35px_rgba(0,240,255,0.15)] backdrop-blur-md flex flex-col justify-between overflow-hidden"
                 >
                   {/* Subtle top card glow line */}
                   <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent group-hover:via-cyan-400 transition-all duration-500 opacity-0 group-hover:opacity-100" />
@@ -404,7 +447,7 @@ export default function Home() {
                   <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between">
                     <span className="inline-flex items-center gap-1.5 text-sm text-slate-300 font-sans line-clamp-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shrink-0" />
-                      {inst.text}
+                      <InstitutionLine text={inst.text} />
                     </span>
                     <span className="text-xs font-mono text-gray-400 flex items-center gap-1 shrink-0 ml-2">
                       <MapPin size={12} className="text-gray-400" />
@@ -415,7 +458,7 @@ export default function Home() {
               ))}
 
               {/* 9th CTA Card to perfectly complete the 3x3 Grid */}
-              <div className="group relative p-6 rounded-2xl bg-gradient-to-br from-cyan-950/30 via-[#0F172A]/40 to-[#0B101D]/50 border border-cyan-500/40 hover:border-cyan-400 shadow-xl transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_12px_35px_rgba(0,240,255,0.25)] backdrop-blur-md flex flex-col justify-between overflow-hidden">
+              <div className="flight-card scroll-in group relative p-6 rounded-2xl bg-gradient-to-br from-cyan-950/30 via-[#0F172A]/40 to-[#0B101D]/50 border border-cyan-500/40 hover:border-cyan-400 shadow-xl transition-colors duration-300 hover:shadow-[0_12px_35px_rgba(0,240,255,0.25)] backdrop-blur-md flex flex-col justify-between overflow-hidden">
                 <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-cyan-500 to-blue-500" />
 
                 <div className="flex items-start gap-4">
@@ -447,13 +490,15 @@ export default function Home() {
           </div>
         </section>
 
+        <SectionTrace />
+
         {/* VALUE PROP & PILLARS ("NO AI : Core Fundamentals Only!") */}
-        <section className="py-12 sm:py-20 bg-[#0B101D]/20 backdrop-blur-sm border-t border-[#1E293B]/60">
+        <section id="sec-mastery" className="py-12 sm:py-20 bg-[#0B101D]/20 backdrop-blur-sm border-t border-[#1E293B]/60">
           <div className="container px-4 md:px-8 mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
 
               {/* Left Column: Interactive Terminal & Copy */}
-              <div className="flex flex-col gap-5 sm:gap-6">
+              <div className="scroll-in flex flex-col gap-5 sm:gap-6">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-[#EF4444]/10 border border-[#EF4444]/30 text-[#EF4444] font-mono text-xs uppercase tracking-wider self-start">
                   NO AI : Core Fundamentals Only!
                 </div>
@@ -494,7 +539,7 @@ export default function Home() {
                     desc: "Trusted by leading institutions, principals, and academic coordinators across Bangalore for our uncompromising standards."
                   }
                 ].map((pillar, idx) => (
-                  <div key={idx} className="p-6 rounded-xl bg-slate-950/25 border border-slate-800/60 backdrop-blur-md hover:border-cyan-500/40 transition-all duration-300">
+                  <div key={idx} className="flight-card scroll-in p-6 rounded-xl bg-slate-950/25 border border-slate-800/60 backdrop-blur-md hover:border-cyan-500/40 transition-colors duration-300">
                     <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 mb-4">
                       <pillar.icon size={20} />
                     </div>
@@ -509,9 +554,11 @@ export default function Home() {
         </section>
 
         {/* BOOKING CALENDAR & CONTACT FORM */}
+        <SectionTrace />
+
         <section id="sec-contact" className="py-20 bg-[#0B101D]/20 backdrop-blur-sm border-t border-[#1E293B]/60">
           <div className="container px-4 md:px-8 mx-auto" id="reach-us">
-            <div className="text-center mb-16">
+            <div className="text-center mb-16 scroll-in">
               <span className="text-sm font-bold font-mono text-cyan-400 tracking-widest uppercase">Get in Touch</span>
               <h2 className="text-3xl md:text-4xl font-bold font-mono tracking-wider mt-2 mb-4">Contact Us</h2>
               <p className="text-gray-400 max-w-2xl mx-auto text-base">
@@ -522,7 +569,7 @@ export default function Home() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
 
               {/* Left Side: Bento Calendar & Contacts (col-7) */}
-              <div className="lg:col-span-7 flex flex-col gap-6 justify-between">
+              <div className="scroll-in lg:col-span-7 flex flex-col gap-6 justify-between">
 
                 {/* Calendar element */}
                 <div className="flex-grow">
@@ -565,7 +612,7 @@ export default function Home() {
               </div>
 
               {/* Right Side: Consultation Request Form (col-5) */}
-              <div className="lg:col-span-5 p-8 rounded-2xl bg-slate-950/35 border border-slate-800/70 backdrop-blur-md flex flex-col justify-between shadow-xl">
+              <div className="scroll-in lg:col-span-5 p-8 rounded-2xl bg-slate-950/35 border border-slate-800/70 backdrop-blur-md flex flex-col justify-between shadow-xl">
                 <div>
                   <h3 className="text-xl font-bold font-mono tracking-wider text-cyan-400 mb-6 uppercase">Consultation Request</h3>
 
@@ -706,5 +753,59 @@ export default function Home() {
       <Footer />
       <LiquidGlassSlowNetworkBanner />
     </div>
+  );
+}
+
+function KineticAccent({ text, play }: { text: string; play: boolean }) {
+  const words = text.split(" ");
+  return (
+    <span className="inline-flex flex-wrap justify-center lg:justify-start gap-x-[0.28em] text-cyan-400 glow-cyan-text align-bottom">
+      {words.map((word, index) => (
+        <span key={`${word}-${index}`} className="inline-block overflow-hidden pb-[0.08em]">
+          <span
+            className={play ? "kinetic-word is-play" : "kinetic-word"}
+            style={play ? { animationDelay: `${index * 0.07}s` } : undefined}
+          >
+            {word}
+          </span>
+        </span>
+      ))}
+    </span>
+  );
+}
+
+function Stat({
+  value,
+  suffix = "",
+  prefix = "",
+  label,
+}: {
+  value: number;
+  suffix?: string;
+  prefix?: string;
+  label: string;
+}) {
+  return (
+    <div className="flight-card scroll-in rounded-xl border border-slate-800/80 bg-[#0B101D]/55 p-4 backdrop-blur-md md:p-5">
+      <dt className="font-mono text-2xl font-bold tracking-wide text-cyan-400 md:text-3xl">
+        {prefix}
+        <span data-count={value} data-suffix={suffix}>
+          {value}
+          {suffix}
+        </span>
+      </dt>
+      <dd className="mt-1 font-mono text-[11px] uppercase tracking-widest text-gray-400 md:text-xs">{label}</dd>
+    </div>
+  );
+}
+
+function InstitutionLine({ text }: { text: string }) {
+  const match = text.match(/^(\d+)([\s\S]*)$/);
+  if (!match) return <>{text}</>;
+  return (
+    <>
+      <span data-count={match[1]}>{match[1]}</span>
+      {match[2]}
+    </>
   );
 }
