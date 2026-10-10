@@ -768,10 +768,10 @@ html[data-splash="on"] header img[alt="Cybotz"] {
     grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
     grid-template-areas:
       "lead craft"
-      "actions craft";
+      "actions .";
     align-items: center;
     column-gap: 2rem;
-    row-gap: 1.25rem;
+    row-gap: 1.5rem;
   }
 
   .hero-lead {
@@ -788,10 +788,44 @@ html[data-splash="on"] header img[alt="Cybotz"] {
 
   .hero-craft {
     grid-area: craft;
+    align-self: center;
+    justify-self: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 0;
   }
 }
 
-.hero-webgl canvas {
+.hero-craft {
+  overflow: visible;
+}
+
+.hero-flight-slot {
+  width: min(100%, 420px);
+  aspect-ratio: 1;
+  margin-inline: auto;
+  pointer-events: none;
+}
+
+@media (min-width: 640px) {
+  .hero-flight-slot { width: min(100%, 460px); }
+}
+
+@media (min-width: 1024px) {
+  .hero-flight-slot { width: min(100%, 540px); }
+}
+
+.flight-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.flight-canvas canvas {
   display: block;
   width: 100% !important;
   height: 100% !important;

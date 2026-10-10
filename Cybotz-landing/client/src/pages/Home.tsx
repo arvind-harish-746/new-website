@@ -148,7 +148,7 @@ export default function Home() {
       <main className="flex-grow relative z-10">
         <FlightRail />
         {/* HERO SECTION */}
-        <section id="sec-hero" className="relative min-h-[100dvh] flex items-center justify-center pt-16 pb-8 sm:pt-20 sm:pb-12 overflow-hidden">
+        <section id="sec-hero" className="relative min-h-[100dvh] flex items-center justify-center pt-16 pb-8 sm:pt-20 sm:pb-12 overflow-visible">
           {/* Subtle overlay over hero section */}
           <div className="absolute inset-0 z-0 opacity-80 pointer-events-none">
             <div className="absolute inset-0 bg-gradient-to-t from-white/40 via-transparent to-[#F4F7FB]/75" />
