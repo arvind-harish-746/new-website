@@ -40,9 +40,9 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
   } else {
     dayClass += "rounded-lg text-sm cursor-pointer ";
     if (isSelected) {
-      dayClass += "bg-[#00F0FF] text-[#0F172A] font-bold shadow-[0_0_10px_rgba(0,240,255,0.6)]";
+      dayClass += "bg-[#0575CE] text-[#102033] font-bold shadow-[0_4px_12px_rgba(5,117,206,0.25)]";
     } else {
-      dayClass += "text-gray-300 hover:bg-cyan-500/20 hover:text-cyan-300 hover:border hover:border-cyan-500/40";
+      dayClass += "text-[#3E5168] hover:bg-cyan-500/20 hover:text-[#0460A9] hover:border hover:border-cyan-500/40";
     }
   }
 
@@ -214,21 +214,21 @@ export function Calendar() {
         <div className="grid h-full gap-5">
           <div className="flex flex-col justify-between">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 font-mono text-xs uppercase tracking-wider mb-3">
-                <Sparkles size={12} className="animate-pulse text-cyan-400" />
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-[#0460A9] font-mono text-xs uppercase tracking-wider mb-3">
+                <Sparkles size={12} className="animate-pulse text-[#0460A9]" />
                 <span>1-Year Advance Registrations Open</span>
               </div>
-              <h2 className="mb-3 text-lg md:text-3xl font-bold text-white tracking-wider font-mono">
+              <h2 className="mb-3 text-lg md:text-3xl font-bold text-[#102033] tracking-wider font-mono">
                 Book a Free Trial Session
               </h2>
-              <p className="mb-2 text-xs md:text-sm text-gray-400">
+              <p className="mb-2 text-xs md:text-sm text-[#3E5168]">
                 Schedule a live demo, STEM workshop, or consultation at your campus! Select any available date up to 12 months in advance.
               </p>
             </div>
             <div>
               <Button 
                 onClick={handleQuickBookConsultation}
-                className="mt-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-dark font-bold px-6 py-2 shadow-[0_0_15px_rgba(0,240,255,0.3)] cursor-pointer"
+                className="mt-3 rounded-lg bg-[#F97405] hover:bg-[#ff8614] text-[#102033] font-bold px-6 py-2 shadow-[0_8px_20px_rgba(249,116,5,0.18)] cursor-pointer"
               >
                 Book Consultation
               </Button>
@@ -236,23 +236,23 @@ export function Calendar() {
           </div>
           <div className="transition-all duration-500 ease-out">
             <div>
-              <div className="h-full w-full max-w-[550px] rounded-[24px] border border-[#1E293B] bg-slate-900/50 p-2 transition-colors duration-100 group-hover:border-cyan-500/50">
+              <div className="h-full w-full max-w-[550px] rounded-[24px] border border-[#D5E0EA] bg-white/80 p-2 transition-colors duration-100 group-hover:border-cyan-500/50">
                 <div
-                  className="h-full rounded-2xl border border-slate-800 p-3"
-                  style={{ boxShadow: "0px 2px 1.5px 0px rgba(0,240,255,0.05) inset" }}
+                  className="h-full rounded-2xl border border-[#D5E0EA] p-3"
+                  style={{ boxShadow: "0px 2px 1.5px 0px rgba(5,117,206,0.05) inset" }}
                 >
                   {/* Month Navigation & Selector Header */}
                   <div className="flex items-center justify-between px-1 mb-2">
                     <div className="flex items-center gap-1.5">
-                      <CalendarIcon size={16} className="text-cyan-400" />
+                      <CalendarIcon size={16} className="text-[#0460A9]" />
                       <select
                         value={monthOffset}
                         onChange={(e) => setMonthOffset(Number(e.target.value))}
-                        className="bg-slate-950/80 border border-slate-700/60 rounded-lg px-2.5 py-1 text-xs sm:text-sm font-bold font-mono text-white hover:border-cyan-500/60 focus:outline-none focus:border-cyan-400 transition-all cursor-pointer"
+                        className="bg-white/88 border border-[#D5E0EA]/60 rounded-lg px-2.5 py-1 text-xs sm:text-sm font-bold font-mono text-[#102033] hover:border-cyan-500/60 focus:outline-none focus:border-cyan-400 transition-all cursor-pointer"
                         aria-label="Select calendar month"
                       >
                         {monthOptions.map((opt) => (
-                          <option key={opt.offset} value={opt.offset} className="bg-slate-900 text-white">
+                          <option key={opt.offset} value={opt.offset} className="bg-white text-[#102033]">
                             {opt.label}
                           </option>
                         ))}
@@ -267,7 +267,7 @@ export function Calendar() {
                         disabled={monthOffset === 0}
                         aria-label="Previous month"
                         title={monthOffset === 0 ? "Cannot view past months" : "Previous Month"}
-                        className="p-1.5 rounded-lg border border-slate-800 bg-slate-950/60 text-gray-300 hover:text-cyan-300 hover:border-cyan-500/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
+                        className="p-1.5 rounded-lg border border-[#D5E0EA] bg-white/80 text-[#3E5168] hover:text-[#0460A9] hover:border-cyan-500/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
                       >
                         <ChevronLeft size={16} />
                       </button>
@@ -278,7 +278,7 @@ export function Calendar() {
                         disabled={monthOffset >= 12}
                         aria-label="Next month"
                         title={monthOffset >= 12 ? "Registrations open up to 1 year in advance" : "Next Month"}
-                        className="p-1.5 rounded-lg border border-slate-800 bg-slate-950/60 text-gray-300 hover:text-cyan-300 hover:border-cyan-500/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
+                        className="p-1.5 rounded-lg border border-[#D5E0EA] bg-white/80 text-[#3E5168] hover:text-[#0460A9] hover:border-cyan-500/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
                       >
                         <ChevronRight size={16} />
                       </button>
@@ -286,8 +286,8 @@ export function Calendar() {
                   </div>
 
                   {/* Sub-header status text */}
-                  <div className="flex items-center justify-between px-1 mb-3 text-[11px] font-mono text-gray-400">
-                    <span className="text-cyan-300">
+                  <div className="flex items-center justify-between px-1 mb-3 text-[11px] font-mono text-[#3E5168]">
+                    <span className="text-[#0460A9]">
                       {selectedDateInfo?.fullDateStr ? `Selected: ${selectedDateInfo.fullDateStr}` : "Click any date to schedule"}
                     </span>
                     <span className="text-slate-500">
@@ -301,7 +301,7 @@ export function Calendar() {
                   </div>
 
                   {/* Legend Indicator */}
-                  <div className="mt-4 pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-[10px] font-mono text-slate-400 px-1">
+                  <div className="mt-4 pt-3 border-t border-[#D5E0EA] flex flex-wrap items-center justify-between gap-2 text-[10px] font-mono text-slate-400 px-1">
                     <div className="flex items-center gap-1">
                       <span className="w-2 h-2 rounded-full bg-cyan-400" />
                       <span>Available</span>

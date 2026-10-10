@@ -62,36 +62,36 @@ export default function CookieBanner() {
   return (
     <aside
       aria-label="Cookie consent banner"
-      className="fixed bottom-4 left-4 right-4 md:left-6 md:right-auto md:max-w-md z-50 p-4 bg-[#0B101D]/95 border border-cyan-500/30 rounded-2xl shadow-[0_0_30px_rgba(0,240,255,0.15)] backdrop-blur-md font-mono text-white animate-fade-in"
+      className="fixed bottom-4 left-4 right-4 md:left-6 md:right-auto md:max-w-md z-50 p-4 bg-white/95 border border-cyan-500/30 rounded-2xl shadow-[0_10px_28px_rgba(16,32,51,0.08)] backdrop-blur-md font-mono text-[#102033] animate-fade-in"
     >
       <div className="flex items-start gap-3">
-        <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shrink-0 mt-0.5">
+        <div className="p-2 rounded-lg bg-cyan-500/10 text-[#0460A9] border border-cyan-500/30 shrink-0 mt-0.5">
           <ShieldCheck className="w-5 h-5" />
         </div>
         <div className="space-y-2 text-xs flex-1">
           <div className="flex items-center justify-between">
-            <h4 className="font-bold text-cyan-300 text-sm">Privacy & Session Storage</h4>
+            <h4 className="font-bold text-[#0460A9] text-sm">Privacy & Session Storage</h4>
             <button
               onClick={handleDismiss}
-              className="text-gray-400 hover:text-white p-1 rounded-md transition-colors cursor-pointer"
+              className="text-[#3E5168] hover:text-[#0460A9] p-1 rounded-md transition-colors cursor-pointer"
               aria-label="Dismiss cookie notice"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
-          <p className="text-gray-300 leading-relaxed text-[11px] font-sans">
+          <p className="text-[#3E5168] leading-relaxed text-[11px] font-sans">
             We use essential local storage and security tokens to enable trial session booking, preserve your preferences, and protect owner portal sessions.
           </p>
           <div className="flex items-center gap-2 pt-1">
             <button
               onClick={handleAccept}
-              className="px-3.5 py-1.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-lg text-xs transition-all shadow-[0_0_10px_rgba(0,240,255,0.3)] cursor-pointer"
+              className="px-3.5 py-1.5 bg-[#F97405] hover:bg-[#ff8614] text-[#102033] font-bold rounded-lg text-xs transition-all shadow-[0_6px_16px_rgba(249,116,5,0.16)] cursor-pointer"
             >
               Accept All
             </button>
             <button
               onClick={handleDismiss}
-              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded-lg text-xs transition-colors cursor-pointer"
+              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-[#3E5168] rounded-lg text-xs transition-colors cursor-pointer"
             >
               Essential Only
             </button>

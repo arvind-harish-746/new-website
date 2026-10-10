@@ -66,12 +66,12 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <ThemeProvider defaultTheme="dark">
+      <ThemeProvider defaultTheme="light">
         <SplashGateProvider value={{ suspendBackground }}>
           <div className="relative min-h-screen" inert={splashMounted ? true : undefined}>
             {isOffline && <OfflineOverlay onRetry={() => setIsOffline(!navigator.onLine)} />}
             <ScrollProgressBar />
-            <MouseEffects showLabel={false} color="#00F0FF" effectSize={60} />
+            <MouseEffects showLabel={false} color="#0575CE" effectSize={60} />
             <Router />
             <ScrollToTop />
             <CookieBanner />

@@ -420,9 +420,9 @@ export const GridItem = ({
       variants: {
         variant: {
           default:
-            "rounded-xl border border-cyan-500/25 bg-slate-900/80 shadow-lg hover:border-cyan-400/60 hover:shadow-[0_0_25px_rgba(0,240,255,0.25)]",
+            "rounded-xl border border-cyan-500/25 bg-white/80 shadow-lg hover:border-cyan-400/60 hover:shadow-[0_0_25px_rgba(5,117,206,0.25)]",
           masonry:
-            "rounded-xl border border-cyan-500/30 bg-slate-900/85 shadow-xl hover:border-cyan-400 hover:shadow-[0_0_30px_rgba(0,240,255,0.35)]",
+            "rounded-xl border border-cyan-500/30 bg-white/85 shadow-xl hover:border-cyan-400 hover:shadow-[0_0_30px_rgba(5,117,206,0.35)]",
           polaroid:
             "p-2 sm:p-2.5 pb-5 sm:pb-6 bg-white border border-white/95 shadow-2xl even:rotate-1 odd:-rotate-1 hover:rotate-0 hover:scale-105 transition-transform ease-out duration-300 rounded-xl",
         },
@@ -685,13 +685,13 @@ export const PortalGalleryWindow: React.FC<PortalGalleryWindowProps> = ({
         className={cn(
           "relative flex flex-col w-full rounded-2xl border border-cyan-500/30 bg-[#090D16] font-mono text-white overflow-hidden shadow-2xl backdrop-blur-xl ring-1 ring-cyan-500/20 transition-all duration-500 ease-in-out",
           isExpanded
-            ? "h-[880px] sm:h-[960px] lg:h-[1020px] shadow-[0_0_60px_rgba(0,240,255,0.25)]"
+            ? "h-[880px] sm:h-[960px] lg:h-[1020px] shadow-[0_0_60px_rgba(5,117,206,0.25)]"
             : "h-[620px] sm:h-[680px] lg:h-[720px]"
         )}
       >
 
         {/* Portal Window Header Bar */}
-        <div className="flex flex-wrap items-center justify-between px-4 sm:px-6 py-3.5 bg-slate-900/90 border-b border-cyan-500/20 shrink-0 select-none backdrop-blur-md gap-3 z-10">
+        <div className="flex flex-wrap items-center justify-between px-4 sm:px-6 py-3.5 bg-white/90 border-b border-cyan-500/20 shrink-0 select-none backdrop-blur-md gap-3 z-10">
 
           {/* Left Side: Mac dots + Heading */}
           <div className="flex items-center gap-3 min-w-0">
@@ -713,14 +713,14 @@ export const PortalGalleryWindow: React.FC<PortalGalleryWindowProps> = ({
           {/* Right Side: View Controls & Expand Toggle */}
           <div className="flex items-center gap-2 shrink-0 ml-auto">
             {/* Variant Switcher Pills */}
-            <div className="flex items-center bg-slate-950/80 p-1 rounded-xl border border-cyan-500/20 text-xs">
+            <div className="flex items-center bg-white/88 p-1 rounded-xl border border-cyan-500/20 text-xs">
               <button
                 type="button"
                 onClick={() => setVariant("masonry")}
                 className={cn(
                   "px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer",
                   variant === "masonry"
-                    ? "bg-cyan-500 text-slate-950 shadow-[0_0_12px_rgba(0,240,255,0.4)]"
+                    ? "bg-cyan-500 text-slate-950 shadow-[0_0_12px_rgba(5,117,206,0.4)]"
                     : "text-gray-400 hover:text-white"
                 )}
                 title="Masonry Staggered Flow"
@@ -733,7 +733,7 @@ export const PortalGalleryWindow: React.FC<PortalGalleryWindowProps> = ({
                 className={cn(
                   "px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer",
                   variant === "polaroid"
-                    ? "bg-cyan-500 text-slate-950 shadow-[0_0_12px_rgba(0,240,255,0.4)]"
+                    ? "bg-cyan-500 text-slate-950 shadow-[0_0_12px_rgba(5,117,206,0.4)]"
                     : "text-gray-400 hover:text-white"
                 )}
                 title="Framed Cards"
@@ -746,7 +746,7 @@ export const PortalGalleryWindow: React.FC<PortalGalleryWindowProps> = ({
                 className={cn(
                   "px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer",
                   variant === "default"
-                    ? "bg-cyan-500 text-slate-950 shadow-[0_0_12px_rgba(0,240,255,0.4)]"
+                    ? "bg-cyan-500 text-slate-950 shadow-[0_0_12px_rgba(5,117,206,0.4)]"
                     : "text-gray-400 hover:text-white"
                 )}
                 title="Standard Cyber Flow"
@@ -775,7 +775,7 @@ export const PortalGalleryWindow: React.FC<PortalGalleryWindowProps> = ({
               className={cn(
                 "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all cursor-pointer border text-xs font-mono font-bold",
                 isExpanded
-                  ? "bg-cyan-500/25 text-cyan-300 border-cyan-400/60 shadow-[0_0_12px_rgba(0,240,255,0.3)]"
+                  ? "bg-cyan-500/25 text-cyan-300 border-cyan-400/60 shadow-[0_0_12px_rgba(5,117,206,0.3)]"
                   : "bg-slate-800 text-gray-300 hover:text-white border-cyan-500/20 hover:bg-slate-700"
               )}
               title={isExpanded ? "Collapse to Standard View" : "Expand to Full Window Width & 1.5x Height"}
@@ -793,7 +793,7 @@ export const PortalGalleryWindow: React.FC<PortalGalleryWindowProps> = ({
           <div
             className="absolute inset-0 pointer-events-none opacity-20"
             style={{
-              backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0,240,255,0.3) 1px, transparent 0)`,
+              backgroundImage: `radial-gradient(circle at 1px 1px, rgba(5,117,206,0.3) 1px, transparent 0)`,
               backgroundSize: "28px 28px",
             }}
           />
@@ -953,17 +953,17 @@ export const PortalGalleryWindow: React.FC<PortalGalleryWindowProps> = ({
         {/* Clean Lightbox for Enlarged Photo Preview */}
         {activePhoto && (
           <div
-            className="absolute inset-0 z-30 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4"
+            className="absolute inset-0 z-30 bg-white/92 backdrop-blur-md flex items-center justify-center p-4"
             onClick={() => setActivePhoto(null)}
           >
             <div
-              className="relative max-w-5xl max-h-[85vh] bg-slate-900/90 border border-cyan-500/40 rounded-2xl overflow-hidden p-2 shadow-2xl flex flex-col items-center justify-center"
+              className="relative max-w-5xl max-h-[85vh] bg-white/90 border border-cyan-500/40 rounded-2xl overflow-hidden p-2 shadow-2xl flex flex-col items-center justify-center"
               onClick={(e) => e.stopPropagation()}
             >
               <button
                 type="button"
                 onClick={() => setActivePhoto(null)}
-                className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-slate-950/80 border border-cyan-500/40 flex items-center justify-center text-gray-300 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-white/88 border border-cyan-500/40 flex items-center justify-center text-gray-300 hover:text-white hover:bg-[#E7EEF6] transition-colors cursor-pointer"
                 title="Close"
               >
                 ✕

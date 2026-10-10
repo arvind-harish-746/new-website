@@ -55,7 +55,7 @@ export default function ScrollToTop() {
       }`}
     >
       {/* Floating Hover Tooltip with Arrow Pointer */}
-      <div className="absolute -top-10 px-2.5 py-1 bg-[#090D16] border border-cyan-500/50 text-cyan-300 text-[11px] font-mono font-medium rounded-md shadow-[0_4px_16px_rgba(0,0,0,0.7)] opacity-0 -translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 whitespace-nowrap">
+      <div className="absolute -top-10 px-2.5 py-1 bg-[#090D16] border border-cyan-500/50 text-[#0460A9] text-[11px] font-mono font-medium rounded-md shadow-[0_4px_16px_rgba(0,0,0,0.7)] opacity-0 -translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 whitespace-nowrap">
         Back to top
         <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#090D16] border-r border-b border-cyan-500/50 rotate-45" />
       </div>
@@ -63,7 +63,7 @@ export default function ScrollToTop() {
       {/* Floating Button (Arrowmark only) */}
       <button
         onClick={scrollToTop}
-        className="w-11 h-11 rounded-full bg-[#0F172A]/95 border border-cyan-400/60 text-cyan-400 hover:text-[#0F172A] hover:bg-cyan-400 hover:border-cyan-300 flex items-center justify-center transition-all duration-300 shadow-[0_0_20px_rgba(0,240,255,0.35)] hover:shadow-[0_0_30px_rgba(0,240,255,0.7)] hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md"
+        className="w-11 h-11 rounded-full bg-white/95 border border-cyan-400/60 text-[#0460A9] hover:text-[#0460A9] hover:bg-[#ff8614] hover:border-cyan-300 flex items-center justify-center transition-all duration-300 shadow-[0_10px_24px_rgba(249,116,5,0.2)] hover:shadow-[0_10px_24px_rgba(16,32,51,0.08)] hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md"
         aria-label="Scroll to top of page"
         title="Back to top"
       >

@@ -287,22 +287,22 @@ export default function BlogComments({ blogId, initialComments = [] }: BlogComme
   };
 
   return (
-    <div className="pt-10 mt-10 border-t border-slate-800 space-y-8 font-mono">
+    <div className="pt-10 mt-10 border-t border-[#D5E0EA] space-y-8 font-mono">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <MessageSquare className="text-cyan-400" size={24} />
-          <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+          <MessageSquare className="text-[#0460A9]" size={24} />
+          <h2 className="text-xl sm:text-2xl font-bold text-[#102033] tracking-tight">
             Discussion & Comments ({comments.length})
           </h2>
         </div>
 
         {/* User Session Bar */}
         {currentUser ? (
-          <div className="flex items-center gap-3 bg-slate-900/80 border border-cyan-500/20 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm">
-            <UserIcon size={14} className="text-cyan-400" />
+          <div className="flex items-center gap-3 bg-white/85 border border-cyan-500/20 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm">
+            <UserIcon size={14} className="text-[#0460A9]" />
             <span className="text-slate-300">
-              Signed in as: <strong className="text-white">{currentUser}</strong>
+              Signed in as: <strong className="text-[#102033]">{currentUser}</strong>
             </span>
             <button
               onClick={handleLogout}
@@ -316,7 +316,7 @@ export default function BlogComments({ blogId, initialComments = [] }: BlogComme
         ) : (
           <button
             onClick={() => setShowInlineLogin(!showInlineLogin)}
-            className="flex items-center gap-2 text-xs sm:text-sm px-3.5 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20 transition-all cursor-pointer"
+            className="flex items-center gap-2 text-xs sm:text-sm px-3.5 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-[#0460A9] hover:bg-cyan-500/20 transition-all cursor-pointer"
           >
             <LogIn size={14} />
             Sign in to comment
@@ -328,17 +328,17 @@ export default function BlogComments({ blogId, initialComments = [] }: BlogComme
       {!currentUser && showInlineLogin && (
         <form
           onSubmit={handleInlineLogin}
-          className="p-5 rounded-xl bg-slate-900/90 border border-cyan-500/30 space-y-4 shadow-xl backdrop-blur-md animate-in fade-in duration-300"
+          className="p-5 rounded-xl bg-white/90 border border-cyan-500/30 space-y-4 shadow-xl backdrop-blur-md animate-in fade-in duration-300"
         >
           <div className="flex items-center justify-between">
-            <h3 className="text-sm sm:text-base font-bold text-cyan-300 flex items-center gap-2">
+            <h3 className="text-sm sm:text-base font-bold text-[#0460A9] flex items-center gap-2">
               <ShieldCheck size={16} />
               Student & Member Login
             </h3>
             <button
               type="button"
               onClick={() => setShowInlineLogin(false)}
-              className="text-slate-400 hover:text-white bg-transparent border-none p-0 cursor-pointer"
+              className="text-slate-400 hover:text-[#0460A9] bg-transparent border-none p-0 cursor-pointer"
             >
               <X size={16} />
             </button>
@@ -352,7 +352,7 @@ export default function BlogComments({ blogId, initialComments = [] }: BlogComme
                 value={loginUser}
                 onChange={(e) => setLoginUser(e.target.value)}
                 placeholder="e.g. aditya.sharma"
-                className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white text-sm focus:outline-none focus:border-cyan-500"
+                className="w-full px-3 py-2 rounded-lg bg-white border border-[#D5E0EA] text-[#102033] text-sm focus:outline-none focus:border-cyan-500"
               />
             </div>
             <div>
@@ -362,7 +362,7 @@ export default function BlogComments({ blogId, initialComments = [] }: BlogComme
                 value={loginPass}
                 onChange={(e) => setLoginPass(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white text-sm focus:outline-none focus:border-cyan-500"
+                className="w-full px-3 py-2 rounded-lg bg-white border border-[#D5E0EA] text-[#102033] text-sm focus:outline-none focus:border-cyan-500"
               />
             </div>
           </div>
@@ -381,7 +381,7 @@ export default function BlogComments({ blogId, initialComments = [] }: BlogComme
             <button
               type="submit"
               disabled={loginLoading}
-              className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-xs sm:text-sm font-bold hover:brightness-110 disabled:opacity-50 transition-all cursor-pointer border-none shadow-md"
+              className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-[#102033] text-xs sm:text-sm font-bold hover:brightness-110 disabled:opacity-50 transition-all cursor-pointer border-none shadow-md"
             >
               {loginLoading ? "Verifying..." : "Sign In & Join"}
             </button>
@@ -414,7 +414,7 @@ export default function BlogComments({ blogId, initialComments = [] }: BlogComme
             }
             rows={3}
             disabled={!currentUser || isSubmitting}
-            className="w-full p-4 rounded-xl bg-slate-950/90 border border-slate-800 text-white text-sm sm:text-base placeholder:text-slate-500 focus:outline-none focus:border-cyan-500/60 focus:ring-1 focus:ring-cyan-500/40 disabled:opacity-60 transition-all resize-y"
+            className="w-full p-4 rounded-xl bg-white/92 border border-[#D5E0EA] text-[#102033] text-sm sm:text-base placeholder:text-slate-500 focus:outline-none focus:border-cyan-500/60 focus:ring-1 focus:ring-cyan-500/40 disabled:opacity-60 transition-all resize-y"
           />
         </div>
 
@@ -443,7 +443,7 @@ export default function BlogComments({ blogId, initialComments = [] }: BlogComme
           <button
             type="submit"
             disabled={!currentUser || !newComment.trim() || isSubmitting}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs sm:text-sm tracking-wide disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg shadow-cyan-500/20 cursor-pointer border-none"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#F97405] hover:bg-[#ff8614] text-[#102033] font-bold text-xs sm:text-sm tracking-wide disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg shadow-cyan-500/20 cursor-pointer border-none"
           >
             <Send size={14} />
             {isSubmitting ? "Posting..." : "Post Comment"}
@@ -454,7 +454,7 @@ export default function BlogComments({ blogId, initialComments = [] }: BlogComme
       {/* Existing Comments List */}
       <div className="space-y-4 pt-4">
         {comments.length === 0 ? (
-          <div className="text-center py-10 px-4 rounded-xl border border-dashed border-slate-800 bg-slate-950/40 text-slate-500 text-sm">
+          <div className="text-center py-10 px-4 rounded-xl border border-dashed border-[#D5E0EA] bg-white/72 text-slate-500 text-sm">
             No comments yet. Be the first to start the discussion!
           </div>
         ) : (
@@ -466,16 +466,16 @@ export default function BlogComments({ blogId, initialComments = [] }: BlogComme
             return (
               <div
                 key={commentId || Math.random().toString()}
-                className="p-4 sm:p-5 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-slate-700/80 transition-all space-y-3"
+                className="p-4 sm:p-5 rounded-xl bg-white/75 border border-[#D5E0EA] hover:border-[#D5E0EA]/80 transition-all space-y-3"
               >
                 {/* Comment Header - No Student Badges, Clean Author Name */}
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-300 font-bold text-xs">
+                    <div className="w-8 h-8 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-[#0460A9] font-bold text-xs">
                       {comment.username ? comment.username.charAt(0).toUpperCase() : "U"}
                     </div>
                     <div>
-                      <span className="font-bold text-white text-sm sm:text-base">
+                      <span className="font-bold text-[#102033] text-sm sm:text-base">
                         {comment.username}
                       </span>
                       <div className="flex items-center gap-1.5 text-xs text-slate-400">
@@ -493,7 +493,7 @@ export default function BlogComments({ blogId, initialComments = [] }: BlogComme
                     {isOwner && !isEditing && (
                       <button
                         onClick={() => handleStartEdit(comment)}
-                        className="p-1.5 text-slate-400 hover:text-cyan-400 rounded-lg hover:bg-slate-800/60 transition-colors bg-transparent border-none cursor-pointer"
+                        className="p-1.5 text-slate-400 hover:text-[#0460A9] rounded-lg hover:bg-[#E7EEF6]/60 transition-colors bg-transparent border-none cursor-pointer"
                         title="Edit Comment"
                       >
                         <Edit3 size={14} />
@@ -519,7 +519,7 @@ export default function BlogComments({ blogId, initialComments = [] }: BlogComme
                       value={editContent}
                       onChange={(e) => setEditContent(e.target.value)}
                       rows={3}
-                      className="w-full p-3 rounded-lg bg-slate-950 border border-cyan-500/50 text-white text-sm focus:outline-none"
+                      className="w-full p-3 rounded-lg bg-white border border-cyan-500/50 text-[#102033] text-sm focus:outline-none"
                     />
                     <div className="flex items-center justify-end gap-2">
                       <button
@@ -527,14 +527,14 @@ export default function BlogComments({ blogId, initialComments = [] }: BlogComme
                           setEditingCommentId(null);
                           setEditContent("");
                         }}
-                        className="px-3 py-1.5 rounded-lg border border-slate-700 text-slate-300 text-xs hover:bg-slate-800 transition-colors bg-transparent cursor-pointer"
+                        className="px-3 py-1.5 rounded-lg border border-[#D5E0EA] text-slate-300 text-xs hover:bg-[#E7EEF6] transition-colors bg-transparent cursor-pointer"
                       >
                         Cancel
                       </button>
                       <button
                         onClick={() => handleSaveEdit(commentId)}
                         disabled={isUpdating}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500 text-slate-950 font-bold text-xs hover:bg-cyan-400 transition-colors cursor-pointer border-none"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F97405] text-[#102033] font-bold text-xs hover:bg-[#ff8614] transition-colors cursor-pointer border-none"
                       >
                         <Check size={13} />
                         {isUpdating ? "Saving..." : "Save Changes"}

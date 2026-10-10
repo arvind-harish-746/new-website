@@ -194,7 +194,7 @@ export default function SplashScreen({ onExitStart, onComplete }: SplashScreenPr
           const streak = streaks[i];
           streak.x += streak.speed * (0.35 + motion.warp * 2.6);
           if (streak.x > viewW + streak.len) streak.x = -streak.len;
-          ctx.strokeStyle = `rgba(0, 240, 255, ${streak.alpha * motion.warp})`;
+          ctx.strokeStyle = `rgba(5, 117, 206, ${streak.alpha * motion.warp})`;
           ctx.beginPath();
           ctx.moveTo(streak.x, streak.y);
           ctx.lineTo(streak.x + streak.len * (0.35 + motion.warp), streak.y);
@@ -212,8 +212,8 @@ export default function SplashScreen({ onExitStart, onComplete }: SplashScreenPr
         }
         const alpha = Math.min(1, spark.life / spark.max) * (0.35 + spark.z * 0.65);
         ctx.fillStyle = spark.hot
-          ? `rgba(255, 255, 255, ${alpha})`
-          : `rgba(0, 240, 255, ${alpha})`;
+          ? `rgba(249, 116, 5, ${alpha})`
+          : `rgba(5, 117, 206, ${alpha})`;
         const px = spark.x + motion.smoothX * 26 * spark.z;
         const py = spark.y + motion.smoothY * 18 * spark.z;
         ctx.fillRect(px, py, spark.size, spark.size);
@@ -228,14 +228,14 @@ export default function SplashScreen({ onExitStart, onComplete }: SplashScreenPr
         ctx.beginPath();
         ctx.arc(cx, cy, radius, a0, a0 + 1.05 + motion.spool * 0.45);
         ctx.strokeStyle = k === 0
-          ? `rgba(0, 240, 255, ${0.28 + motion.spool * 0.4})`
-          : `rgba(56, 189, 248, ${0.2 + motion.spool * 0.3})`;
+          ? `rgba(5, 117, 206, ${0.35 + motion.spool * 0.4})`
+          : `rgba(249, 116, 5, ${0.28 + motion.spool * 0.28})`;
         ctx.stroke();
       }
 
       const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, ring * 1.6);
-      glow.addColorStop(0, `rgba(0, 240, 255, ${0.05 + (1 - motion.warp) * 0.07})`);
-      glow.addColorStop(1, "rgba(0, 240, 255, 0)");
+      glow.addColorStop(0, `rgba(5, 117, 206, ${0.06 + (1 - motion.warp) * 0.08})`);
+      glow.addColorStop(1, "rgba(5, 117, 206, 0)");
       ctx.fillStyle = glow;
       ctx.beginPath();
       ctx.arc(cx, cy, ring * 1.6, 0, Math.PI * 2);
@@ -577,6 +577,7 @@ export default function SplashScreen({ onExitStart, onComplete }: SplashScreenPr
     "--splash-cyan": SPLASH_COLORS.cyan,
     "--splash-sky": SPLASH_COLORS.sky,
     "--splash-ink": SPLASH_COLORS.ink,
+    "--splash-orange": SPLASH_COLORS.orange,
   } as React.CSSProperties;
 
   return createPortal(

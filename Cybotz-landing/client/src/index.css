@@ -35,32 +35,38 @@
 }
 
 :root {
-  /* Cyberpunk Dark Theme */
-  --primary: #00F0FF;
-  --primary-foreground: #0F172A;
-  --chart-1: #00F0FF;
-  --chart-2: #38BDF8;
-  --chart-3: #1E293B;
-  --chart-4: #334155;
-  --chart-5: #64748B;
+  /* Light theme. Cyan and orange sampled from the CYBOTZ wordmark. */
+  --primary: #0575CE;
+  --primary-foreground: #FFFFFF;
+  --chart-1: #0575CE;
+  --chart-2: #F97405;
+  --chart-3: #E7EEF6;
+  --chart-4: #D5E0EA;
+  --chart-5: #3E5168;
   --radius: 0.5rem;
-  --background: #0F172A;
-  --foreground: #FFFFFF;
-  --card: #1E293B;
-  --card-foreground: #FFFFFF;
-  --popover: #1E293B;
-  --popover-foreground: #FFFFFF;
-  --secondary: #00F0FF;
-  --secondary-foreground: #0F172A;
-  --muted: #334155;
-  --muted-foreground: #94A3B8;
-  --accent: #00F0FF;
-  --accent-foreground: #0F172A;
+  --background: #F4F7FB;
+  --foreground: #102033;
+  --card: #FFFFFF;
+  --card-foreground: #102033;
+  --popover: #FFFFFF;
+  --popover-foreground: #102033;
+  --secondary: #F97405;
+  --secondary-foreground: #102033;
+  --muted: #E7EEF6;
+  --muted-foreground: #3E5168;
+  --accent: #0575CE;
+  --accent-foreground: #FFFFFF;
   --destructive: #EF4444;
   --destructive-foreground: #FFFFFF;
-  --border: #1E293B;
-  --input: #1E293B;
-  --ring: #00F0FF;
+  --border: #D5E0EA;
+  --input: #D5E0EA;
+  --ring: #0575CE;
+  --paper: #F4F7FB;
+  --ink: #102033;
+  --cyan: #0575CE;
+  --cyan-ink: #0460A9;
+  --orange: #F97405;
+  --orange-ink: #A04B03;
 }
 
 html {
@@ -148,7 +154,7 @@ html {
 
   /* Cyberpunk utilities */
   .glow-cyan {
-    box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+    box-shadow: 0 8px 22px rgba(249, 116, 5, 0.22);
   }
 
   .text-slate-dark {
@@ -182,7 +188,7 @@ html {
     }
     50% {
       opacity: 1;
-      box-shadow: inset 0 1px 2px 0 rgba(0, 240, 255, 0.35), 0 8px 32px 0 rgba(0, 240, 255, 0.15);
+      box-shadow: inset 0 1px 2px 0 rgba(5, 117, 206, 0.35), 0 8px 32px 0 rgba(5, 117, 206, 0.15);
     }
   }
 
@@ -200,7 +206,7 @@ html {
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.22), inset 0 -1px 1px 0 rgba(0, 240, 255, 0.08), 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.22), inset 0 -1px 1px 0 rgba(5, 117, 206, 0.08), 0 8px 32px 0 rgba(0, 0, 0, 0.4);
   }
 
   .liquid-glass-shimmer {
@@ -210,7 +216,7 @@ html {
       rgba(255, 255, 255, 0.03) 20%,
       rgba(6, 182, 212, 0.12) 38%,
       rgba(255, 255, 255, 0.35) 50%,
-      rgba(0, 240, 255, 0.25) 54%,
+      rgba(5, 117, 206, 0.25) 54%,
       rgba(6, 182, 212, 0.12) 62%,
       rgba(255, 255, 255, 0.03) 80%,
       transparent 100%
@@ -317,14 +323,16 @@ html[data-splash="on"] header img[alt="Cybotz"] {
 }
 
 .cybotz-splash {
-  --splash-void: #0a0f1d;
-  --splash-cyan: #00f0ff;
-  --splash-sky: #38bdf8;
+  --splash-void: #f4f7fb;
+  --splash-cyan: #0575ce;
+  --splash-sky: #3d8fd4;
+  --splash-ink: #102033;
+  --splash-orange: #f97405;
   position: fixed;
   inset: 0;
   z-index: 1100;
   overflow: hidden;
-  color: white;
+  color: var(--splash-ink, #102033);
   cursor: pointer;
   touch-action: none;
   font-family: "Space Mono", ui-monospace, monospace;
@@ -366,8 +374,8 @@ html[data-splash="on"] header img[alt="Cybotz"] {
   bottom: -28%;
   height: 68%;
   background-image:
-    linear-gradient(rgba(0, 240, 255, 0.16) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 240, 255, 0.16) 1px, transparent 1px);
+    linear-gradient(rgba(5, 117, 206, 0.16) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(5, 117, 206, 0.16) 1px, transparent 1px);
   background-size: 52px 52px;
   transform: perspective(480px) rotateX(68deg);
   transform-origin: center top;
@@ -384,14 +392,14 @@ html[data-splash="on"] header img[alt="Cybotz"] {
   width: min(920px, 110vw);
   height: 28vh;
   transform: translateX(-50%);
-  background: radial-gradient(ellipse at center, rgba(0, 240, 255, 0.2), transparent 68%);
+  background: radial-gradient(ellipse at center, rgba(5, 117, 206, 0.2), transparent 68%);
 }
 
 .splash-vignette {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse at 50% 42%, transparent 0%, transparent 36%, rgba(5, 8, 16, 0.55) 78%, rgba(5, 8, 16, 0.88) 100%);
+    radial-gradient(ellipse at 50% 42%, transparent 0%, transparent 52%, rgba(16, 32, 51, 0.05) 100%);
 }
 
 .splash-film {
@@ -403,7 +411,7 @@ html[data-splash="on"] header img[alt="Cybotz"] {
     transparent 3px,
     rgba(0, 0, 0, 0.16) 4px
   );
-  opacity: 0.35;
+  opacity: 0.12;
   mix-blend-mode: multiply;
 }
 
@@ -474,7 +482,7 @@ html[data-splash="on"] header img[alt="Cybotz"] {
   width: 100%;
   height: auto;
   overflow: visible;
-  filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.55));
+  filter: drop-shadow(0 0 10px rgba(5, 117, 206, 0.55));
 }
 
 .splash-trace {
@@ -520,8 +528,8 @@ html[data-splash="on"] header img[alt="Cybotz"] {
   font-weight: 700;
   letter-spacing: 0.34em;
   line-height: 0.9;
-  color: white;
-  text-shadow: 0 0 22px rgba(0, 240, 255, 0.42);
+  color: var(--splash-ink, #102033);
+  text-shadow: none;
   padding: 0.06em 0.12em 0.14em;
 }
 
@@ -550,13 +558,13 @@ html[data-splash="on"] header img[alt="Cybotz"] {
   letter-spacing: inherit;
   line-height: 0.9;
   opacity: 0;
-  mix-blend-mode: screen;
+  mix-blend-mode: multiply;
   pointer-events: none;
   white-space: nowrap;
 }
 
 .splash-glitch-a { color: var(--splash-cyan); }
-.splash-glitch-b { color: #e8fdff; }
+.splash-glitch-b { color: var(--splash-orange, #f97405); }
 
 .splash-sweep {
   position: absolute;
@@ -569,10 +577,10 @@ html[data-splash="on"] header img[alt="Cybotz"] {
     transparent 0%,
     rgba(255, 255, 255, 0.05) 35%,
     rgba(255, 255, 255, 0.95) 50%,
-    rgba(0, 240, 255, 0.75) 58%,
+    rgba(5, 117, 206, 0.75) 58%,
     transparent 72%
   );
-  mix-blend-mode: screen;
+  mix-blend-mode: multiply;
   transform: translateX(-180%);
   pointer-events: none;
 }
@@ -602,10 +610,10 @@ html[data-splash="on"] header img[alt="Cybotz"] {
   display: inline-flex;
   align-items: center;
   padding: 0.32rem 0.6rem;
-  border: 1px solid rgba(0, 240, 255, 0.4);
+  border: 1px solid rgba(5, 117, 206, 0.35);
   border-radius: 999px;
-  background: rgba(0, 240, 255, 0.06);
-  color: #cffafe;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--splash-ink, #102033);
   font-size: clamp(0.58rem, 1.6vw, 0.72rem);
   letter-spacing: 0.16em;
   opacity: 0;
@@ -627,7 +635,7 @@ html[data-splash="on"] header img[alt="Cybotz"] {
   position: absolute;
   inset: 0;
   z-index: 5;
-  background: radial-gradient(circle at 50% 50%, rgba(0, 240, 255, 0.55), rgba(255, 255, 255, 0.18) 18%, transparent 52%);
+  background: radial-gradient(circle at 50% 50%, rgba(5, 117, 206, 0.55), rgba(255, 255, 255, 0.18) 18%, transparent 52%);
   opacity: 0;
 }
 
@@ -638,7 +646,7 @@ html[data-splash="on"] header img[alt="Cybotz"] {
   top: 0;
   height: 16%;
   z-index: 5;
-  background: linear-gradient(to bottom, transparent, rgba(0, 240, 255, 0.16), transparent);
+  background: linear-gradient(to bottom, transparent, rgba(5, 117, 206, 0.16), transparent);
   opacity: 0;
 }
 
@@ -649,7 +657,7 @@ html[data-splash="on"] header img[alt="Cybotz"] {
   bottom: 0;
   z-index: 6;
   height: 2px;
-  background: rgba(0, 240, 255, 0.14);
+  background: rgba(5, 117, 206, 0.14);
 }
 
 .splash-progress > span {
@@ -671,9 +679,9 @@ html[data-splash="on"] header img[alt="Cybotz"] {
   min-height: 44px;
   padding: 0.65rem 1.05rem;
   border-radius: 999px;
-  border: 1px solid rgba(0, 240, 255, 0.6);
-  background: rgba(10, 15, 29, 0.78);
-  color: var(--splash-cyan);
+  border: 1px solid rgba(5, 117, 206, 0.45);
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--splash-ink, #102033);
   font-family: inherit;
   font-size: 0.72rem;
   font-weight: 700;
@@ -686,7 +694,7 @@ html[data-splash="on"] header img[alt="Cybotz"] {
 .splash-skip:hover {
   background: var(--splash-cyan);
   color: var(--splash-ink, #0f172a);
-  box-shadow: 0 0 18px rgba(0, 240, 255, 0.45);
+  box-shadow: 0 0 18px rgba(5, 117, 206, 0.45);
 }
 
 .splash-skip:focus-visible {
@@ -731,7 +739,7 @@ html[data-splash="on"] header img[alt="Cybotz"] {
    ========================================================================== */
 
 .home-stage .glow-cyan-text {
-  text-shadow: 0 0 18px rgba(0, 240, 255, 0.45);
+  text-shadow: none;
 }
 
 .hero-layout {
@@ -783,6 +791,12 @@ html[data-splash="on"] header img[alt="Cybotz"] {
   }
 }
 
+.hero-webgl canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
 .drone-hud {
   position: relative;
   width: min(100%, 280px);
@@ -809,7 +823,7 @@ html[data-splash="on"] header img[alt="Cybotz"] {
   position: absolute;
   width: 18px;
   height: 18px;
-  border: 1.5px solid #00f0ff;
+  border: 1.5px solid #0575ce;
   opacity: 0.8;
 }
 
@@ -823,7 +837,7 @@ html[data-splash="on"] header img[alt="Cybotz"] {
   left: 12%;
   right: 12%;
   height: 1px;
-  background: linear-gradient(90deg, transparent, #00f0ff, transparent);
+  background: linear-gradient(90deg, transparent, #0575ce, transparent);
   animation: drone-scan 3s ease-in-out infinite;
   opacity: 0.75;
   pointer-events: none;
@@ -838,13 +852,13 @@ html[data-splash="on"] header img[alt="Cybotz"] {
   font-family: "Space Mono", ui-monospace, monospace;
   font-size: 9px;
   letter-spacing: 0.14em;
-  color: rgba(0, 240, 255, 0.78);
+  color: rgba(5, 117, 206, 0.78);
   text-transform: uppercase;
   pointer-events: none;
 }
 
 .drone-readout strong {
-  color: #38bdf8;
+  color: #3d8fd4;
   font-weight: 700;
 }
 
@@ -853,15 +867,15 @@ html[data-splash="on"] header img[alt="Cybotz"] {
 
 .radar-ring {
   fill: none;
-  stroke: rgba(0, 240, 255, 0.35);
+  stroke: rgba(5, 117, 206, 0.35);
   stroke-width: 1;
 }
 
 .radar-ring.dim { stroke: rgba(56, 189, 248, 0.22); }
 
-.crosshair { stroke: rgba(0, 240, 255, 0.18); stroke-width: 1; }
+.crosshair { stroke: rgba(5, 117, 206, 0.18); stroke-width: 1; }
 
-.sweep-wedge { fill: rgba(0, 240, 255, 0.08); }
+.sweep-wedge { fill: rgba(5, 117, 206, 0.08); }
 
 .drone-sweep {
   transform-box: view-box;
@@ -870,7 +884,7 @@ html[data-splash="on"] header img[alt="Cybotz"] {
 }
 
 .arm {
-  stroke: #00f0ff;
+  stroke: #0575ce;
   stroke-width: 3;
   stroke-linecap: round;
   opacity: 0.85;
@@ -879,8 +893,8 @@ html[data-splash="on"] header img[alt="Cybotz"] {
 .rotor-disc { fill: rgba(10, 15, 29, 0.72); stroke: rgba(56, 189, 248, 0.7); stroke-width: 1.5; }
 
 .drone-rotor {
-  fill: rgba(0, 240, 255, 0.28);
-  stroke: #00f0ff;
+  fill: rgba(5, 117, 206, 0.28);
+  stroke: #0575ce;
   stroke-width: 1.25;
   transform-box: fill-box;
   transform-origin: center;
@@ -889,11 +903,11 @@ html[data-splash="on"] header img[alt="Cybotz"] {
 
 .drone-rotor.reverse { animation-direction: reverse; animation-duration: 0.33s; }
 
-.rotor-hub { fill: #00f0ff; }
+.rotor-hub { fill: #0575ce; }
 
-.fuselage { fill: #0a0f1d; stroke: #00f0ff; stroke-width: 2; }
-.deck { fill: rgba(56, 189, 248, 0.18); stroke: #38bdf8; stroke-width: 1.5; }
-.deck-core { fill: #00f0ff; }
+.fuselage { fill: #f4f7fb; stroke: #0575ce; stroke-width: 2; }
+.deck { fill: rgba(56, 189, 248, 0.18); stroke: #3d8fd4; stroke-width: 1.5; }
+.deck-core { fill: #0575ce; }
 
 .drone-hud.is-paused .drone-craft,
 .drone-hud.is-paused .drone-rotor,
@@ -924,7 +938,7 @@ html[data-splash="on"] header img[alt="Cybotz"] {
 .home-rail-path,
 .home-trace-path {
   fill: none;
-  stroke: #00f0ff;
+  stroke: #0575ce;
   stroke-width: 1.5;
   stroke-linejoin: round;
   stroke-linecap: round;
@@ -939,9 +953,9 @@ html[data-splash="on"] header img[alt="Cybotz"] {
 
 .home-trace svg { width: 100%; height: 100%; display: block; }
 
-.trace-node { fill: #0a0f1d; stroke: #38bdf8; stroke-width: 1.5; }
+.trace-node { fill: #ffffff; stroke: #0575ce; stroke-width: 1.5; }
 
-.trace-packet { fill: #00f0ff; }
+.trace-packet { fill: #f97405; }
 
 .flight-card {
   --mx: 50%;
@@ -956,7 +970,7 @@ html[data-splash="on"] header img[alt="Cybotz"] {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: radial-gradient(420px circle at var(--mx) var(--my), rgba(0, 240, 255, 0.18), transparent 42%);
+  background: radial-gradient(420px circle at var(--mx) var(--my), rgba(5, 117, 206, 0.18), transparent 42%);
   opacity: 0;
   transition: opacity 0.25s linear;
   pointer-events: none;
@@ -982,7 +996,7 @@ html[data-splash="on"] header img[alt="Cybotz"] {
   height: 2px;
   transform-origin: 0 50%;
   transform: scaleX(0);
-  background: linear-gradient(90deg, transparent, #00f0ff, #38bdf8);
+  background: linear-gradient(90deg, transparent, #0575ce, #3d8fd4);
   pointer-events: none;
 }
 
