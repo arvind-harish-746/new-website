@@ -27,6 +27,98 @@ function docTop(el: HTMLElement) {
   return el.getBoundingClientRect().top + window.scrollY;
 }
 
+function screenOf(pose: Key, vw: number, vh: number) {
+  const cx = ((pose.x + 1) / 2) * vw;
+  const cy = ((1 - pose.y) / 2) * vh;
+  const rad = 0.42 * Math.max(0.08, pose.s) * vh;
+  return { cx, cy, rad };
+}
+
+function toPose(pose: Key, cx: number, cy: number, vw: number, vh: number, s = pose.s): Key {
+  return {
+    ...pose,
+    s,
+    x: (cx / Math.max(vw, 1)) * 2 - 1,
+    y: 1 - 2 * (cy / Math.max(vh, 1)),
+  };
+}
+
+/** Keep the flyover in the gap above or below the numeral row. */
+function dodgeTelemetry(pose: Key, vw: number, vh: number): Key {
+  const rects = Array.from(document.querySelectorAll("#sec-telemetry .readout"))
+    .map((el) => el.getBoundingClientRect())
+    .filter((rect) => rect.width > 8 && rect.bottom > 0 && rect.top < vh);
+  if (!rects.length) return pose;
+  const box = screenOf(pose, vw, vh);
+  const union = {
+    left: Math.min(...rects.map((rect) => rect.left)),
+    right: Math.max(...rects.map((rect) => rect.right)),
+    top: Math.min(...rects.map((rect) => rect.top)),
+    bottom: Math.max(...rects.map((rect) => rect.bottom)),
+  };
+  const vRad = box.rad * 0.7;
+  const hits = box.cx + box.rad > union.left - 8
+    && box.cx - box.rad < union.right + 8
+    && box.cy + vRad > union.top - 8
+    && box.cy - vRad < union.bottom + 8;
+  if (!hits) return pose;
+  const header = 88;
+  const above = union.top - header;
+  const below = vh - union.bottom;
+  const need = vRad * 2 + 16;
+  let cy = box.cy;
+  let s = pose.s;
+  let rad = vRad;
+  if (above >= need) {
+    cy = Math.min(union.top - rad - 14, header + above / 2);
+    cy = Math.max(cy, header + rad);
+  } else if (below >= need) {
+    cy = Math.max(union.bottom + rad + 14, union.bottom + 20);
+    cy = Math.min(cy, vh - rad - 8);
+  } else {
+    const gap = Math.max(above, below, 36);
+    s = Math.max(0.12, Math.min(pose.s, (gap - 20) / (0.7 * vh)));
+    rad = 0.42 * s * vh * 0.7;
+    cy = above >= below ? header + rad + 6 : vh - rad - 10;
+  }
+  return toPose(pose, box.cx, cy, vw, vh, s);
+}
+
+/** Slide the small night-band craft off the mastery heading when they meet. */
+function dodgeHeading(pose: Key, vw: number, vh: number): Key {
+  if (pose.opacity < 0.05) return pose;
+  const heading = document.querySelector("#sec-mastery h2");
+  if (!(heading instanceof HTMLElement)) return pose;
+  const rect = heading.getBoundingClientRect();
+  if (rect.width < 8 || rect.bottom < 0 || rect.top > vh) return pose;
+  const box = screenOf(pose, vw, vh);
+  const vRad = box.rad * 0.7;
+  const hits = box.cx + box.rad > rect.left - 12
+    && box.cx - box.rad < rect.right + 12
+    && box.cy + vRad > rect.top - 8
+    && box.cy - vRad < rect.bottom + 8;
+  if (!hits) return pose;
+  const cx = Math.min(vw - 12, Math.max(box.cx, vw - box.rad * 0.2));
+  let cy = rect.bottom + vRad + 18;
+  if (cy + vRad > vh - 12) cy = Math.max(88 + vRad, rect.top - vRad - 14);
+  return toPose(pose, cx, cy, vw, vh);
+}
+
+function markHero() {
+  const heroEl = document.getElementById("sec-hero");
+  const root = document.documentElement;
+  if (!heroEl) {
+    root.dataset.hero = "off";
+    return;
+  }
+  const rect = heroEl.getBoundingClientRect();
+  const vh = window.innerHeight || 1;
+  const ticker = document.getElementById("flight-ticker");
+  const tickerTop = ticker ? ticker.getBoundingClientRect().top : rect.bottom;
+  const gone = rect.bottom < 72 || rect.top > vh * 0.82 || tickerTop < 80;
+  root.dataset.hero = gone ? "off" : "on";
+}
+
 /**
  * One scroll sampler. Slot and section positions are read on refresh and resize,
  * never inside the WebGL frame loop.
@@ -39,6 +131,7 @@ export function useDroneStage(active: boolean) {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const apply = () => {
+      markHero();
       if (introDriving) return;
       const width = window.innerWidth;
       const hero = heroKey(width);
@@ -122,6 +215,8 @@ export function useDroneStage(active: boolean) {
       } else if (y < contactMid) pose = mix(k8, k9, expo(clamp01((y - (contactTop - vh * 0.3)) / Math.max(1, contactMid - (contactTop - vh * 0.3)))));
       else pose = mix(k9, k10, easeOut(clamp01((y - contactMid) / Math.max(1, vh * 0.45))));
 
+      pose = dodgeTelemetry(pose, width, vh);
+      pose = dodgeHeading(pose, width, vh);
       writePose(pose);
       publishPose();
     };
@@ -136,9 +231,11 @@ export function useDroneStage(active: boolean) {
     });
     ScrollTrigger.addEventListener("refresh", apply);
     window.addEventListener("resize", apply);
+    window.addEventListener("scroll", apply, { passive: true });
     apply();
 
     return () => {
+      window.removeEventListener("scroll", apply);
       window.removeEventListener("resize", apply);
       ScrollTrigger.removeEventListener("refresh", apply);
       trigger.kill();

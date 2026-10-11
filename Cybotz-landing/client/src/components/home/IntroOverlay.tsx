@@ -39,7 +39,7 @@ function settleHero() {
 
 /**
  * Fixed intro overlay. It stays off the page until the drone has drawn a frame
- * (or a real intro clip is ready). If neither arrives within 600ms, the hero shows.
+ * (or a real intro clip is ready). If neither arrives within 8s, the hero shows.
  */
 export function IntroOverlay() {
   const [active, setActive] = useState(() => mode() !== "off");
@@ -69,6 +69,8 @@ export function IntroOverlay() {
 
   useEffect(() => {
     if (!active || doneRef.current) return;
+    // Strict mode remounts this effect. A reveal flagged by the discarded
+    // pass must not block the pass that actually paints the overlay.
     revealedRef.current = false;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     setIntroDriving(true);
@@ -101,9 +103,9 @@ export function IntroOverlay() {
 
     const onFrame = () => {
       if (cancelled || doneRef.current || revealedRef.current) return;
-      revealedRef.current = true;
       requestAnimationFrame(() => {
-        if (cancelled || doneRef.current) return;
+        if (cancelled || doneRef.current || revealedRef.current) return;
+        revealedRef.current = true;
         document.documentElement.dataset.introPhase = "flight";
         document.documentElement.dataset.introLock = "1";
         markStarted();
@@ -113,7 +115,9 @@ export function IntroOverlay() {
     if (document.documentElement.dataset.droneFrame === "1") onFrame();
     window.addEventListener("cybotz-drone-frame", onFrame);
 
-    const deadline = window.setTimeout(abort, 600);
+    // Stay hidden until a frame exists. SwiftShader can take a couple of
+    // seconds to draw; aborting at 600ms skipped the flight entirely.
+    const deadline = window.setTimeout(abort, 8000);
     void introClipReady().then((ok) => {
       if (cancelled || doneRef.current || !ok) return;
       setClip(true);

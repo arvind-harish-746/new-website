@@ -176,13 +176,19 @@ function DroneModel({ reduce, layerRef }: { reduce: boolean; layerRef: React.Ref
   const coneRef = useRef<THREE.Mesh>(null);
   const parts = useRef<{ child: THREE.Object3D; base: THREE.Vector3; dir: THREE.Vector3 }[]>([]);
   const edges = useRef<THREE.LineSegments[]>([]);
-  const { camera } = useThree();
+  const { camera, size } = useThree();
   const notifyModelReady = useSplashGate().notifyModelReady;
   const spring = useRef({ x: 0.2, y: 0.1, s: 0.3, vx: 0, vy: 0, vs: 0, yaw: 0.2, ready: false });
   const spinRate = useRef(0);
   const axes = useRef({ right: new THREE.Vector3(), up: new THREE.Vector3() });
   const tickerAt = useRef(0);
   const told = useRef(false);
+  const projectTmp = useRef(new THREE.Vector3());
+  const projectNdc = useRef(new THREE.Vector3());
+  const calloutNodes = useRef<null | {
+    svg: SVGSVGElement;
+    parts: { line: SVGLineElement; dot: SVGCircleElement; text: SVGTextElement }[];
+  }>(null);
 
   useEffect(() => {
     notifyModelReady();
@@ -267,10 +273,53 @@ function DroneModel({ reduce, layerRef }: { reduce: boolean; layerRef: React.Ref
 
     const footprint = box.getSize(new THREE.Vector3());
     const span = Math.min(footprint.x, footprint.z);
+    pivot.updateMatrixWorld(true);
+    const propLocal = new THREE.Vector3(0.55, 0.08, 0.2);
+    const sample = new THREE.Vector3();
+    let propReach = 0;
+    root.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (!mesh.isMesh || !mesh.geometry) return;
+      const attr = mesh.geometry.getAttribute("position");
+      if (!attr || attr.count < 24) return;
+      const step = Math.max(1, Math.floor(attr.count / 280));
+      for (let i = 0; i < attr.count; i += step) {
+        sample.fromBufferAttribute(attr, i);
+        mesh.localToWorld(sample);
+        pivot.worldToLocal(sample);
+        const reach = sample.length();
+        if (reach > propReach) {
+          propReach = reach;
+          propLocal.copy(sample);
+        }
+      }
+    });
+    const motorLocal = propLocal.clone().multiplyScalar(0.86);
+    const camSum = new THREE.Vector3();
+    let camCount = 0;
+    root.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (!mesh.isMesh) return;
+      const host = `${mesh.parent?.name || ""} ${mesh.name}`;
+      if (!/camera/i.test(host)) return;
+      const center = new THREE.Box3().setFromObject(mesh).getCenter(new THREE.Vector3());
+      pivot.worldToLocal(center);
+      camSum.add(center);
+      camCount += 1;
+    });
+    const cameraLocal = camCount
+      ? camSum.multiplyScalar(1 / camCount)
+      : new THREE.Vector3(0, 0.04, box.max.z * 0.82);
     return {
       root: pivot,
       points: posedCorners(box),
       shadow: { y: box.min.y + 0.02, w: span * 1.05, d: span * 0.62 },
+      anchors: {
+        prop: propLocal,
+        motor: motorLocal,
+        camera: cameraLocal,
+        fc: new THREE.Vector3(0, 0, 0),
+      },
     };
   }, [scene]);
 
@@ -375,6 +424,116 @@ function DroneModel({ reduce, layerRef }: { reduce: boolean; layerRef: React.Ref
       window.dispatchEvent(new Event("cybotz-drone-frame"));
     }
 
+    const showCallouts = size.width >= 1024
+      && document.documentElement.dataset.hero !== "off"
+      && document.documentElement.dataset.introPhase !== "flight";
+    if (calloutNodes.current && !calloutNodes.current.svg.isConnected) calloutNodes.current = null;
+    if (!showCallouts) {
+      calloutNodes.current?.svg.classList.remove("is-live");
+    } else {
+      if (!calloutNodes.current) {
+        const svg = document.getElementById("hero-callouts");
+        if (svg instanceof SVGSVGElement) {
+          const parts = ["prop", "motor", "camera", "fc"].map((id) => {
+            const group = svg.querySelector(`[data-part="${id}"]`);
+            return {
+              line: group?.querySelector("line") as SVGLineElement,
+              dot: group?.querySelector("circle") as SVGCircleElement,
+              text: group?.querySelector("text") as SVGTextElement,
+            };
+          });
+          if (parts.every((part) => part.line && part.dot && part.text)) {
+            calloutNodes.current = { svg, parts };
+          }
+        }
+      }
+      const nodes = calloutNodes.current;
+      if (nodes) {
+        craft.updateMatrixWorld(true);
+        const w = size.width;
+        const h = size.height;
+        if (nodes.svg.dataset.w !== String(w) || nodes.svg.dataset.h !== String(h)) {
+          nodes.svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
+          nodes.svg.dataset.w = String(w);
+          nodes.svg.dataset.h = String(h);
+        }
+        const keys = ["prop", "motor", "camera", "fc"] as const;
+        const points = keys.map((key) => {
+          const tmp = projectTmp.current;
+          tmp.copy(fitted.anchors[key]);
+          fitted.root.localToWorld(tmp);
+          const ndc = projectNdc.current.copy(tmp).project(camera);
+          const point = { x: (ndc.x * 0.5 + 0.5) * w, y: (-ndc.y * 0.5 + 0.5) * h };
+          if (key === "prop" || key === "motor") point.y += Math.max(8, 0.018 * spr.s * h);
+          return point;
+        });
+        let minX = Infinity;
+        let maxX = -Infinity;
+        let minY = Infinity;
+        let maxY = -Infinity;
+        for (const point of points) {
+          minX = Math.min(minX, point.x);
+          maxX = Math.max(maxX, point.x);
+          minY = Math.min(minY, point.y);
+          maxY = Math.max(maxY, point.y);
+        }
+        const reach = Math.max(64, 0.24 * spr.s * h);
+        minX -= reach;
+        maxX += reach;
+        minY -= reach * 0.35;
+        maxY += reach * 0.35;
+        const labelW = 168;
+        const side: "left" | "right" | "above" = w - maxX >= labelW + 20
+          ? "right"
+          : minX >= labelW + 20
+            ? "left"
+            : "above";
+        const placed = points.map((point, index) => ({
+          index,
+          side,
+          x: side === "left" ? minX : side === "right" ? maxX : point.x,
+          y: side === "above" ? minY : point.y,
+          ax: point.x,
+          ay: point.y,
+        }));
+        if (side === "above") {
+          placed.sort((a, b) => a.x - b.x);
+          const span = Math.max(labelW, (maxX - minX) / Math.max(1, placed.length));
+          placed.forEach((item, index) => {
+            item.x = THREE.MathUtils.clamp(minX + span * (index + 0.5), labelW / 2 + 12, w - labelW / 2 - 12);
+            item.y = minY;
+          });
+        } else {
+          placed.sort((a, b) => a.y - b.y);
+          for (let i = 1; i < placed.length; i += 1) {
+            if (placed[i].y < placed[i - 1].y + 28) placed[i].y = placed[i - 1].y + 28;
+          }
+          for (let i = placed.length - 2; i >= 0; i -= 1) {
+            if (placed[i].y > placed[i + 1].y - 28) placed[i].y = placed[i + 1].y - 28;
+          }
+        }
+        placed.forEach((item) => {
+          const node = nodes.parts[item.index];
+          const labelX = side === "left"
+            ? Math.max(labelW + 8, item.x)
+            : side === "right"
+              ? Math.min(w - labelW - 8, item.x)
+              : item.x;
+          const labelY = THREE.MathUtils.clamp(item.y, 96, h - 28);
+          node.line.setAttribute("x1", labelX.toFixed(1));
+          node.line.setAttribute("y1", labelY.toFixed(1));
+          node.line.setAttribute("x2", item.ax.toFixed(1));
+          node.line.setAttribute("y2", item.ay.toFixed(1));
+          node.dot.setAttribute("cx", item.ax.toFixed(1));
+          node.dot.setAttribute("cy", item.ay.toFixed(1));
+          node.text.setAttribute("x", (side === "left" ? labelX - 12 : side === "right" ? labelX + 12 : labelX).toFixed(1));
+          node.text.setAttribute("y", (labelY - (side === "above" ? 10 : -4)).toFixed(1));
+          node.text.setAttribute("text-anchor", side === "left" ? "end" : side === "above" ? "middle" : "start");
+        });
+        nodes.svg.classList.add("is-live");
+      }
+    }
+
     if (t - tickerAt.current > 0.1) {
       tickerAt.current = t;
       const ticker = document.getElementById("flight-ticker");
@@ -455,6 +614,7 @@ function HeroCanvas({ reduce }: { reduce: boolean }) {
   }, [mobile]);
 
   const canvas = (
+    <>
     <div ref={layerRef} className="flight-canvas" aria-hidden="true">
       {mounted && !hidden && (
         <Canvas
@@ -479,6 +639,21 @@ function HeroCanvas({ reduce }: { reduce: boolean }) {
         </Canvas>
       )}
     </div>
+    <svg id="hero-callouts" className="hero-callouts" aria-hidden="true">
+      {([
+        ["prop", "PROPELLER"],
+        ["motor", "BRUSHLESS MOTOR"],
+        ["camera", "FPV CAMERA"],
+        ["fc", "FLIGHT CONTROLLER"],
+      ] as const).map(([id, label]) => (
+        <g className="callout" data-part={id} key={id}>
+          <line x1="0" y1="0" x2="0" y2="0" />
+          <circle r="4" />
+          <text>{label}</text>
+        </g>
+      ))}
+    </svg>
+    </>
   );
 
   return createPortal(canvas, document.body);

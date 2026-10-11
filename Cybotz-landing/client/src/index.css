@@ -1577,6 +1577,15 @@ header nav button { font-family: Inter, sans-serif; font-weight: 500; font-size:
   color: #43566A; border-top: 1px solid #CFDBE4;
   margin: 28px auto 0; width: min(1440px, calc(100% - 48px)); padding-top: 12px;
 }
+html[data-hero="off"] .flight-ticker { visibility: hidden; }
+.hero-callouts {
+  position: fixed; inset: 0; width: 100vw; height: 100vh;
+  z-index: 36; pointer-events: none; overflow: visible;
+  opacity: 0;
+}
+.hero-callouts.is-live { opacity: 1; }
+html[data-hero="off"] .hero-callouts,
+html[data-intro-phase="flight"] .hero-callouts { opacity: 0; }
 .callouts { width: 100%; height: 100%; overflow: visible; }
 .callout line { stroke: #0B1620; stroke-width: 1; stroke-dasharray: 240; stroke-dashoffset: 240; animation: leader 600ms cubic-bezier(0.65,0,0.35,1) forwards; }
 .callout circle { fill: #0B1620; }
@@ -1621,7 +1630,7 @@ html[data-intro-phase="settled"] .hero-copy > *:nth-child(4) { animation-delay: 
   .home-stage h1 { order: 2; }
   .log-sub { order: 3; }
   .hero-actions { order: 4; }
-  .callouts { display: none; }
+  .callouts, .hero-callouts { display: none; }
 }
 @media (max-width: 767px) {
   .drone-slot { max-height: 220px; }
@@ -1664,9 +1673,9 @@ html[data-intro-phase="settled"] .hero-copy > *:nth-child(4) { animation-delay: 
   font-family: "JetBrains Mono", ui-monospace, monospace;
   font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #43566A;
 }
-.odo-window { height: 1em; overflow: hidden; display: inline-block; }
-.odo-strip { display: flex; flex-direction: column; transform: translateY(0); transition: transform 900ms steps(10, end); }
-.odo-strip.is-on { transform: translateY(calc(var(--n) * -1em)); }
+.odo-window { height: 1em; overflow: hidden; display: inline-block; vertical-align: bottom; }
+.odo-strip { display: flex; flex-direction: column; line-height: 1; }
+.odo-strip span { display: block; height: 1em; line-height: 1; }
 .odo-suffix { color: #C2410C; font-size: 0.45em; margin-left: 0.08em; line-height: 1.4; }
 .home-trace-path { stroke: #0575CE; }
 .trace-packet { fill: #F97405; }
@@ -1712,6 +1721,9 @@ html[data-intro-phase="settled"] .hero-copy > *:nth-child(4) { animation-delay: 
 
 #sec-mastery { background: #0B1620; color: #F5F8FA; position: relative; padding-block: 96px; overflow: hidden; }
 #sec-mastery h2, #sec-mastery .night-statement { color: #F5F8FA; }
+@media (min-width: 1024px) and (max-width: 1360px) {
+  #sec-mastery h2 { max-width: 68%; }
+}
 .night-grid {
   position: absolute; inset: 0; pointer-events: none;
   background-image: linear-gradient(rgba(56,182,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(56,182,255,0.06) 1px, transparent 1px);

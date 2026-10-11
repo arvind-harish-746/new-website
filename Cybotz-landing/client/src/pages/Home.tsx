@@ -8,7 +8,6 @@ import { Send, Mail, Phone, MapPin, ArrowRight, CheckCircle } from "lucide-react
 import { INSTITUTIONS } from "@/data";
 import { captureUtmParams } from "@/lib/utm";
 import { usePageMeta } from "@/hooks/usePageMeta";
-import { LiquidGlassSlowNetworkBanner } from "@/components/ui/SkeletonLoader";
 import { SectionTrace } from "@/components/home/SectionTrace";
 import { IntroOverlay } from "@/components/home/IntroOverlay";
 import { useHomeMotion } from "@/components/home/useHomeMotion";
@@ -172,14 +171,7 @@ export default function Home() {
                 </button>
               </div>
             </div>
-            <div className="drone-slot" aria-hidden="true">
-              <svg className="callouts" viewBox="0 0 640 480">
-                <Callout x1={120} y1={150} x2={250} y2={190} label="PROPELLER" />
-                <Callout x1={150} y1={300} x2={270} y2={250} label="BRUSHLESS MOTOR" />
-                <Callout x1={520} y1={160} x2={390} y2={210} label="FPV CAMERA" />
-                <Callout x1={500} y1={330} x2={360} y2={250} label="FLIGHT CONTROLLER" />
-              </svg>
-            </div>
+            <div className="drone-slot" aria-hidden="true" />
           </div>
           <p id="flight-ticker" className="flight-ticker" aria-hidden="true">
             ALT 001.2 m · HDG 284° · BAT 98%
@@ -371,54 +363,18 @@ export default function Home() {
         </section>
       </main>
       <Footer />
-      <LiquidGlassSlowNetworkBanner />
     </div>
   );
 }
 
-function Callout({ x1, y1, x2, y2, label }: { x1: number; y1: number; x2: number; y2: number; label: string }) {
-  return (
-    <g className="callout">
-      <line x1={x1} y1={y1} x2={x2} y2={y2} />
-      <circle cx={x2} cy={y2} r="4" />
-      <text x={x1} y={y1} textAnchor={x1 > 320 ? "end" : "start"}>
-        {label}
-      </text>
-    </g>
-  );
-}
-
 function Odometer({ value, suffix = "", label }: { value: number; suffix?: string; label: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [on, setOn] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setOn(true);
-      return;
-    }
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry?.isIntersecting) return;
-        setOn(true);
-        observer.disconnect();
-      },
-      { threshold: 0.8 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
   const digits = String(value).split("");
   return (
-    <div className="readout" ref={ref}>
+    <div className="readout">
       <dt aria-label={`${value}${suffix}`}>
         {digits.map((digit, index) => (
           <span className="odo-window" key={`${digit}-${index}`}>
-            <span
-              className={on ? "odo-strip is-on" : "odo-strip"}
-              style={{ transform: on ? `translateY(calc(${digit} * -1em))` : "translateY(0)", transitionDelay: `${index * 120}ms` }}
-            >
+            <span className="odo-strip" style={{ transform: `translateY(calc(${digit} * -1em))` }}>
               {Array.from({ length: 10 }, (_, n) => (
                 <span key={n}>{n}</span>
               ))}
