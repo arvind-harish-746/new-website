@@ -1209,6 +1209,8 @@ html[data-intro-lock="1"] body {
 
 .scrub-poster { z-index: 0; }
 
+.scrub-section.is-return .scrub-poster { visibility: hidden; }
+
 video.scrub-media {
   z-index: 1;
   opacity: 0;

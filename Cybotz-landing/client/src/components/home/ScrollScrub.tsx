@@ -177,6 +177,7 @@ export function ScrollScrub() {
   const [reduce, setReduce] = useState(() => prefers("(prefers-reduced-motion: reduce)"));
   const [ready, setReady] = useState(false);
   const [soundOn, setSoundOn] = useState(false);
+  const [returnVisit] = useState(() => seenAlready());
   const sectionRef = useRef<HTMLElement>(null);
   const fadeRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -239,6 +240,28 @@ export function ScrollScrub() {
     const ctrl = new AbortController();
     let blobUrl = "";
     let dead = false;
+
+    if (phaseRef.current !== "play") {
+      video.style.opacity = "0";
+      video.muted = true;
+      video.preload = "auto";
+      video.pause();
+      const show = () => {
+        if (video.currentTime < IMPACT - 0.25) return;
+        video.style.opacity = "1";
+        video.removeEventListener("seeked", show);
+      };
+      video.addEventListener("seeked", show);
+      const fallback = window.setTimeout(show, 2200);
+      video.src = src;
+      video.load();
+      setReady(true);
+      return () => {
+        dead = true;
+        window.clearTimeout(fallback);
+        video.removeEventListener("seeked", show);
+      };
+    }
 
     const arm = (url: string) => {
       video.style.opacity = "0";
@@ -336,6 +359,7 @@ export function ScrollScrub() {
       phaseRef.current = "freeze";
       video.pause();
       video.muted = true;
+      video.playbackRate = 1;
       snapImpact();
       markSeen();
       releaseLock();
@@ -370,9 +394,9 @@ export function ScrollScrub() {
       armUntilRef.current = performance.now() + ARM_MS;
     }
 
+    // canplay also fires after every scrub seek. Only the first one may start playback.
     const onReady = () => {
       if (phaseRef.current === "play") tryPlay();
-      else snapImpact();
     };
     video.addEventListener("canplay", onReady);
     tryPlay();
@@ -526,7 +550,7 @@ export function ScrollScrub() {
     <section
       id="sec-scrub"
       ref={sectionRef}
-      className={reduce ? "scrub-section is-still" : "scrub-section"}
+      className={reduce ? "scrub-section is-still" : returnVisit ? "scrub-section is-return" : "scrub-section"}
       aria-label="Cybotz introduction"
     >
       <div className="scrub-pin">
