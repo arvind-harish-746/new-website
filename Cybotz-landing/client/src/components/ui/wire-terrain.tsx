@@ -229,7 +229,7 @@ export interface WireTerrainProps {
 const DEFAULTS = {
   background: "#060A13",
   lineColor: "#11B3D9",
-  accent: "#00A3FF",
+  accent: "#0575CE",
   density: 120,
   speed: 100,
   relief: 98,
@@ -241,7 +241,7 @@ const DEFAULTS = {
 export function WireTerrain({
   background = "#060A13",
   lineColor = "#11B3D9",
-  accent = "#00A3FF",
+  accent = "#0575CE",
   density = 120,
   speed = 100,
   relief = 98,

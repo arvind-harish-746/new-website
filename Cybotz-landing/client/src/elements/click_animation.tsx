@@ -50,6 +50,7 @@ export default function MouseEffects({
 
     useEffect(() => {
         const handleClick = (e: MouseEvent) => {
+            if (document.documentElement.dataset.splash === "on") return;
             const container = containerRef.current;
             if (!container) return;
 

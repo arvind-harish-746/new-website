@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -18,7 +18,7 @@ import OfflinePage from "./pages/OfflinePage";
 import Portal from "./pages/Portal";
 import StudentPortal from "./pages/StudentPortal";
 import { captureUtmParams } from "./lib/utm";
-import { useState } from "react";
+import { SplashGateProvider } from "./components/SplashScreen";
 
 function Router() {
   return (
@@ -61,15 +61,25 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <ThemeProvider defaultTheme="dark">
-        <div className="relative min-h-screen">
-          {isOffline && <OfflineOverlay onRetry={() => setIsOffline(!navigator.onLine)} />}
-          <ScrollProgressBar />
-          <MouseEffects showLabel={false} color="#00F0FF" effectSize={60} />
-          <Router />
-          <ScrollToTop />
-          <CookieBanner />
-        </div>
+      <ThemeProvider defaultTheme="light">
+        <SplashGateProvider
+          value={{
+            suspendBackground: false,
+            intro: "none",
+            notifyModelReady: () => {},
+            finishIntro: () => {},
+            abortToClassic: () => {},
+          }}
+        >
+          <div className="relative min-h-screen">
+            {isOffline && <OfflineOverlay onRetry={() => setIsOffline(!navigator.onLine)} />}
+            <ScrollProgressBar />
+            <MouseEffects showLabel={false} color="#0575CE" effectSize={60} />
+            <Router />
+            <ScrollToTop />
+            <CookieBanner />
+          </div>
+        </SplashGateProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );

@@ -273,14 +273,14 @@ export function WalleRobot({ className = "", showHint = true }: WalleRobotProps)
       {/* Stage */}
       <div className="relative w-64 h-56 sm:w-72 sm:h-64 flex items-center justify-center">
         {/* Hologram shadow / glow */}
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-44 h-7 rounded-full bg-cyan-500/20 blur-md border border-cyan-400/30 shadow-[0_0_24px_rgba(0,240,255,0.35)] pointer-events-none" />
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-44 h-7 rounded-full bg-cyan-500/20 blur-md border border-cyan-400/30 shadow-[0_0_24px_rgba(5,117,206,0.35)] pointer-events-none" />
 
         {/* EXACT SVG from offline_prompt.txt */}
         <svg
           id="walle"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 139.4 129.4"
-          className="w-full h-full relative z-10 overflow-visible drop-shadow-[0_8px_20px_rgba(0,240,255,0.22)]"
+          className="w-full h-full relative z-10 overflow-visible drop-shadow-[0_8px_20px_rgba(5,117,206,0.22)]"
         >
           <defs>
             <clipPath id="clip-path" transform="translate(-81.8 -924.4)">

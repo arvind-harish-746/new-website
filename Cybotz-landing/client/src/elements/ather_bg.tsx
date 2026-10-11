@@ -7,12 +7,15 @@ import { ArrowRight, Zap } from 'lucide-react';
 interface AetherFlowHeroProps {
     showContent?: boolean;
     densityMultiplier?: number;
+    /** Pause the constellation while the intro splash is covering the page. */
+    suspended?: boolean;
 }
 
-const AetherFlowHero = ({ showContent = true, densityMultiplier = 2.4 }: AetherFlowHeroProps) => {
+const AetherFlowHero = ({ showContent = true, densityMultiplier = 2.4, suspended = false }: AetherFlowHeroProps) => {
     const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
 
     React.useEffect(() => {
+        if (suspended) return;
         const canvas = canvasRef.current;
         if (!canvas) return;
 
@@ -28,11 +31,11 @@ const AetherFlowHero = ({ showContent = true, densityMultiplier = 2.4 }: AetherF
         };
 
         const cyanPalette = [
-            'rgba(0, 240, 255, 0.9)',
-            'rgba(56, 189, 248, 0.85)',
-            'rgba(34, 211, 238, 0.75)',
-            'rgba(14, 165, 233, 0.7)',
-            'rgba(125, 211, 252, 0.8)'
+            'rgba(5, 117, 206, 0.4)',
+            'rgba(197, 220, 236, 0.72)',
+            'rgba(255, 255, 255, 0.62)',
+            'rgba(249, 116, 5, 0.32)',
+            'rgba(110, 139, 98, 0.38)'
         ];
 
         class Particle {
@@ -69,7 +72,7 @@ const AetherFlowHero = ({ showContent = true, densityMultiplier = 2.4 }: AetherF
                     ctx.save();
                     ctx.beginPath();
                     ctx.arc(this.x, this.y, glowRadius, 0, Math.PI * 2, false);
-                    ctx.fillStyle = 'rgba(0, 240, 255, 0.15)';
+                    ctx.fillStyle = 'rgba(5, 117, 206, 0.1)';
                     ctx.fill();
                     ctx.restore();
                 }
@@ -121,12 +124,11 @@ const AetherFlowHero = ({ showContent = true, densityMultiplier = 2.4 }: AetherF
             let numberOfParticles: number;
 
             if (isMobile) {
-                const rawCount = Math.floor(((canvas.height * canvas.width) / 3800) * (densityMultiplier / 2));
-                numberOfParticles = Math.min(Math.max(rawCount, 100), 130);
+                const rawCount = Math.floor(((canvas.height * canvas.width) / 14000) * densityMultiplier);
+                numberOfParticles = Math.min(Math.max(rawCount, 24), 40);
             } else {
-                // Laptop / Desktop density: balanced count (~180-320 particles)
-                const rawCount = Math.floor((canvas.height * canvas.width) / 7200);
-                numberOfParticles = Math.min(Math.max(rawCount, 180), 320);
+                const rawCount = Math.floor(((canvas.height * canvas.width) / 22000) * densityMultiplier);
+                numberOfParticles = Math.min(Math.max(rawCount, 36), 70);
             }
 
             for (let i = 0; i < numberOfParticles; i++) {
@@ -158,7 +160,8 @@ const AetherFlowHero = ({ showContent = true, densityMultiplier = 2.4 }: AetherF
         function animate() {
             if (!canvas || !ctx) return;
             animationFrameId = requestAnimationFrame(animate);
-            ctx.fillStyle = 'rgba(10, 15, 29, 1)';
+            if (document.documentElement.dataset.heroWebgl === "on") return;
+            ctx.fillStyle = 'rgba(244, 247, 251, 1)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             for (let i = 0; i < particles.length; i++) {
@@ -169,7 +172,7 @@ const AetherFlowHero = ({ showContent = true, densityMultiplier = 2.4 }: AetherF
 
         function connect() {
             if (!canvas || !ctx) return;
-            const maxConnectDistanceSq = 135 * 135;
+            const maxConnectDistanceSq = 96 * 96;
 
             for (let a = 0; a < particles.length; a++) {
                 // Check connectivity with nearby particles
@@ -180,7 +183,7 @@ const AetherFlowHero = ({ showContent = true, densityMultiplier = 2.4 }: AetherF
 
                     if (distSq < maxConnectDistanceSq) {
                         const ratio = 1 - (distSq / maxConnectDistanceSq);
-                        const opacity = ratio * 0.52;
+                        const opacity = ratio * 0.28;
                         
                         let isNearMouse = false;
                         if (mouse.x !== null && mouse.y !== null) {
@@ -191,10 +194,10 @@ const AetherFlowHero = ({ showContent = true, densityMultiplier = 2.4 }: AetherF
                             }
                         }
 
-                        ctx.strokeStyle = isNearMouse 
-                            ? `rgba(255, 255, 255, ${Math.min(opacity * 1.6, 0.95)})` 
-                            : `rgba(0, 230, 255, ${opacity})`;
-                        ctx.lineWidth = isNearMouse ? 2.0 : 1.35;
+                        ctx.strokeStyle = isNearMouse
+                            ? `rgba(249, 116, 5, ${Math.min(opacity * 1.8, 0.55)})`
+                            : `rgba(5, 117, 206, ${opacity})`;
+                        ctx.lineWidth = isNearMouse ? 1.4 : 1;
                         ctx.beginPath();
                         ctx.moveTo(particles[a].x, particles[a].y);
                         ctx.lineTo(particles[b].x, particles[b].y);
@@ -225,7 +228,7 @@ const AetherFlowHero = ({ showContent = true, densityMultiplier = 2.4 }: AetherF
             window.removeEventListener('mouseout', handleMouseOut);
             cancelAnimationFrame(animationFrameId);
         };
-    }, []);
+    }, [suspended]);
 
     const fadeUpVariants: any = {
         hidden: { opacity: 0, y: 20 },

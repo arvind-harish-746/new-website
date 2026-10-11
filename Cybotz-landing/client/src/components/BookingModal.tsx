@@ -184,28 +184,28 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   const formattedTime = getFormattedTimeString(selectedHour, selectedMinute);
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 bg-black/60 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 bg-[#E7F2FA]/60 backdrop-blur-sm animate-fade-in">
       {/* Smaller compact floating modal window hovering over calendar */}
-      <div className="relative w-full max-w-md rounded-2xl border border-[#1E293B] bg-[#0B101D] p-5 shadow-[0_0_40px_rgba(0,240,255,0.25)] text-white overflow-hidden my-auto">
+      <div className="relative w-full max-w-md rounded-2xl border border-[#C9DDEC] bg-[#E7F2FA] p-5 shadow-[0_0_40px_rgba(5,117,206,0.25)] text-[#102033] overflow-hidden my-auto">
         
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#1E293B]">
+        <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#C9DDEC]">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
+            <div className="p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-[#0460A9]">
               <CalendarIcon className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold font-mono text-white">
+              <h3 className="text-base font-bold font-mono text-[#102033]">
                 Book Trial Session
               </h3>
-              <p className="text-xs text-cyan-400 font-mono">
+              <p className="text-xs text-[#0460A9] font-mono">
                 {selectedDate.fullDateStr}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-[#3E5168] hover:text-[#0460A9] hover:bg-[#E4F1F8] transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -214,23 +214,23 @@ export const BookingModal: React.FC<BookingModalProps> = ({
         {isSuccess ? (
           /* Success Screen */
           <div className="flex flex-col items-center text-center py-4 gap-3">
-            <div className="w-12 h-12 rounded-full bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400">
+            <div className="w-12 h-12 rounded-full bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-[#0460A9]">
               <CheckCircle2 className="w-8 h-8" />
             </div>
-            <h4 className="text-xl font-bold font-mono text-white">
+            <h4 className="text-xl font-bold font-mono text-[#102033]">
               Trial Session Booked!
             </h4>
-            <p className="text-xs text-gray-300 max-w-sm leading-relaxed">
-              Your booking request for <span className="text-cyan-400 font-semibold">{selectedDate.fullDateStr}</span> at <span className="text-cyan-400 font-semibold">{formattedTime}</span> has been confirmed.
+            <p className="text-xs text-[#3E5168] max-w-sm leading-relaxed">
+              Your booking request for <span className="text-[#0460A9] font-semibold">{selectedDate.fullDateStr}</span> at <span className="text-[#0460A9] font-semibold">{formattedTime}</span> has been confirmed.
             </p>
 
-            <div className="w-full bg-slate-900/80 p-3 rounded-xl border border-slate-800 text-left text-xs font-mono space-y-1 my-1">
-              <p><span className="text-gray-400">Date:</span> {selectedDate.fullDateStr}</p>
-              <p><span className="text-gray-400">Time:</span> {formattedTime}</p>
-              {schoolName && <p><span className="text-gray-400">School:</span> {schoolName}</p>}
-              <p><span className="text-gray-400">Email:</span> {email}</p>
-              <p><span className="text-gray-400">Phone:</span> {countryCode} {phone}</p>
-              {additionalInfo && <p><span className="text-gray-400">Notes:</span> {additionalInfo}</p>}
+            <div className="w-full bg-white/85 p-3 rounded-xl border border-[#C9DDEC] text-left text-xs font-mono space-y-1 my-1">
+              <p><span className="text-[#3E5168]">Date:</span> {selectedDate.fullDateStr}</p>
+              <p><span className="text-[#3E5168]">Time:</span> {formattedTime}</p>
+              {schoolName && <p><span className="text-[#3E5168]">School:</span> {schoolName}</p>}
+              <p><span className="text-[#3E5168]">Email:</span> {email}</p>
+              <p><span className="text-[#3E5168]">Phone:</span> {countryCode} {phone}</p>
+              {additionalInfo && <p><span className="text-[#3E5168]">Notes:</span> {additionalInfo}</p>}
             </div>
 
             {/* 1-Click Google Calendar Add Button */}
@@ -239,7 +239,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 href={gcalUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold font-mono text-xs transition-all shadow-[0_0_15px_rgba(99,102,241,0.4)] cursor-pointer"
+                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-[#102033] font-bold font-mono text-xs transition-all shadow-[0_0_15px_rgba(99,102,241,0.4)] cursor-pointer"
               >
                 <CalendarIcon className="w-4 h-4" />
                 Add to My Google Calendar
@@ -248,7 +248,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
             <button
               onClick={onClose}
-              className="w-full mt-1 px-6 py-2 rounded-lg border border-slate-700 text-gray-300 hover:text-white hover:bg-slate-800 font-mono text-xs transition-all cursor-pointer"
+              className="w-full mt-1 px-6 py-2 rounded-lg border border-[#C9DDEC] text-[#3E5168] hover:text-[#0460A9] hover:bg-[#E4F1F8] font-mono text-xs transition-all cursor-pointer"
             >
               Done
             </button>
@@ -266,23 +266,23 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
             {/* Custom Hours & Minutes Time Selector */}
             <div>
-              <label className="block text-xs font-mono text-gray-300 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+              <label className="block text-xs font-mono text-[#3E5168] uppercase tracking-wider mb-1.5 flex items-center justify-between">
                 <span className="flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-cyan-400" /> Time (9:00 AM - 4:00 PM) <span className="text-rose-500">*</span>
+                  <Clock className="w-3.5 h-3.5 text-[#0460A9]" /> Time (9:00 AM - 4:00 PM) <span className="text-rose-500">*</span>
                 </span>
-                <span className="text-cyan-400 text-xs font-bold font-mono">
+                <span className="text-[#0460A9] text-xs font-bold font-mono">
                   {formattedTime}
                 </span>
               </label>
 
-              <div className="grid grid-cols-2 gap-2 bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
+              <div className="grid grid-cols-2 gap-2 bg-white/85 p-2.5 rounded-xl border border-[#C9DDEC]">
                 {/* Hours Selection */}
                 <div>
-                  <label className="block text-[10px] font-mono text-gray-400 mb-1">Hour</label>
+                  <label className="block text-[10px] font-mono text-[#3E5168] mb-1">Hour</label>
                   <select
                     value={selectedHour}
                     onChange={(e) => handleHourChange(Number(e.target.value))}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white font-mono text-xs focus:border-cyan-400 focus:outline-none cursor-pointer"
+                    className="w-full bg-slate-800 border border-[#C9DDEC] rounded-lg p-2 text-[#102033] font-mono text-xs focus:border-cyan-400 focus:outline-none cursor-pointer"
                   >
                     {HOUR_OPTIONS.map((item) => (
                       <option key={item.hour24} value={item.hour24}>
@@ -294,11 +294,11 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
                 {/* Minutes Selection (multiples of 15) */}
                 <div>
-                  <label className="block text-[10px] font-mono text-gray-400 mb-1">Minutes (15 min steps)</label>
+                  <label className="block text-[10px] font-mono text-[#3E5168] mb-1">Minutes (15 min steps)</label>
                   <select
                     value={selectedMinute}
                     onChange={(e) => handleMinuteChange(Number(e.target.value))}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white font-mono text-xs focus:border-cyan-400 focus:outline-none cursor-pointer"
+                    className="w-full bg-slate-800 border border-[#C9DDEC] rounded-lg p-2 text-[#102033] font-mono text-xs focus:border-cyan-400 focus:outline-none cursor-pointer"
                   >
                     {MINUTE_OPTIONS.map((m) => (
                       <option key={m} value={m}>
@@ -318,25 +318,25 @@ export const BookingModal: React.FC<BookingModalProps> = ({
             </div>
 
             {/* Contact Details Section */}
-            <div className="space-y-2.5 pt-2 border-t border-[#1E293B]">
+            <div className="space-y-2.5 pt-2 border-t border-[#C9DDEC]">
               {/* School Name */}
               <div>
-                <label className="block text-xs font-mono text-gray-300 mb-1 flex items-center gap-1">
-                  <Building2 className="w-3.5 h-3.5 text-cyan-400" /> School Name
+                <label className="block text-xs font-mono text-[#3E5168] mb-1 flex items-center gap-1">
+                  <Building2 className="w-3.5 h-3.5 text-[#0460A9]" /> School Name
                 </label>
                 <input
                   type="text"
                   placeholder="e.g. St. Mary's Academy"
                   value={schoolName}
                   onChange={(e) => setSchoolName(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white focus:border-cyan-400 focus:outline-none"
+                  className="w-full bg-white border border-[#C9DDEC] rounded-lg px-3 py-1.5 text-xs text-[#102033] focus:border-cyan-400 focus:outline-none"
                 />
               </div>
 
               {/* Email (Required) */}
               <div>
-                <label className="block text-xs font-mono text-gray-300 mb-1 flex items-center gap-1">
-                  <Mail className="w-3.5 h-3.5 text-cyan-400" /> Email Address <span className="text-rose-500">*</span>
+                <label className="block text-xs font-mono text-[#3E5168] mb-1 flex items-center gap-1">
+                  <Mail className="w-3.5 h-3.5 text-[#0460A9]" /> Email Address <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="email"
@@ -347,8 +347,8 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                     setEmail(e.target.value);
                     if (emailError) setEmailError(null);
                   }}
-                  className={`w-full bg-slate-900 border rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none ${
-                    emailError ? "border-rose-500" : "border-slate-700 focus:border-cyan-400"
+                  className={`w-full bg-white border rounded-lg px-3 py-1.5 text-xs text-[#102033] focus:outline-none ${
+                    emailError ? "border-rose-500" : "border-[#C9DDEC] focus:border-cyan-400"
                   }`}
                 />
                 {emailError && (
@@ -361,15 +361,15 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
               {/* Phone with Country Code Prefix */}
               <div>
-                <label className="block text-xs font-mono text-gray-300 mb-1 flex items-center gap-1">
-                  <Phone className="w-3.5 h-3.5 text-cyan-400" /> Phone Number <span className="text-rose-500">*</span>
+                <label className="block text-xs font-mono text-[#3E5168] mb-1 flex items-center gap-1">
+                  <Phone className="w-3.5 h-3.5 text-[#0460A9]" /> Phone Number <span className="text-rose-500">*</span>
                 </label>
                 <div className="flex gap-1.5">
                   {/* Country Code Select */}
                   <select
                     value={countryCode}
                     onChange={(e) => setCountryCode(e.target.value)}
-                    className="bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-cyan-400 font-mono focus:border-cyan-400 focus:outline-none cursor-pointer"
+                    className="bg-slate-800 border border-[#C9DDEC] rounded-lg px-2 py-1.5 text-xs text-[#0460A9] font-mono focus:border-cyan-400 focus:outline-none cursor-pointer"
                   >
                     {COUNTRY_CODES.map((c) => (
                       <option key={c.code} value={c.code}>
@@ -388,8 +388,8 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                       setPhone(e.target.value);
                       if (phoneError) setPhoneError(null);
                     }}
-                    className={`flex-1 bg-slate-900 border rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none ${
-                      phoneError ? "border-rose-500" : "border-slate-700 focus:border-cyan-400"
+                    className={`flex-1 bg-white border rounded-lg px-3 py-1.5 text-xs text-[#102033] focus:outline-none ${
+                      phoneError ? "border-rose-500" : "border-[#C9DDEC] focus:border-cyan-400"
                     }`}
                   />
                 </div>
@@ -403,15 +403,15 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
               {/* Additional Information / Notes */}
               <div>
-                <label className="block text-xs font-mono text-gray-300 mb-1 flex items-center gap-1">
-                  <FileText className="w-3.5 h-3.5 text-gray-400" /> Additional Information (Optional)
+                <label className="block text-xs font-mono text-[#3E5168] mb-1 flex items-center gap-1">
+                  <FileText className="w-3.5 h-3.5 text-[#3E5168]" /> Additional Information (Optional)
                 </label>
                 <textarea
                   rows={2}
                   placeholder="Student count, topic interest, or specific requirements..."
                   value={additionalInfo}
                   onChange={(e) => setAdditionalInfo(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white focus:border-cyan-400 focus:outline-none resize-none"
+                  className="w-full bg-white border border-[#C9DDEC] rounded-lg px-3 py-1.5 text-xs text-[#102033] focus:border-cyan-400 focus:outline-none resize-none"
                 />
               </div>
             </div>
@@ -421,7 +421,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
               <button
                 type="submit"
                 disabled={isSubmitting || !!timeError}
-                className="w-full py-2.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-dark font-bold font-mono text-xs tracking-wider transition-all duration-300 shadow-[0_0_15px_rgba(0,240,255,0.4)] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2"
+                className="w-full py-2.5 rounded-lg bg-[#F97405] hover:bg-[#ff8614] text-[#102033] font-bold font-mono text-xs tracking-wider transition-all duration-300 shadow-[0_8px_20px_rgba(249,116,5,0.2)] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2"
               >
                 {isSubmitting ? (
                   <>

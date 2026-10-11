@@ -127,7 +127,7 @@ export const LiquidGlassImage: React.FC<LiquidGlassImageProps> = ({
             <div className="flex flex-col items-center justify-center h-full w-full p-4 text-center select-none">
               {/* Refractive Glass Icon Core */}
               <div className="relative mb-2">
-                <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-[0_0_15px_rgba(0,240,255,0.2)]">
+                <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-[0_0_15px_rgba(5,117,206,0.2)]">
                   <ImageIcon size={18} className="animate-pulse" />
                 </div>
                 <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-cyan-400/80 border-2 border-slate-900 animate-ping" />
@@ -176,7 +176,7 @@ export const LiquidGlassImage: React.FC<LiquidGlassImageProps> = ({
 
       {/* Error Fallback Glass Card */}
       {hasError && !fallbackSrc && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md border border-cyan-500/20 text-center font-mono select-none">
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-4 bg-white/88 backdrop-blur-md border border-cyan-500/20 text-center font-mono select-none">
           <div className="p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 mb-2">
             <AlertCircle size={20} />
           </div>

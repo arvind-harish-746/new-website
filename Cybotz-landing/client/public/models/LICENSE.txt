@@ -1,0 +1,3 @@
+This work is based on "Dji FPV by SDC - High performance drone" (https://sketchfab.com/3d-models/dji-fpv-by-sdc-high-performance-drone-d471ea8c6235457b8e131842e2cf3783) by SDC PERFORMANCE™️ (https://sketchfab.com/3Duae) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/).
+
+The Sketchfab profile for this model is https://sketchfab.com/Lambo_SC04. Geometry and the carbon texture were Draco- and WebP-compressed for the web. Materials were not recolored.
