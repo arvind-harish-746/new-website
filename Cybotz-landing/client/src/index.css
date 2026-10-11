@@ -1160,8 +1160,14 @@ footer {
 .scrub-section {
   position: relative;
   z-index: 25;
-  height: 380vh;
+  height: 220vh;
   margin-bottom: -100vh;
+}
+
+html[data-intro-lock="1"],
+html[data-intro-lock="1"] body {
+  overflow: hidden;
+  touch-action: none;
 }
 
 .scrub-section.is-still {
@@ -1241,7 +1247,34 @@ video.scrub-media {
   font-size: 0.72rem;
   letter-spacing: 0.28em;
   text-transform: uppercase;
-  opacity: 1;
+  opacity: 0;
+}
+
+.scrub-sound {
+  position: absolute;
+  z-index: 6;
+  top: 5.6rem;
+  right: 1rem;
+  pointer-events: auto;
+  touch-action: manipulation;
+  margin: 0;
+  padding: 0.32rem 0.6rem;
+  border: 1px solid rgba(5, 117, 206, 0.35);
+  border-radius: 999px;
+  background: rgba(247, 251, 254, 0.72);
+  color: #3e5168;
+  font-family: "Space Mono", ui-monospace, monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  text-transform: uppercase;
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+}
+
+.scrub-sound[aria-pressed="true"] {
+  color: #102033;
+  border-color: #0575ce;
 }
 
 .scrub-hint i {

@@ -88,17 +88,22 @@ const MOBILE_PATH: Key[] = [
   { x: 0.6, y: -0.62, s: 0.2 },
 ];
 
-/** Handoff sits in the hero's right column, clear of the STEM headline. */
-const HOVER_DESKTOP: Key = { x: 0.58, y: 0.02, s: 0.46 };
-const HOVER_MOBILE: Key = { x: 0.46, y: -0.32, s: 0.3 };
+/**
+ * Handoff matches the cut at ~6s: the footage drone is still in the glass,
+ * not parked in the right column. The path and clearance carry it right
+ * once the headline is readable.
+ */
+const HOVER_DESKTOP: Key = { x: 0.04, y: 0.16, s: 0.42 };
+/** Portrait stays lower and to the right so the stacked headline can clear. */
+const HOVER_MOBILE: Key = { x: 0.34, y: -0.2, s: 0.3 };
 
 /** Screen half-extent of the framed drone at scale 1, in NDC. */
 const NDC_HALF = 0.7;
-const OBSTACLE_QUERY = [
-  ".home-stage .hero-lead",
+/** Headline copy is ignored during the frost so the match can sit in the glass. */
+const HERO_OBSTACLE_QUERY = [".home-stage .hero-lead", ".home-stage h1"].join(", ");
+const FLIGHT_OBSTACLE_QUERY = [
   ".home-stage .hero-actions",
   ".home-stage .flight-card",
-  ".home-stage h1",
   ".home-stage h2",
   ".home-stage h3",
   ".home-stage h4",
@@ -441,12 +446,16 @@ function DroneModel({
     const boxes: ScreenBox[] = [];
     const viewW = window.innerWidth;
     const viewH = window.innerHeight;
-    document.querySelectorAll(OBSTACLE_QUERY).forEach((node) => {
-      const rect = node.getBoundingClientRect();
-      if (rect.width > 12 && rect.height > 12 && rect.bottom > 0 && rect.top < viewH && rect.right > 0 && rect.left < viewW) {
-        boxes.push({ left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom });
-      }
-    });
+    const collect = (selector: string) => {
+      document.querySelectorAll(selector).forEach((node) => {
+        const rect = node.getBoundingClientRect();
+        if (rect.width > 12 && rect.height > 12 && rect.bottom > 0 && rect.top < viewH && rect.right > 0 && rect.left < viewW) {
+          boxes.push({ left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom });
+        }
+      });
+    };
+    collect(FLIGHT_OBSTACLE_QUERY);
+    if (reveal >= 0.45) collect(HERO_OBSTACLE_QUERY);
     avoid.current.boxes = boxes;
     const cleared = clearFlight(blended, avoid.current.boxes, size.width, size.height);
     let tucked = cleared.tucked;
