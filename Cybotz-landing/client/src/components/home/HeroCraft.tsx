@@ -20,7 +20,7 @@ const MODEL = "/models/drone.glb";
 useGLTF.setDecoderPath("/draco/");
 useGLTF.preload(MODEL, "/draco/", false);
 
-const VIEW_DIR = new THREE.Vector3(1.02, 0.4, 1.18).normalize();
+const VIEW_DIR = new THREE.Vector3(1.02, 0.1, 1.18).normalize();
 const NDC_LIMIT = 0.7;
 
 function posedCorners(box: THREE.Box3) {
@@ -84,8 +84,8 @@ function shadowTexture() {
   canvas.height = 128;
   const ctx = canvas.getContext("2d");
   if (!ctx) return null;
-  const gradient = ctx.createRadialGradient(64, 64, 4, 64, 64, 60);
-  gradient.addColorStop(0, "rgba(11, 22, 32, 0.45)");
+  const gradient = ctx.createRadialGradient(64, 64, 6, 64, 64, 60);
+  gradient.addColorStop(0, "rgba(11, 22, 32, 0.72)");
   gradient.addColorStop(1, "rgba(11, 22, 32, 0)");
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, 128, 128);
@@ -101,9 +101,10 @@ function blurTexture() {
   const ctx = canvas.getContext("2d");
   if (!ctx) return null;
   const gradient = ctx.createRadialGradient(64, 64, 18, 64, 64, 62);
-  gradient.addColorStop(0, "rgba(26, 29, 33, 0)");
-  gradient.addColorStop(0.55, "rgba(26, 29, 33, 0.08)");
-  gradient.addColorStop(1, "rgba(26, 29, 33, 0.35)");
+  gradient.addColorStop(0, "rgba(14, 16, 20, 0)");
+  gradient.addColorStop(0.42, "rgba(14, 16, 20, 0.05)");
+  gradient.addColorStop(0.72, "rgba(14, 16, 20, 0.55)");
+  gradient.addColorStop(1, "rgba(14, 16, 20, 0.15)");
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, 128, 128);
   const texture = new THREE.CanvasTexture(canvas);
@@ -131,8 +132,11 @@ function tuneMaterials(root: THREE.Object3D) {
         clearcoatRoughness: 0.25,
         envMapIntensity: 1,
       });
-      if (/carbone|carbon|arm|frame/i.test(name) && !mat.map) next.color.set("#1A1D21");
-      if (/carbone|carbon|arm|frame/i.test(name)) next.roughness = 0.55;
+      if (/carbone|carbon|arm|frame/i.test(name) && !mat.map) next.color.set("#10141A");
+      if (/carbone|carbon|arm|frame/i.test(name)) {
+        next.roughness = 0.62;
+        next.color.multiplyScalar(0.72);
+      }
       if (/metall|metal|motor/i.test(name)) {
         next.metalness = 1;
         next.roughness = 0.28;
@@ -189,6 +193,7 @@ function DroneModel({ reduce, layerRef }: { reduce: boolean; layerRef: React.Ref
     svg: SVGSVGElement;
     parts: { line: SVGLineElement; dot: SVGCircleElement; text: SVGTextElement }[];
   }>(null);
+  const reticleEl = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     notifyModelReady();
@@ -224,7 +229,7 @@ function DroneModel({ reduce, layerRef }: { reduce: boolean; layerRef: React.Ref
         const center = new THREE.Box3().setFromObject(child).getCenter(new THREE.Vector3());
         const dir = center.clone();
         if (dir.length() < 0.05) dir.set(0, 0.2, 0);
-        dir.normalize().multiplyScalar(0.35 * Math.max(center.length(), 0.15));
+        dir.normalize().multiplyScalar(0.62 * Math.max(center.length(), 0.15));
         return { child, base: child.position.clone(), dir };
       });
 
@@ -246,13 +251,13 @@ function DroneModel({ reduce, layerRef }: { reduce: boolean; layerRef: React.Ref
       map,
       transparent: true,
       depthWrite: false,
-      opacity: 0.9,
+      opacity: 1,
       side: THREE.DoubleSide,
     });
     const made: THREE.Mesh[] = [];
     const hosts = found.length ? found : [pivot];
     hosts.forEach((node) => {
-      const disc = new THREE.Mesh(new THREE.CircleGeometry(found.length ? 0.16 : 0.22, 32), discMat.clone());
+      const disc = new THREE.Mesh(new THREE.CircleGeometry(0.32, 40), discMat.clone());
       disc.rotation.x = -Math.PI / 2;
       disc.visible = false;
       node.add(disc);
@@ -262,14 +267,19 @@ function DroneModel({ reduce, layerRef }: { reduce: boolean; layerRef: React.Ref
 
     const led = (color: string, position: [number, number, number]) => {
       const mesh = new THREE.Mesh(
-        new THREE.PlaneGeometry(0.06, 0.025),
-        new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: color === "#0575CE" ? 2.5 : 2, roughness: 0.4 })
+        new THREE.SphereGeometry(0.055, 14, 10),
+        new THREE.MeshBasicMaterial({ color, toneMapped: false })
       );
       mesh.position.set(...position);
       pivot.add(mesh);
+      const light = new THREE.PointLight(color, 2.2, 1.8, 2);
+      light.position.set(position[0], position[1] + 0.05, position[2]);
+      pivot.add(light);
     };
-    led("#0575CE", [0.08, 0.02, 0.42]);
-    led("#F97405", [-0.04, 0.02, -0.4]);
+    led("#38B6FF", [0.16, 0.07, 0.42]);
+    led("#F97405", [-0.12, 0.07, -0.4]);
+    led("#38B6FF", [-0.46, 0.06, 0.18]);
+    led("#F97405", [0.44, 0.06, -0.2]);
 
     const footprint = box.getSize(new THREE.Vector3());
     const span = Math.min(footprint.x, footprint.z);
@@ -385,7 +395,7 @@ function DroneModel({ reduce, layerRef }: { reduce: boolean; layerRef: React.Ref
     for (const disc of discs.current) {
       disc.visible = fast || reduce;
       const mat = disc.material as THREE.MeshBasicMaterial;
-      mat.opacity = reduce ? 0.35 : 0.9;
+      mat.opacity = reduce ? 0.45 : 1;
       if (fast) disc.rotateZ(3 * dt);
     }
 
@@ -405,7 +415,7 @@ function DroneModel({ reduce, layerRef }: { reduce: boolean; layerRef: React.Ref
       shadowRef.current.visible = !hide && live.opacity > 0.2;
       const alt = live.altitude;
       const mat = shadowRef.current.material as THREE.MeshBasicMaterial;
-      mat.opacity = 0.28 * (1 - THREE.MathUtils.clamp(alt / 0.6, 0, 1));
+      mat.opacity = 0.55 * (1 - THREE.MathUtils.clamp(alt / 0.7, 0, 1));
       const grow = 1 + alt * 0.6;
       shadowRef.current.scale.set(grow, grow, 1);
     }
@@ -428,9 +438,23 @@ function DroneModel({ reduce, layerRef }: { reduce: boolean; layerRef: React.Ref
       && document.documentElement.dataset.hero !== "off"
       && document.documentElement.dataset.introPhase !== "flight";
     if (calloutNodes.current && !calloutNodes.current.svg.isConnected) calloutNodes.current = null;
+    if (!reticleEl.current || !reticleEl.current.isConnected) {
+      reticleEl.current = document.getElementById("hero-reticle");
+    }
     if (!showCallouts) {
       calloutNodes.current?.svg.classList.remove("is-live");
+      reticleEl.current?.classList.remove("is-live");
     } else {
+      if (reticleEl.current) {
+        craft.updateMatrixWorld(true);
+        const tmp = projectTmp.current.set(0, 0, 0);
+        craft.localToWorld(tmp);
+        const ndc = tmp.project(camera);
+        const rx = (ndc.x * 0.5 + 0.5) * size.width;
+        const ry = (-ndc.y * 0.5 + 0.5) * size.height;
+        reticleEl.current.style.transform = `translate(${rx.toFixed(1)}px, ${ry.toFixed(1)}px)`;
+        reticleEl.current.classList.add("is-live");
+      }
       if (!calloutNodes.current) {
         const svg = document.getElementById("hero-callouts");
         if (svg instanceof SVGSVGElement) {
@@ -464,7 +488,7 @@ function DroneModel({ reduce, layerRef }: { reduce: boolean; layerRef: React.Ref
           fitted.root.localToWorld(tmp);
           const ndc = projectNdc.current.copy(tmp).project(camera);
           const point = { x: (ndc.x * 0.5 + 0.5) * w, y: (-ndc.y * 0.5 + 0.5) * h };
-          if (key === "prop" || key === "motor") point.y += Math.max(8, 0.018 * spr.s * h);
+          if (key === "prop" || key === "motor") point.y += Math.max(4, 0.01 * spr.s * h);
           return point;
         });
         let minX = Infinity;
@@ -477,21 +501,17 @@ function DroneModel({ reduce, layerRef }: { reduce: boolean; layerRef: React.Ref
           minY = Math.min(minY, point.y);
           maxY = Math.max(maxY, point.y);
         }
-        const reach = Math.max(64, 0.24 * spr.s * h);
+        const reach = Math.max(96, 0.36 * spr.s * h);
         minX -= reach;
         maxX += reach;
         minY -= reach * 0.35;
         maxY += reach * 0.35;
         const labelW = 168;
-        const side: "left" | "right" | "above" = w - maxX >= labelW + 20
-          ? "right"
-          : minX >= labelW + 20
-            ? "left"
-            : "above";
+        const side: "right" | "above" = w - maxX >= labelW + 16 ? "right" : "above";
         const placed = points.map((point, index) => ({
           index,
           side,
-          x: side === "left" ? minX : side === "right" ? maxX : point.x,
+          x: side === "right" ? maxX : point.x,
           y: side === "above" ? minY : point.y,
           ax: point.x,
           ay: point.y,
@@ -500,7 +520,7 @@ function DroneModel({ reduce, layerRef }: { reduce: boolean; layerRef: React.Ref
           placed.sort((a, b) => a.x - b.x);
           const span = Math.max(labelW, (maxX - minX) / Math.max(1, placed.length));
           placed.forEach((item, index) => {
-            item.x = THREE.MathUtils.clamp(minX + span * (index + 0.5), labelW / 2 + 12, w - labelW / 2 - 12);
+            item.x = THREE.MathUtils.clamp(minX + span * (index + 0.5), Math.max(labelW / 2 + 12, w * 0.5), w - labelW / 2 - 12);
             item.y = minY;
           });
         } else {
@@ -514,11 +534,7 @@ function DroneModel({ reduce, layerRef }: { reduce: boolean; layerRef: React.Ref
         }
         placed.forEach((item) => {
           const node = nodes.parts[item.index];
-          const labelX = side === "left"
-            ? Math.max(labelW + 8, item.x)
-            : side === "right"
-              ? Math.min(w - labelW - 8, item.x)
-              : item.x;
+          const labelX = side === "right" ? Math.min(w - labelW - 8, item.x) : item.x;
           const labelY = THREE.MathUtils.clamp(item.y, 96, h - 28);
           node.line.setAttribute("x1", labelX.toFixed(1));
           node.line.setAttribute("y1", labelY.toFixed(1));
@@ -526,9 +542,9 @@ function DroneModel({ reduce, layerRef }: { reduce: boolean; layerRef: React.Ref
           node.line.setAttribute("y2", item.ay.toFixed(1));
           node.dot.setAttribute("cx", item.ax.toFixed(1));
           node.dot.setAttribute("cy", item.ay.toFixed(1));
-          node.text.setAttribute("x", (side === "left" ? labelX - 12 : side === "right" ? labelX + 12 : labelX).toFixed(1));
+          node.text.setAttribute("x", (side === "right" ? labelX + 12 : labelX).toFixed(1));
           node.text.setAttribute("y", (labelY - (side === "above" ? 10 : -4)).toFixed(1));
-          node.text.setAttribute("text-anchor", side === "left" ? "end" : side === "above" ? "middle" : "start");
+          node.text.setAttribute("text-anchor", side === "above" ? "middle" : "start");
         });
         nodes.svg.classList.add("is-live");
       }
@@ -554,6 +570,18 @@ function DroneModel({ reduce, layerRef }: { reduce: boolean; layerRef: React.Ref
           <meshBasicMaterial map={shadowMap} transparent depthWrite={false} toneMapped={false} />
         </mesh>
       )}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, fitted.shadow.y - 0.015, 0]} renderOrder={-2}>
+        <planeGeometry args={[fitted.shadow.w * 1.35, fitted.shadow.d * 1.45]} />
+        <meshPhysicalMaterial
+          color="#C5D5E2"
+          transparent
+          opacity={0.14}
+          roughness={0.12}
+          metalness={0.55}
+          envMapIntensity={1.4}
+          depthWrite={false}
+        />
+      </mesh>
       <group ref={rig}>
         <primitive object={fitted.root} />
         <mesh ref={coneRef} position={[0.15, 0.35, 0.2]} visible={false} rotation={[0.6, 0, 0]}>
@@ -569,16 +597,17 @@ function RigLights() {
   const { gl, scene } = useThree();
   useLayoutEffect(() => {
     gl.toneMapping = THREE.AgXToneMapping ?? THREE.ACESFilmicToneMapping;
-    gl.toneMappingExposure = 1.05;
+    gl.toneMappingExposure = 1.08;
     gl.outputColorSpace = THREE.SRGBColorSpace;
-    scene.environmentIntensity = 0.9;
+    scene.environmentIntensity = 0.48;
     scene.environmentRotation.set(0, 1.2, 0);
   }, [gl, scene]);
   return (
     <>
-      <directionalLight position={[-3, 5.5, 3.5]} intensity={2.2} color="#FFF4E8" />
-      <directionalLight position={[2.5, 1.5, -4]} intensity={1.6} color="#9FD4FF" />
-      <directionalLight position={[0, -2, 3]} intensity={0.25} color="#FFFFFF" />
+      <directionalLight position={[-4.2, 7.4, 2.4]} intensity={4.2} color="#FFF6E4" />
+      <directionalLight position={[4.4, 1.4, -5]} intensity={3.4} color="#5EBEFF" />
+      <directionalLight position={[-3.2, 0.4, -3.4]} intensity={2.8} color="#F97405" />
+      <directionalLight position={[0.4, -2.2, 3.6]} intensity={0.22} color="#FFFFFF" />
     </>
   );
 }
@@ -625,7 +654,7 @@ function HeroCanvas({ reduce }: { reduce: boolean }) {
           onCreated={({ gl }) => {
             gl.setClearColor(0x000000, 0);
             gl.toneMapping = THREE.AgXToneMapping ?? THREE.ACESFilmicToneMapping;
-            gl.toneMappingExposure = 1.05;
+            gl.toneMappingExposure = 1.08;
           }}
         >
           <PerformanceMonitor onDecline={() => setDpr(1)} />
@@ -639,6 +668,12 @@ function HeroCanvas({ reduce }: { reduce: boolean }) {
         </Canvas>
       )}
     </div>
+    <svg id="hero-reticle" className="hero-reticle" viewBox="0 0 240 240" aria-hidden="true">
+      <circle cx="120" cy="120" r="108" fill="none" stroke="#0575CE" strokeWidth="1" />
+      <circle cx="120" cy="120" r="68" fill="none" stroke="#0575CE" strokeWidth="1" strokeDasharray="3 7" />
+      <path d="M120 6 V34 M120 206 V234 M6 120 H34 M206 120 H234" stroke="#F97405" strokeWidth="1.5" />
+      <circle cx="120" cy="120" r="3" fill="#F97405" />
+    </svg>
     <svg id="hero-callouts" className="hero-callouts" aria-hidden="true">
       {([
         ["prop", "PROPELLER"],

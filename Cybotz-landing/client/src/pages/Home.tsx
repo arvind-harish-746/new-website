@@ -82,6 +82,16 @@ export default function Home() {
   const [pin, setPin] = useState<number | null>(null);
 
   useEffect(() => {
+    const row = document.querySelector("#sec-telemetry .telemetry");
+    if (!row) return;
+    const watch = new IntersectionObserver(([entry]) => {
+      row.classList.toggle("is-live", !!entry?.isIntersecting);
+    }, { threshold: 0.35 });
+    watch.observe(row);
+    return () => watch.disconnect();
+  }, []);
+
+  useEffect(() => {
     const handleDateSelect = (e: Event) => {
       const day = (e as CustomEvent).detail;
       const month = new Date().toLocaleString("default", { month: "long" });
@@ -171,16 +181,22 @@ export default function Home() {
                 </button>
               </div>
             </div>
-            <div className="drone-slot" aria-hidden="true" />
+            <div className="drone-slot" aria-hidden="true">
+              <div className="hero-glow" />
+              <p className="hero-outline">CYBOTZ</p>
+              <p className="hero-outline sub">LOG 01</p>
+            </div>
           </div>
           <p id="flight-ticker" className="flight-ticker" aria-hidden="true">
             ALT 001.2 m · HDG 284° · BAT 98%
           </p>
         </section>
+        <div className="wipe" aria-hidden="true" />
 
         <section id="sec-telemetry" aria-label="Cybotz at a glance">
-          <div className="log-wrap">
+          <div className="log-wrap telemetry-stage">
             <p className="log-kicker">LOG 02 — Telemetry</p>
+            <SectionTrace />
             <dl className="telemetry">
               <Odometer value={400} suffix="+" label="Students mentored" />
               <Odometer value={INSTITUTIONS.length} label="Partner institutions" />
@@ -191,31 +207,45 @@ export default function Home() {
               <Odometer value={100} suffix="%" label="Hands-on curriculum" />
             </dl>
           </div>
-          <SectionTrace />
         </section>
+        <div className="wipe" aria-hidden="true" />
 
         <ServicesLog onGo={go} />
+        <div className="wipe" aria-hidden="true" />
 
         <section id="sec-network">
-          <div className="log-wrap network-grid">
-            <div>
-              <p className="log-kicker">LOG 04 — Partner schools</p>
-              <h2>Trusted by schools across Bangalore</h2>
-              <p className="log-sub">
-                Empowering hundreds of students across top international schools and universities with raw, hands-on engineering education.
-              </p>
-              <svg className="city-map" viewBox="0 0 320 320" aria-hidden="true">
-                <ellipse cx="160" cy="160" rx="128" ry="132" fill="none" stroke="#CFDBE4" />
-                <path d="M30 160 H290 M160 24 V296 M48 70 L270 250 M52 250 L268 64" fill="none" stroke="#CFDBE4" />
-                {PINS.map((spot, index) => (
-                  <g key={spot.x} className={pin === index ? "is-hot" : ""}>
-                    <circle cx={spot.x} cy={spot.y} r="8" className="pin-pulse" />
-                    <circle cx={spot.x} cy={spot.y} r="4" className="pin-dot" />
-                  </g>
-                ))}
-              </svg>
-            </div>
-            <ul className="school-rows">
+          <div className="log-wrap">
+            <p className="log-kicker">LOG 04 — Partner schools</p>
+            <h2>Trusted by schools across Bangalore</h2>
+            <p className="log-sub">
+              Empowering hundreds of students across top international schools and universities with raw, hands-on engineering education.
+            </p>
+            <svg className="city-map" viewBox="0 0 640 360" aria-hidden="true">
+              <ellipse cx="320" cy="180" rx="280" ry="150" fill="none" stroke="#CFDBE4" />
+              <path d="M40 180 H600 M320 24 V336 M80 70 L560 290 M90 300 L550 60" fill="none" stroke="#CFDBE4" />
+              <path
+                className="flight-route"
+                pathLength={1}
+                d="M172 168 L236 88 L392 108 L460 172 L336 188 L300 144 L248 240 L376 264"
+                fill="none"
+              />
+              <g className="route-craft">
+                <polygon points="0,-7 5,6 -5,6" fill="#F97405" />
+                <animateMotion
+                  dur="9s"
+                  repeatCount="indefinite"
+                  rotate="auto"
+                  path="M172 168 L236 88 L392 108 L460 172 L336 188 L300 144 L248 240 L376 264"
+                />
+              </g>
+              {PINS.map((spot, index) => (
+                <g key={spot.x} className={pin === index ? "is-hot" : ""} transform={`translate(${spot.x * 2}, ${spot.y * 1.05})`}>
+                  <circle r="8" className="pin-pulse" />
+                  <circle r="4" className="pin-dot" />
+                </g>
+              ))}
+            </svg>
+            <ul className="logo-grid">
               {INSTITUTIONS.map((inst, index) => (
                 <li
                   key={inst.name}
@@ -225,28 +255,37 @@ export default function Home() {
                   onBlur={() => setPin(null)}
                 >
                   <img src={inst.logo} alt="" />
-                  <div>
-                    <strong>{inst.name}</strong>
-                    <span>{inst.text}</span>
-                    <em>Bangalore</em>
-                  </div>
+                  <strong>{inst.name}</strong>
+                  <span>{inst.text}</span>
                 </li>
               ))}
             </ul>
           </div>
         </section>
+        <div className="wipe night-wipe" aria-hidden="true" />
 
         <section id="sec-mastery">
           <div className="night-grid" aria-hidden="true" />
+          <svg className="night-craft" viewBox="0 0 420 280" aria-hidden="true">
+            <g fill="none" stroke="#38B6FF" strokeWidth="1.25">
+              <ellipse cx="78" cy="64" rx="58" ry="16" />
+              <ellipse cx="342" cy="64" rx="58" ry="16" />
+              <ellipse cx="78" cy="216" rx="58" ry="16" />
+              <ellipse cx="342" cy="216" rx="58" ry="16" />
+              <path d="M118 74 L188 128 M302 74 L232 128 M118 206 L188 152 M302 206 L232 152" />
+              <rect x="176" y="112" width="68" height="42" />
+              <circle cx="210" cy="133" r="9" />
+            </g>
+          </svg>
           <svg className="solder" viewBox="0 0 40 800" preserveAspectRatio="none" aria-hidden="true">
             <path d="M20 0 V800" />
           </svg>
           <div className="log-wrap">
             <p className="log-kicker night">NO AI : Core Fundamentals Only!</p>
             <p className="night-statement">
-              <span>No AI.</span>
-              <span>No shortcuts.</span>
-              <span>Just physics, maths and logic.</span>
+              <span><i className="night-word accent">No</i> <i className="night-word accent">AI.</i></span>
+              <span><i className="night-word">No</i> <i className="night-word">shortcuts.</i></span>
+              <span><i className="night-word">Just</i> <i className="night-word">physics,</i> <i className="night-word">maths</i> <i className="night-word">and</i> <i className="night-word">logic.</i></span>
             </p>
             <h2>Your Path to Mastery: Expert Training, Hands-On Learning, and STEM Focus.</h2>
             <p className="mist">
@@ -280,6 +319,7 @@ export default function Home() {
             </div>
           </div>
         </section>
+        <div className="wipe" aria-hidden="true" />
 
         <section id="sec-contact">
           <div className="log-wrap contact-grid" id="reach-us">
@@ -355,7 +395,12 @@ export default function Home() {
             <div className="landing-pad" aria-hidden="true">
               <svg viewBox="0 0 240 240">
                 <circle cx="120" cy="120" r="108" fill="none" stroke="#0B1620" strokeDasharray="4 6" />
+                <circle cx="120" cy="120" r="72" fill="none" stroke="#CFDBE4" />
                 <path d="M70 78 H108 V162 H70 M170 78 H132 V162 H170" fill="none" stroke="#0B1620" strokeWidth="6" />
+                <circle className="pad-light cyan" cx="120" cy="14" r="5" />
+                <circle className="pad-light orange" cx="226" cy="120" r="5" />
+                <circle className="pad-light cyan" cx="120" cy="226" r="5" />
+                <circle className="pad-light orange" cx="14" cy="120" r="5" />
               </svg>
               <p>LANDED — READY FOR YOUR SCHOOL</p>
             </div>
@@ -439,18 +484,22 @@ function ServicesLog({ onGo }: { onGo: (path: string) => void }) {
             <button type="button" className="btn-text" onClick={() => onGo(active.href)}>
               {active.label} <ArrowRight size={16} aria-hidden="true" />
             </button>
-            <video
-              key={active.media}
-              className="chapter-media"
-              muted
-              loop
-              playsInline
-              autoPlay
-              preload={seen ? "metadata" : "none"}
-              poster={active.poster}
-            >
-              {seen && <source src={active.media} type="video/mp4" />}
-            </video>
+            <figure className="footage">
+              <span className="tc">TC 00:0{chapter + 1}:12:04</span>
+              <span className="rec">REC</span>
+              <video
+                key={active.media}
+                className="chapter-media"
+                muted
+                loop
+                playsInline
+                autoPlay
+                preload={seen ? "metadata" : "none"}
+                poster={active.poster}
+              >
+                {seen && <source src={active.media} type="video/mp4" />}
+              </video>
+            </figure>
           </div>
           <div className="drone-slot services-slot" aria-hidden="true" />
         </div>

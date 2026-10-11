@@ -187,7 +187,7 @@ export function useDroneStage(active: boolean) {
         padY = -((cy / Math.max(vh, 1)) * 2 - 1);
       }
 
-      const stage = width < 1280 ? 0.5 : 0.58;
+      const stage = width < 1280 ? 0.64 : 0.78;
       const k1: Key = { ...idle, prop: 52 };
       const k2: Key = { x: 0.1, y: 0.52, s: 0.3, yaw: deg(-70), pitch: deg(14), roll: deg(-16), explode: 0, blueprint: 0, sensor: 0, prop: 52, opacity: 1, altitude: 0.45 };
       const k3: Key = { x: 0.38, y: 0, s: stage, yaw: deg(35), pitch: deg(10), roll: 0, explode: 0, blueprint: 0, sensor: 0, prop: 52, opacity: 1, altitude: 0.35 };

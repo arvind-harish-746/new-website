@@ -61,11 +61,11 @@ export function publishPose() {
 
 export function heroKey(width: number): Pick<DroneTarget, "x" | "y" | "s" | "yaw" | "pitch" | "roll"> {
   const yaw = deg(28);
-  const pitch = deg(8);
-  if (width < 768) return { x: 0, y: -0.12, s: 0.4, yaw, pitch, roll: 0 };
-  if (width < 1024) return { x: 0, y: -0.3, s: 0.46, yaw, pitch, roll: 0 };
-  if (width < 1280) return { x: 0.48, y: 0.04, s: 0.54, yaw, pitch, roll: 0 };
-  return { x: 0.46, y: 0.04, s: 0.62, yaw, pitch, roll: 0 };
+  const pitch = deg(6);
+  if (width < 768) return { x: 0, y: -0.08, s: 0.52, yaw, pitch, roll: 0 };
+  if (width < 1024) return { x: 0, y: -0.22, s: 0.58, yaw, pitch, roll: 0 };
+  if (width < 1280) return { x: 0.74, y: 0.02, s: 0.98, yaw, pitch, roll: 0 };
+  return { x: 0.84, y: 0.0, s: 1.12, yaw, pitch, roll: 0 };
 }
 
 /** Centered, large enough to read on the paper field while the intro flies. */

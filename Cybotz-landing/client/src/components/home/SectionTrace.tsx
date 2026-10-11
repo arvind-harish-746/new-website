@@ -1,21 +1,26 @@
-/** PCB trace that joins two home sections. Drawn with CSS scroll timelines where supported. */
+/** Oscilloscope the telemetry drone flies along. Decorative only. */
 export function SectionTrace() {
   return (
-    <div className="home-trace" aria-hidden="true">
-      <svg viewBox="0 0 1200 56" preserveAspectRatio="none">
+    <div className="scope" aria-hidden="true">
+      <svg viewBox="0 0 1200 220" preserveAspectRatio="none">
+        <g className="scope-grid">
+          {Array.from({ length: 7 }, (_, i) => (
+            <line key={`h${i}`} x1="0" x2="1200" y1={20 + i * 30} y2={20 + i * 30} />
+          ))}
+          {Array.from({ length: 13 }, (_, i) => (
+            <line key={`v${i}`} y1="10" y2="210" x1={i * 100} x2={i * 100} />
+          ))}
+        </g>
         <path
-          className="home-trace-path"
+          className="scope-wave"
           pathLength={1}
-          d="M0 30 C160 30 210 12 340 16 S560 42 720 24 S980 10 1200 28"
+          d="M0 120 C80 120 90 40 160 48 S250 190 330 150 S430 30 520 70 S640 200 740 140 S860 24 960 80 S1080 170 1200 90"
         />
-        <circle className="trace-node" cx="340" cy="16" r="3.5" />
-        <circle className="trace-node" cx="720" cy="24" r="3.5" />
-        <circle className="trace-node" cx="1040" cy="18" r="3.5" />
-        <circle className="trace-packet" r="4">
+        <circle className="scope-packet" r="7">
           <animateMotion
-            dur="5.5s"
+            dur="6.5s"
             repeatCount="indefinite"
-            path="M0 30 C160 30 210 12 340 16 S560 42 720 24 S980 10 1200 28"
+            path="M0 120 C80 120 90 40 160 48 S250 190 330 150 S430 30 520 70 S640 200 740 140 S860 24 960 80 S1080 170 1200 90"
           />
         </circle>
       </svg>

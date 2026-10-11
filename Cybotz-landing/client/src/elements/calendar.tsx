@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { BookingModal } from "@/components/BookingModal";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Sparkles } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from "lucide-react";
 
 const dayNames = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
@@ -27,23 +27,20 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
   isSunday,
   onClick,
 }) => {
-  let dayClass = "col-span-1 row-span-1 flex h-8 w-8 items-center justify-center transition-all duration-200 border-none bg-transparent ";
-  
+  let dayClass = "cal-day col-span-1 row-span-1 flex h-8 w-8 items-center justify-center border-none bg-transparent ";
+
   if (isHeader) {
-    dayClass += "text-gray-500 font-mono text-xs";
+    dayClass += "is-label";
   } else if (isSunday) {
-    dayClass += "rounded-lg text-sm text-amber-500/80 bg-amber-500/10 border border-amber-500/30 opacity-70 cursor-not-allowed select-none";
+    dayClass += "is-closed";
   } else if (isBooked) {
-    dayClass += "rounded-lg text-sm text-rose-400 bg-rose-500/10 border border-rose-500/40 opacity-80 cursor-not-allowed select-none";
+    dayClass += "is-booked";
   } else if (isPast) {
-    dayClass += "rounded-lg text-sm text-gray-600 opacity-30 cursor-not-allowed select-none bg-transparent";
+    dayClass += "is-past";
+  } else if (isSelected) {
+    dayClass += "is-selected";
   } else {
-    dayClass += "rounded-lg text-sm cursor-pointer ";
-    if (isSelected) {
-      dayClass += "bg-[#0575CE] text-[#102033] font-bold shadow-[0_4px_12px_rgba(5,117,206,0.25)]";
-    } else {
-      dayClass += "text-[#3E5168] hover:bg-cyan-500/20 hover:text-[#0460A9] hover:border hover:border-cyan-500/40";
-    }
+    dayClass += "is-open";
   }
 
   const tooltipText = isSunday
@@ -210,37 +207,28 @@ export function Calendar() {
 
   return (
     <>
-      <BentoCard height="h-auto">
+      <div className="log-calendar">
         <div className="grid h-full gap-5">
           <div className="flex flex-col justify-between">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-[#0460A9] font-mono text-xs uppercase tracking-wider mb-3">
-                <Sparkles size={12} className="animate-pulse text-[#0460A9]" />
-                <span>1-Year Advance Registrations Open</span>
-              </div>
-              <h2 className="mb-3 text-lg md:text-3xl font-bold text-[#102033] tracking-wider font-mono">
-                Book a Free Trial Session
-              </h2>
-              <p className="mb-2 text-xs md:text-sm text-[#3E5168]">
+              <h2 className="trial-title">Book a Free Trial Session</h2>
+              <p className="trial-copy">
                 Schedule a live demo, STEM workshop, or consultation at your campus! Select any available date up to 12 months in advance.
               </p>
             </div>
             <div>
-              <Button 
+              <Button
                 onClick={handleQuickBookConsultation}
-                className="mt-3 rounded-lg bg-[#F97405] hover:bg-[#ff8614] text-[#102033] font-bold px-6 py-2 shadow-[0_8px_20px_rgba(249,116,5,0.18)] cursor-pointer"
+                className="btn-primary mt-3 h-12 rounded-[4px] border-0 bg-[#F97405] px-6 text-[#0B1620] shadow-none hover:bg-[#ff8614]"
               >
                 Book Consultation
               </Button>
             </div>
           </div>
-          <div className="transition-all duration-500 ease-out">
+          <div>
             <div>
-              <div className="h-full w-full max-w-[550px] rounded-[24px] border border-[#C9DDEC] bg-white/80 p-2 transition-colors duration-100 group-hover:border-cyan-500/50">
-                <div
-                  className="h-full rounded-2xl border border-[#C9DDEC] p-3"
-                  style={{ boxShadow: "0px 2px 1.5px 0px rgba(5,117,206,0.05) inset" }}
-                >
+              <div className="cal-shell">
+                <div className="cal-inner">
                   {/* Month Navigation & Selector Header */}
                   <div className="flex items-center justify-between px-1 mb-2">
                     <div className="flex items-center gap-1.5">
@@ -248,7 +236,7 @@ export function Calendar() {
                       <select
                         value={monthOffset}
                         onChange={(e) => setMonthOffset(Number(e.target.value))}
-                        className="bg-white/88 border border-[#C9DDEC]/60 rounded-lg px-2.5 py-1 text-xs sm:text-sm font-bold font-mono text-[#102033] hover:border-cyan-500/60 focus:outline-none focus:border-cyan-400 transition-all cursor-pointer"
+                        className="cal-select"
                         aria-label="Select calendar month"
                       >
                         {monthOptions.map((opt) => (
@@ -267,7 +255,7 @@ export function Calendar() {
                         disabled={monthOffset === 0}
                         aria-label="Previous month"
                         title={monthOffset === 0 ? "Cannot view past months" : "Previous Month"}
-                        className="p-1.5 rounded-lg border border-[#C9DDEC] bg-white/80 text-[#3E5168] hover:text-[#0460A9] hover:border-cyan-500/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
+                        className="cal-nav"
                       >
                         <ChevronLeft size={16} />
                       </button>
@@ -278,7 +266,7 @@ export function Calendar() {
                         disabled={monthOffset >= 12}
                         aria-label="Next month"
                         title={monthOffset >= 12 ? "Registrations open up to 1 year in advance" : "Next Month"}
-                        className="p-1.5 rounded-lg border border-[#C9DDEC] bg-white/80 text-[#3E5168] hover:text-[#0460A9] hover:border-cyan-500/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
+                        className="cal-nav"
                       >
                         <ChevronRight size={16} />
                       </button>
@@ -286,7 +274,7 @@ export function Calendar() {
                   </div>
 
                   {/* Sub-header status text */}
-                  <div className="flex items-center justify-between px-1 mb-3 text-[11px] font-mono text-[#3E5168]">
+                  <div className="cal-status">
                     <span className="text-[#0460A9]">
                       {selectedDateInfo?.fullDateStr ? `Selected: ${selectedDateInfo.fullDateStr}` : "Click any date to schedule"}
                     </span>
@@ -301,7 +289,7 @@ export function Calendar() {
                   </div>
 
                   {/* Legend Indicator */}
-                  <div className="mt-4 pt-3 border-t border-[#C9DDEC] flex flex-wrap items-center justify-between gap-2 text-[10px] font-mono text-slate-400 px-1">
+                  <div className="cal-legend">
                     <div className="flex items-center gap-1">
                       <span className="w-2 h-2 rounded-full bg-cyan-400" />
                       <span>Available</span>
@@ -320,7 +308,7 @@ export function Calendar() {
             </div>
           </div>
         </div>
-      </BentoCard>
+      </div>
 
       {/* Booking Popup Modal */}
       <BookingModal
