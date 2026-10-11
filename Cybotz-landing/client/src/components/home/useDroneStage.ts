@@ -84,6 +84,32 @@ function dodgeTelemetry(pose: Key, vw: number, vh: number): Key {
   return toPose(pose, box.cx, cy, vw, vh, s);
 }
 
+/** Keep the craft off a block of copy. Prefers the gap underneath it. */
+function dodgeCopy(pose: Key, selector: string, vw: number, vh: number): Key {
+  if (pose.opacity < 0.05) return pose;
+  const rects = Array.from(document.querySelectorAll(selector))
+    .map((el) => el.getBoundingClientRect())
+    .filter((rect) => rect.width > 8 && rect.bottom > 0 && rect.top < vh);
+  if (!rects.length) return pose;
+  const union = {
+    left: Math.min(...rects.map((rect) => rect.left)),
+    right: Math.max(...rects.map((rect) => rect.right)),
+    top: Math.min(...rects.map((rect) => rect.top)),
+    bottom: Math.max(...rects.map((rect) => rect.bottom)),
+  };
+  const box = screenOf(pose, vw, vh);
+  const vRad = box.rad * 0.72;
+  const hits = box.cx + box.rad > union.left - 16
+    && box.cx - box.rad < union.right + 16
+    && box.cy + vRad > union.top - 10
+    && box.cy - vRad < union.bottom + 10;
+  if (!hits) return pose;
+  const cx = Math.min(vw * 0.42, Math.max(box.rad + 24, box.cx));
+  let cy = union.bottom + vRad + 28;
+  if (cy + vRad > vh - 16) cy = Math.max(96 + vRad, union.top - vRad - 20);
+  return toPose(pose, cx, cy, vw, vh);
+}
+
 /** Slide the small night-band craft off the mastery heading when they meet. */
 function dodgeHeading(pose: Key, vw: number, vh: number): Key {
   if (pose.opacity < 0.05) return pose;
@@ -172,15 +198,15 @@ export function useDroneStage(active: boolean) {
       const pinSpan = Math.max(1, services.offsetHeight - vh);
       const pinU = clamp01((y - pinStart) / pinSpan);
       const netTop = docTop(network);
-      const netMid = netTop + network.offsetHeight * 0.5 - vh * 0.5;
       const mastTop = docTop(mastery);
       const contactTop = docTop(contact);
-      const contactMid = contactTop + contact.offsetHeight * 0.5 - vh * 0.5;
 
       let padX = 0.55;
       let padY = -0.05;
-      if (pad) {
-        const rect = pad.getBoundingClientRect();
+      const mark = document.querySelector(".landing-pad svg");
+      const padTarget = mark instanceof HTMLElement ? mark : pad;
+      if (padTarget) {
+        const rect = padTarget.getBoundingClientRect();
         const cx = rect.left + rect.width / 2;
         const cy = rect.top + rect.height / 2;
         padX = (cx / Math.max(window.innerWidth, 1)) * 2 - 1;
@@ -194,28 +220,38 @@ export function useDroneStage(active: boolean) {
       const k4: Key = { ...k3, yaw: deg(65), explode: 1 };
       const k5: Key = { ...k3, y: 0.02, s: stage - 0.03, yaw: deg(110), pitch: deg(18), explode: 0, blueprint: 1 };
       const k6: Key = { ...k3, y: 0.06, s: stage - 0.06, yaw: deg(180), pitch: deg(62), blueprint: 0, sensor: 1 };
-      const k7: Key = { x: 0.86, y: 0.62, s: 0.18, yaw: deg(-40), pitch: deg(12), roll: deg(14), explode: 0, blueprint: 0, sensor: 0, prop: 52, opacity: 1, altitude: 0.5 };
+      const k7: Key = { x: -0.42, y: -0.42, s: 0.16, yaw: deg(-40), pitch: deg(12), roll: deg(14), explode: 0, blueprint: 0, sensor: 0, prop: 52, opacity: 1, altitude: 0.35 };
       const k8: Key = { x: 1.35, y: 0.8, s: 0.16, yaw: deg(-60), pitch: deg(16), roll: deg(20), explode: 0, blueprint: 0, sensor: 0, prop: 52, opacity: 0, altitude: 0.4 };
-      const k9: Key = { x: padX, y: padY + 0.12, s: 0.34, yaw: deg(20), pitch: deg(6), roll: 0, explode: 0, blueprint: 0, sensor: 0, prop: 52, opacity: 1, altitude: 0.28 };
-      const k10: Key = { ...k9, y: padY, pitch: 0, prop: 0, altitude: 0 };
+      const k9: Key = { x: padX, y: padY + 0.2, s: 0.26, yaw: deg(18), pitch: deg(8), roll: 0, explode: 0, blueprint: 0, sensor: 0, prop: 36, opacity: 1, altitude: 0.22 };
+      const k10: Key = { ...k9, y: padY, s: 0.24, pitch: 0, prop: 0, altitude: 0 };
 
       const heroSplit = heroTop + heroH * 0.4;
       let pose = k1;
       if (y < heroSplit) pose = k1;
       else if (y < telemMid) pose = mix(k1, k2, easeInOut(clamp01((y - heroSplit) / Math.max(1, telemMid - heroSplit))));
       else if (y < pinStart) pose = mix(k2, k3, easeOut(clamp01((y - telemMid) / Math.max(1, pinStart - telemMid))));
-      else if (pinU < 1 && y < netTop - vh * 0.2) {
-        if (pinU < 0.33) pose = mix(k3, k4, easeInOut(pinU / 0.33));
-        else if (pinU < 0.66) pose = mix(k4, k5, easeInOut((pinU - 0.33) / 0.33));
-        else pose = mix(k5, k6, easeInOut((pinU - 0.66) / 0.34));
-      } else if (y < netMid) pose = mix(k6, k7, easeInOut(clamp01((y - (netTop - vh * 0.8)) / Math.max(1, netMid - (netTop - vh * 0.8)))));
+      else if (pinU < 1 && y < netTop - vh * 0.15) {
+        if (pinU < 0.08) pose = mix(k3, k4, easeInOut(pinU / 0.08));
+        else if (pinU < 0.33) pose = k4;
+        else if (pinU < 0.4) pose = mix(k4, k5, easeInOut((pinU - 0.33) / 0.07));
+        else if (pinU < 0.66) pose = k5;
+        else if (pinU < 0.74) pose = mix(k5, k6, easeInOut((pinU - 0.66) / 0.08));
+        else pose = k6;
+      } else if (y < netTop) pose = mix(k6, k7, easeInOut(clamp01((y - (netTop - vh * 0.55)) / Math.max(1, vh * 0.55))));
+      else if (y < mastTop - vh * 0.25) pose = k7;
       else if (y < mastTop + mastery.offsetHeight * 0.45) {
         const u = clamp01((y - (mastTop - vh * 0.1)) / Math.max(1, vh * 0.5));
         pose = mix(k7, k8, easeInOut(u));
-      } else if (y < contactMid) pose = mix(k8, k9, expo(clamp01((y - (contactTop - vh * 0.3)) / Math.max(1, contactMid - (contactTop - vh * 0.3)))));
-      else pose = mix(k9, k10, easeOut(clamp01((y - contactMid) / Math.max(1, vh * 0.45))));
+      } else if (padTarget) {
+        const rect = padTarget.getBoundingClientRect();
+        const onPad = rect.top < vh * 0.78 && rect.bottom > vh * 0.22 && y > contactTop - 8;
+        if (onPad) pose = k10;
+        else if (rect.top < vh + 40) pose = k9;
+        else pose = mix(k8, k9, expo(clamp01((y - (contactTop - vh * 0.4)) / Math.max(1, vh * 0.35))));
+      } else pose = k10;
 
       pose = dodgeTelemetry(pose, width, vh);
+      pose = dodgeCopy(pose, "#sec-network h2, #sec-network .log-sub", width, vh);
       pose = dodgeHeading(pose, width, vh);
       writePose(pose);
       publishPose();

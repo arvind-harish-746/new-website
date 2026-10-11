@@ -56,14 +56,14 @@ const CHAPTERS = [
 ];
 
 const PINS = [
-  { x: 118, y: 78 },
-  { x: 196, y: 96 },
-  { x: 86, y: 150 },
-  { x: 168, y: 168 },
-  { x: 230, y: 154 },
-  { x: 124, y: 214 },
-  { x: 188, y: 236 },
-  { x: 150, y: 128 },
+  { x: 150, y: 92, label: "Canadian" },
+  { x: 310, y: 70, label: "Aditi" },
+  { x: 92, y: 168, label: "NH Public" },
+  { x: 250, y: 150, label: "NH Intl" },
+  { x: 430, y: 128, label: "Gurukul" },
+  { x: 170, y: 250, label: "Trio" },
+  { x: 340, y: 236, label: "Christ" },
+  { x: 480, y: 210, label: "RUAS" },
 ];
 
 export default function Home() {
@@ -184,7 +184,6 @@ export default function Home() {
             <div className="drone-slot" aria-hidden="true">
               <div className="hero-glow" />
               <p className="hero-outline">CYBOTZ</p>
-              <p className="hero-outline sub">LOG 01</p>
             </div>
           </div>
           <p id="flight-ticker" className="flight-ticker" aria-hidden="true">
@@ -220,28 +219,33 @@ export default function Home() {
             <p className="log-sub">
               Empowering hundreds of students across top international schools and universities with raw, hands-on engineering education.
             </p>
-            <svg className="city-map" viewBox="0 0 640 360" aria-hidden="true">
-              <ellipse cx="320" cy="180" rx="280" ry="150" fill="none" stroke="#CFDBE4" />
-              <path d="M40 180 H600 M320 24 V336 M80 70 L560 290 M90 300 L550 60" fill="none" stroke="#CFDBE4" />
+            <div className="network-stage">
+            <svg className="city-map" viewBox="0 0 560 320" aria-hidden="true">
+              <text className="map-city" x="16" y="28">BENGALURU</text>
+              <path
+                d="M70 70 C140 36 280 28 390 58 C490 90 530 150 510 210 C480 280 340 300 210 286 C90 270 36 200 40 140 C44 96 48 84 70 70 Z"
+                className="map-land"
+              />
               <path
                 className="flight-route"
                 pathLength={1}
-                d="M172 168 L236 88 L392 108 L460 172 L336 188 L300 144 L248 240 L376 264"
+                d={PINS.map((spot, index) => `${index === 0 ? "M" : "L"}${spot.x} ${spot.y}`).join(" ")}
                 fill="none"
               />
               <g className="route-craft">
-                <polygon points="0,-7 5,6 -5,6" fill="#F97405" />
+                <polygon points="0,-6 4,5 -4,5" fill="#F97405" />
                 <animateMotion
                   dur="9s"
                   repeatCount="indefinite"
                   rotate="auto"
-                  path="M172 168 L236 88 L392 108 L460 172 L336 188 L300 144 L248 240 L376 264"
+                  path={PINS.map((spot, index) => `${index === 0 ? "M" : "L"}${spot.x} ${spot.y}`).join(" ")}
                 />
               </g>
               {PINS.map((spot, index) => (
-                <g key={spot.x} className={pin === index ? "is-hot" : ""} transform={`translate(${spot.x * 2}, ${spot.y * 1.05})`}>
-                  <circle r="8" className="pin-pulse" />
-                  <circle r="4" className="pin-dot" />
+                <g key={spot.label} className={pin === index ? "is-hot" : ""}>
+                  <circle cx={spot.x} cy={spot.y} r="8" className="pin-pulse" />
+                  <circle cx={spot.x} cy={spot.y} r="4" className="pin-dot" />
+                  <text className="pin-label" x={spot.x + 10} y={spot.y + 4}>{spot.label}</text>
                 </g>
               ))}
             </svg>
@@ -260,6 +264,7 @@ export default function Home() {
                 </li>
               ))}
             </ul>
+            </div>
           </div>
         </section>
         <div className="wipe night-wipe" aria-hidden="true" />
@@ -395,8 +400,8 @@ export default function Home() {
             <div className="landing-pad" aria-hidden="true">
               <svg viewBox="0 0 240 240">
                 <circle cx="120" cy="120" r="108" fill="none" stroke="#0B1620" strokeDasharray="4 6" />
-                <circle cx="120" cy="120" r="72" fill="none" stroke="#CFDBE4" />
-                <path d="M70 78 H108 V162 H70 M170 78 H132 V162 H170" fill="none" stroke="#0B1620" strokeWidth="6" />
+                <circle cx="120" cy="120" r="78" fill="none" stroke="#CFDBE4" />
+                <path d="M86 62 V178 M154 62 V178 M86 120 H154" fill="none" stroke="#0B1620" strokeWidth="12" strokeLinecap="square" />
                 <circle className="pad-light cyan" cx="120" cy="14" r="5" />
                 <circle className="pad-light orange" cx="226" cy="120" r="5" />
                 <circle className="pad-light cyan" cx="120" cy="226" r="5" />
@@ -448,18 +453,18 @@ function ServicesLog({ onGo }: { onGo: (path: string) => void }) {
     const desktop = window.matchMedia("(min-width: 1024px)");
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (!desktop.matches || reduce.matches) return () => view.disconnect();
-    const trigger = ScrollTrigger.create({
-      trigger: el,
-      start: "top top",
-      end: "bottom bottom",
-      onUpdate: (self) => {
-        const next = self.progress < 0.33 ? 0 : self.progress < 0.66 ? 1 : 2;
-        setChapter((prev) => (prev === next ? prev : next));
-      },
-    });
+    const onScroll = () => {
+      const span = Math.max(1, el.offsetHeight - window.innerHeight);
+      const top = el.getBoundingClientRect().top + window.scrollY;
+      const progress = Math.min(1, Math.max(0, (window.scrollY - top) / span));
+      const next = progress < 0.33 ? 0 : progress < 0.66 ? 1 : 2;
+      setChapter((prev) => (prev === next ? prev : next));
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       view.disconnect();
-      trigger.kill();
+      window.removeEventListener("scroll", onScroll);
     };
   }, []);
 
