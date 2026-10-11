@@ -845,6 +845,11 @@ html[data-splash="on"] header img[alt="Cybotz"] {
   pointer-events: none;
 }
 
+.flight-canvas.is-tucked {
+  z-index: 4;
+  filter: blur(2.5px);
+}
+
 .flight-canvas canvas {
   display: block;
   width: 100% !important;

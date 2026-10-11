@@ -189,8 +189,19 @@ export function ScrollScrub() {
       const reveal = current <= REVEAL_AT ? 0 : Math.min(1, (current - REVEAL_AT) / (1 - REVEAL_AT));
       document.documentElement.dataset.droneReveal = reveal.toFixed(3);
       section.dataset.progress = current.toFixed(3);
-      if (fadeRef.current) fadeRef.current.style.opacity = (1 - reveal).toFixed(3);
-      if (pictureRef.current) pictureRef.current.style.filter = `blur(${(reveal * 16).toFixed(2)}px)`;
+      const veil = smoothstep(0.02, 0.42, reveal);
+      if (fadeRef.current) fadeRef.current.style.opacity = (1 - smoothstep(0.48, 0.96, reveal)).toFixed(3);
+      if (pictureRef.current) {
+        pictureRef.current.style.opacity = (1 - veil).toFixed(3);
+        pictureRef.current.style.filter = `blur(${(veil * 22).toFixed(2)}px)`;
+        const clear = veil * 76;
+        const mask =
+          veil < 0.02
+            ? "none"
+            : `linear-gradient(90deg, transparent 0%, transparent ${clear.toFixed(1)}%, #000 ${(clear + 14).toFixed(1)}%, #000 100%)`;
+        pictureRef.current.style.maskImage = mask;
+        pictureRef.current.style.setProperty("-webkit-mask-image", mask);
+      }
       if (frostRef.current) {
         const frost = reveal <= 0.5 ? reveal / 0.5 : 1 - (reveal - 0.5) / 0.5;
         frostRef.current.style.opacity = frost.toFixed(3);

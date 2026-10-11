@@ -66,27 +66,46 @@ const NDC_LIMIT = 0.76;
 type Key = { x: number; y: number; s: number };
 
 /** Big left / right / left sweeps. Rotation comes from spring velocity, not these keys. */
-/** Stay on the right so the copy on the left stays clear. The first key is replaced by the hero slot. */
+/**
+ * Stay in the right column and the right gutter. Scales stay small once the
+ * page turns into card grids so the airframe can sit beside the copy.
+ * The first key is replaced by the measured hero slot.
+ */
 const DESKTOP_PATH: Key[] = [
-  { x: 0.52, y: 0.02, s: 0.76 },
-  { x: 0.68, y: 0.24, s: 0.5 },
-  { x: 0.4, y: -0.16, s: 0.52 },
-  { x: 0.74, y: 0.18, s: 0.44 },
-  { x: 0.46, y: -0.3, s: 0.4 },
-  { x: 0.62, y: -0.46, s: 0.36 },
+  { x: 0.58, y: 0.02, s: 0.46 },
+  { x: 0.8, y: 0.18, s: 0.26 },
+  { x: 0.86, y: -0.02, s: 0.22 },
+  { x: 0.82, y: 0.1, s: 0.2 },
+  { x: 0.88, y: -0.16, s: 0.2 },
+  { x: 0.78, y: -0.32, s: 0.22 },
 ];
 
 /** Smaller and lower-right, clear of the stacked headline. */
 const MOBILE_PATH: Key[] = [
-  { x: 0.42, y: -0.34, s: 0.38 },
-  { x: 0.58, y: -0.12, s: 0.3 },
-  { x: 0.36, y: -0.48, s: 0.28 },
-  { x: 0.52, y: -0.6, s: 0.24 },
+  { x: 0.48, y: -0.36, s: 0.32 },
+  { x: 0.62, y: -0.16, s: 0.24 },
+  { x: 0.52, y: -0.48, s: 0.22 },
+  { x: 0.6, y: -0.62, s: 0.2 },
 ];
 
-/** Where the video drone is hovering when the glass clears: near frame center. */
-const HOVER_DESKTOP: Key = { x: -0.04, y: 0.05, s: 1.05 };
-const HOVER_MOBILE: Key = { x: 0.0, y: 0.02, s: 0.74 };
+/** Handoff sits in the hero's right column, clear of the STEM headline. */
+const HOVER_DESKTOP: Key = { x: 0.58, y: 0.02, s: 0.46 };
+const HOVER_MOBILE: Key = { x: 0.46, y: -0.32, s: 0.3 };
+
+/** Screen half-extent of the framed drone at scale 1, in NDC. */
+const NDC_HALF = 0.7;
+const OBSTACLE_QUERY = [
+  ".home-stage .hero-lead",
+  ".home-stage .hero-actions",
+  ".home-stage .flight-card",
+  ".home-stage h1",
+  ".home-stage h2",
+  ".home-stage h3",
+  ".home-stage h4",
+  "#sec-contact label",
+  "#sec-contact form",
+  "footer .container",
+].join(", ");
 
 function posedCorners(box: THREE.Box3) {
   const base: THREE.Vector3[] = [];
@@ -227,15 +246,74 @@ function flightTarget(progress: number, mobile: boolean, reduce: boolean): Key {
   }
   const keys = (mobile ? MOBILE_PATH : DESKTOP_PATH).map((key) => ({ ...key }));
   if (slot) {
-    const cap = mobile ? 0.42 : 0.86;
-    const gain = mobile ? 1.15 : 2;
+    const cap = mobile ? 0.34 : 0.48;
+    const gain = mobile ? 1.05 : 1.05;
     keys[0] = {
-      x: mobile ? Math.max(0.34, slot.x + 0.22) : slot.x,
-      y: mobile ? slot.y - 0.28 : slot.y,
+      x: mobile ? Math.max(0.4, slot.x + 0.18) : Math.min(0.74, slot.x + 0.08),
+      y: mobile ? slot.y - 0.32 : slot.y,
       s: Math.min(cap, slot.s * gain),
     };
   }
   return samplePath(keys, progress);
+}
+
+type ScreenBox = { left: number; right: number; top: number; bottom: number };
+
+function poseRect(pose: Key, w: number, h: number) {
+  const cx = ((pose.x + 1) * 0.5) * w;
+  const cy = ((1 - pose.y) * 0.5) * h;
+  const hw = pose.s * NDC_HALF * w * 0.5;
+  const hh = pose.s * NDC_HALF * h * 0.5;
+  return { left: cx - hw, right: cx + hw, top: cy - hh, bottom: cy + hh, hw };
+}
+
+function overlaps(rect: ScreenBox, box: ScreenBox, pad: number) {
+  return rect.left < box.right - pad && rect.right > box.left + pad && rect.top < box.bottom - pad && rect.bottom > box.top + pad;
+}
+
+/**
+ * Keep the drone in open space: the right gutter when it fits, otherwise a
+ * smaller pose that the canvas tucks behind the cards.
+ */
+function clearFlight(pose: Key, boxes: ScreenBox[], w: number, h: number) {
+  const fit = (key: Key): Key => ({
+    ...key,
+    x: Math.min(key.x, 0.97 - key.s * NDC_HALF),
+    s: Math.max(0.1, key.s),
+  });
+  let next = fit(pose);
+  const blocked = (key: Key, pad: number) => {
+    const rect = poseRect(key, w, h);
+    return boxes.some((box) => overlaps(rect, box, pad));
+  };
+  if (!blocked(next, 8)) return { pose: next, tucked: false };
+
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    const rect = poseRect(next, w, h);
+    let edge = Number.NEGATIVE_INFINITY;
+    for (const box of boxes) {
+      if (rect.top < box.bottom - 8 && rect.bottom > box.top + 8) edge = Math.max(edge, box.right);
+    }
+    const gutter = w - edge - 12;
+    if (edge > Number.NEGATIVE_INFINITY && gutter >= 70) {
+      const s = Math.min(next.s, Math.max(0.1, (gutter - 8) / (NDC_HALF * w)));
+      const hw = s * NDC_HALF * w * 0.5;
+      const cx = Math.min(w - hw - 6, edge + 12 + hw);
+      next = fit({ x: (cx / w) * 2 - 1, y: next.y, s });
+      if (!blocked(next, 4)) return { pose: next, tucked: false };
+    }
+    next = fit({ ...next, s: next.s * 0.72 });
+    if (next.s <= 0.11) break;
+  }
+
+  return {
+    pose: fit({
+      x: Math.max(pose.x, w < 768 ? 0.5 : 0.7),
+      y: pose.y,
+      s: Math.min(pose.s, w < 768 ? 0.22 : 0.24),
+    }),
+    tucked: true,
+  };
 }
 
 function contactFade() {
@@ -282,10 +360,12 @@ function placeOnView(
 function DroneModel({
   reduce,
   progressRef,
+  tuckRef,
   layerRef,
 }: {
   reduce: boolean;
   progressRef: MutableRefObject<number>;
+  tuckRef: MutableRefObject<boolean>;
   layerRef: RefObject<HTMLDivElement | null>;
 }) {
   const { scene } = useGLTF(MODEL, "/draco/", false);
@@ -297,6 +377,7 @@ function DroneModel({
   const notifyModelReady = useSplashGate().notifyModelReady;
   const spring = useRef({ x: 0, y: 0, s: 0.7, vx: 0, vy: 0, vs: 0, ready: false });
   const axes = useRef({ right: new THREE.Vector3(), up: new THREE.Vector3() });
+  const avoid = useRef<{ boxes: ScreenBox[]; tucked: boolean }>({ boxes: [], tucked: false });
 
   useEffect(() => {
     notifyModelReady();
@@ -351,12 +432,30 @@ function DroneModel({
 
     const slot = flightTarget(reduce ? 0 : progressRef.current, mobile, reduce);
     const hover = mobile ? HOVER_MOBILE : HOVER_DESKTOP;
-    const handoff = reduce ? 1 : THREE.MathUtils.smoothstep(reveal, 0.34, 1);
-    const target = {
+    const handoff = reduce ? 1 : THREE.MathUtils.smoothstep(reveal, 0.28, 1);
+    const blended = {
       x: THREE.MathUtils.lerp(hover.x, slot.x, handoff),
       y: THREE.MathUtils.lerp(hover.y, slot.y, handoff),
       s: THREE.MathUtils.lerp(hover.s, slot.s, handoff),
     };
+    const boxes: ScreenBox[] = [];
+    const viewW = window.innerWidth;
+    const viewH = window.innerHeight;
+    document.querySelectorAll(OBSTACLE_QUERY).forEach((node) => {
+      const rect = node.getBoundingClientRect();
+      if (rect.width > 12 && rect.height > 12 && rect.bottom > 0 && rect.top < viewH && rect.right > 0 && rect.left < viewW) {
+        boxes.push({ left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom });
+      }
+    });
+    avoid.current.boxes = boxes;
+    const cleared = clearFlight(blended, avoid.current.boxes, size.width, size.height);
+    let tucked = cleared.tucked;
+    if (avoid.current.tucked && !tucked) {
+      const rect = poseRect(cleared.pose, size.width, size.height);
+      if (avoid.current.boxes.some((box) => overlaps(rect, box, 20))) tucked = true;
+    }
+    avoid.current.tucked = tucked;
+    const target = cleared.pose;
     const spr = spring.current;
     if (!spr.ready || reduce) {
       spr.x = target.x;
@@ -371,6 +470,15 @@ function DroneModel({
       [spr.x, spr.vx] = integrate(spr.x, spr.vx, target.x, dt);
       [spr.y, spr.vy] = integrate(spr.y, spr.vy, target.y, dt);
       [spr.s, spr.vs] = integrate(spr.s, spr.vs, target.s, dt);
+    }
+    const legal = clearFlight({ x: spr.x, y: spr.y, s: Math.max(0.1, spr.s) }, avoid.current.boxes, size.width, size.height);
+    spr.x = legal.pose.x;
+    spr.y = legal.pose.y;
+    spr.s = legal.pose.s;
+    if (legal.tucked) avoid.current.tucked = true;
+    if (layerRef.current) {
+      layerRef.current.dataset.geometric = avoid.current.tucked ? "1" : "0";
+      layerRef.current.classList.toggle("is-tucked", avoid.current.tucked || tuckRef.current);
     }
 
     const speed = Math.hypot(spr.vx, spr.vy);
@@ -421,6 +529,7 @@ function HeroCanvas({ reduce }: { reduce: boolean }) {
   const { intro } = useSplashGate();
   const layerRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef(0);
+  const tuckRef = useRef(false);
   const [hidden, setHidden] = useState(false);
   const [revealOn, setRevealOn] = useState(false);
   const live = !hidden && intro !== "classic";
@@ -461,9 +570,29 @@ function HeroCanvas({ reduce }: { reduce: boolean }) {
         progressRef.current = self.progress;
       },
     });
+    const syncTuck = () => {
+      const layer = layerRef.current;
+      const hero = document.getElementById("sec-hero");
+      const heroClear = !hero || hero.getBoundingClientRect().bottom < 140;
+      let force = false;
+      if (heroClear) {
+        const dangerLeft = window.innerWidth * 0.5;
+        document.querySelectorAll(".home-stage .flight-card, .home-stage h2, #sec-contact form, #sec-contact h3").forEach((node) => {
+          const rect = node.getBoundingClientRect();
+          if (rect.bottom > 48 && rect.top < window.innerHeight - 16 && rect.right > dangerLeft && rect.left < window.innerWidth - 8) {
+            force = true;
+          }
+        });
+      }
+      tuckRef.current = force;
+      if (layer) layer.classList.toggle("is-tucked", force || layer.dataset.geometric === "1");
+    };
+    syncTuck();
+    window.addEventListener("scroll", syncTuck, { passive: true });
     const refresh = window.setTimeout(() => ScrollTrigger.refresh(), 400);
     return () => {
       window.clearTimeout(refresh);
+      window.removeEventListener("scroll", syncTuck);
       trigger.kill();
     };
   }, [reduce, intro]);
@@ -484,7 +613,7 @@ function HeroCanvas({ reduce }: { reduce: boolean }) {
           }}
         >
           <StudioLights />
-          <DroneModel reduce={reduce} progressRef={progressRef} layerRef={layerRef} />
+          <DroneModel reduce={reduce} progressRef={progressRef} tuckRef={tuckRef} layerRef={layerRef} />
         </Canvas>
       )}
     </div>

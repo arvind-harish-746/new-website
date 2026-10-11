@@ -461,7 +461,7 @@ export default function Home() {
 
                   {/* Highlights section with cyber styling */}
                   <div className="mt-4 pt-3 border-t border-[#C9DDEC] flex items-center justify-between">
-                    <span className="inline-flex items-center gap-1.5 text-sm text-slate-300 font-sans line-clamp-1">
+                    <span className="inline-flex items-center gap-1.5 text-sm font-medium text-[#3E5168] font-sans line-clamp-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shrink-0" />
                       <InstitutionLine text={inst.text} />
                     </span>
