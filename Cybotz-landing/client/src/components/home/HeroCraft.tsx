@@ -176,7 +176,9 @@ function DroneModel({ reduce, layerRef }: { reduce: boolean; layerRef: React.Ref
   const glows = useRef<THREE.Mesh[]>([]);
   const bodyMats = useRef<THREE.Material[]>([]);
   const coneRef = useRef<THREE.Mesh>(null);
-  const parts = useRef<{ child: THREE.Object3D; base: THREE.Vector3; dir: THREE.Vector3 }[]>([]);
+  const parts = useRef<{ child: THREE.Object3D; base: THREE.Vector3; dir: THREE.Vector3; tag: string }[]>([]);
+  const explodeAnchors = useRef<THREE.Object3D[]>([]);
+  const explodeBox = useRef(new THREE.Box3());
   const edges = useRef<THREE.LineSegments[]>([]);
   const { camera, size } = useThree();
   const notifyModelReady = useSplashGate().notifyModelReady;
@@ -188,6 +190,10 @@ function DroneModel({ reduce, layerRef }: { reduce: boolean; layerRef: React.Ref
   const projectTmp = useRef(new THREE.Vector3());
   const projectNdc = useRef(new THREE.Vector3());
   const calloutNodes = useRef<null | {
+    svg: SVGSVGElement;
+    parts: { line: SVGLineElement; dot: SVGCircleElement; text: SVGTextElement }[];
+  }>(null);
+  const explodeNodes = useRef<null | {
     svg: SVGSVGElement;
     parts: { line: SVGLineElement; dot: SVGCircleElement; text: SVGTextElement }[];
   }>(null);
@@ -222,15 +228,34 @@ function DroneModel({ reduce, layerRef }: { reduce: boolean; layerRef: React.Ref
     let host: THREE.Object3D = root;
     while (host.children.length === 1) host = host.children[0];
     const airframe = host.children.find((child) => child.children.length > 8) ?? host;
-    parts.current = airframe.children
+    const exploded = airframe.children
       .filter((child) => !/text/i.test(child.name))
       .map((child) => {
         const center = new THREE.Box3().setFromObject(child).getCenter(new THREE.Vector3());
         const dir = center.clone();
-        if (dir.length() < 0.05) dir.set(0, 0.2, 0);
-        dir.normalize().multiplyScalar(0.62 * Math.max(center.length(), 0.15));
-        return { child, base: child.position.clone(), dir };
+        if (dir.length() < 0.05) dir.set(0, 1, 0);
+        const reach = Math.max(center.length(), 0.06);
+        dir.normalize().multiplyScalar(2.2 * reach);
+        const blob = `${child.name} ${child.children.map((node) => node.name).join(" ")}`;
+        let tag = "other";
+        if (/camera|gimbal/i.test(blob)) tag = "camera";
+        else if (/spin|prop|rotor|blade/i.test(blob)) tag = "prop";
+        else if (/cylinder|motor/i.test(blob)) tag = "motor";
+        if (tag === "prop") dir.multiplyScalar(1.4);
+        if (tag === "camera") dir.multiplyScalar(1.3);
+        return { child, base: child.position.clone(), dir, tag, reach, kids: child.children.length };
       });
+    const framePool = exploded.filter((part) => part.tag === "other");
+    framePool.sort((a, b) => b.kids - a.kids || a.reach - b.reach);
+    if (framePool[0]) {
+      framePool[0].tag = "frame";
+      framePool[0].dir.multiplyScalar(0.2).add(new THREE.Vector3(0, 0.85, 0));
+    }
+    parts.current = exploded.map(({ child, base, dir, tag }) => ({ child, base, dir, tag }));
+    explodeAnchors.current = (["frame", "motor", "prop", "camera"] as const).map((tag) => {
+      const group = exploded.filter((part) => part.tag === tag).sort((a, b) => b.reach - a.reach);
+      return group[0]?.child ?? exploded[0]?.child;
+    }).filter((node): node is THREE.Object3D => !!node);
 
     const edgeMat = new THREE.LineBasicMaterial({ color: "#0575CE", transparent: true, opacity: 0 });
     const built: THREE.LineSegments[] = [];
@@ -563,9 +588,14 @@ function DroneModel({ reduce, layerRef }: { reduce: boolean; layerRef: React.Ref
       shadowRef.current.visible = !hide && live.opacity > 0.2;
       const alt = live.altitude;
       const mat = shadowRef.current.material as THREE.MeshBasicMaterial;
-      mat.opacity = 0.55 * (1 - THREE.MathUtils.clamp(alt / 0.7, 0, 1));
-      const grow = 1 + alt * 0.6;
-      shadowRef.current.scale.set(grow, grow, 1);
+      if (grounded) {
+        mat.opacity = 0.32;
+        shadowRef.current.scale.set(1.9, 1.9, 1);
+      } else {
+        mat.opacity = 0.55 * (1 - THREE.MathUtils.clamp(alt / 0.7, 0, 1));
+        const grow = 1 + alt * 0.6;
+        shadowRef.current.scale.set(grow, grow, 1);
+      }
     }
 
     if (coneRef.current) {
@@ -726,6 +756,75 @@ function DroneModel({ reduce, layerRef }: { reduce: boolean; layerRef: React.Ref
       }
     }
 
+    const showExplode = size.width >= 1024 && explode > 0.72 && live.opacity > 0.4;
+    if (explodeNodes.current && !explodeNodes.current.svg.isConnected) explodeNodes.current = null;
+    if (!showExplode) {
+      explodeNodes.current?.svg.classList.remove("is-live");
+    } else {
+      if (!explodeNodes.current) {
+        const svg = document.getElementById("explode-callouts");
+        if (svg instanceof SVGSVGElement) {
+          const labels = ["frame", "motor", "prop", "camera"].map((id) => {
+            const group = svg.querySelector(`[data-part="${id}"]`);
+            return {
+              line: group?.querySelector("line") as SVGLineElement,
+              dot: group?.querySelector("circle") as SVGCircleElement,
+              text: group?.querySelector("text") as SVGTextElement,
+            };
+          });
+          if (labels.every((part) => part.line && part.dot && part.text)) {
+            explodeNodes.current = { svg, parts: labels };
+          }
+        }
+      }
+      const labels = explodeNodes.current;
+      if (labels && explodeAnchors.current.length === labels.parts.length) {
+        const w = size.width;
+        const h = size.height;
+        if (labels.svg.dataset.w !== String(w) || labels.svg.dataset.h !== String(h)) {
+          labels.svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
+          labels.svg.dataset.w = String(w);
+          labels.svg.dataset.h = String(h);
+        }
+        const anchors = explodeAnchors.current.map((obj) => {
+          const center = explodeBox.current.setFromObject(obj).getCenter(projectTmp.current);
+          const ndc = projectNdc.current.copy(center).project(camera);
+          return { x: (ndc.x * 0.5 + 0.5) * w, y: (-ndc.y * 0.5 + 0.5) * h };
+        });
+        let minX = Infinity;
+        let maxX = -Infinity;
+        let minY = Infinity;
+        for (const point of anchors) {
+          minX = Math.min(minX, point.x);
+          maxX = Math.max(maxX, point.x);
+          minY = Math.min(minY, point.y);
+        }
+        const row = 16;
+        const gap = 22;
+        const stack = anchors.length * row + (anchors.length - 1) * gap;
+        const columnX = w - (maxX + 28) >= 168
+          ? Math.min(maxX + 28, w - 168)
+          : Math.max(w * 0.42, minX - 176);
+        let cursor = THREE.MathUtils.clamp(minY, 108, h - stack - 20);
+        const order = anchors.map((point, index) => ({ index, y: point.y })).sort((a, b) => a.y - b.y);
+        order.forEach((item) => {
+          const node = labels.parts[item.index];
+          const labelY = cursor + row * 0.75;
+          cursor += row + gap;
+          const anchor = anchors[item.index];
+          node.line.setAttribute("x1", columnX.toFixed(1));
+          node.line.setAttribute("y1", labelY.toFixed(1));
+          node.line.setAttribute("x2", anchor.x.toFixed(1));
+          node.line.setAttribute("y2", anchor.y.toFixed(1));
+          node.dot.setAttribute("cx", anchor.x.toFixed(1));
+          node.dot.setAttribute("cy", anchor.y.toFixed(1));
+          node.text.setAttribute("x", (columnX + 8).toFixed(1));
+          node.text.setAttribute("y", labelY.toFixed(1));
+        });
+        labels.svg.classList.add("is-live");
+      }
+    }
+
     if (t - tickerAt.current > 0.1) {
       tickerAt.current = t;
       const ticker = document.getElementById("flight-ticker");
@@ -841,6 +940,20 @@ function HeroCanvas({ reduce }: { reduce: boolean }) {
       <circle cx="120" cy="120" r="68" fill="none" stroke="#0575CE" strokeWidth="1" strokeDasharray="3 7" />
       <path d="M120 6 V34 M120 206 V234 M6 120 H34 M206 120 H234" stroke="#F97405" strokeWidth="1.5" />
       <circle cx="120" cy="120" r="3" fill="#F97405" />
+    </svg>
+    <svg id="explode-callouts" className="explode-callouts" aria-hidden="true">
+      {([
+        ["frame", "FRAME"],
+        ["motor", "MOTORS"],
+        ["prop", "PROPS"],
+        ["camera", "FPV CAMERA"],
+      ] as const).map(([id, label]) => (
+        <g className="callout" data-part={id} key={id}>
+          <line x1="0" y1="0" x2="0" y2="0" />
+          <circle r="3" />
+          <text>{label}</text>
+        </g>
+      ))}
     </svg>
     <svg id="hero-callouts" className="hero-callouts" aria-hidden="true">
       {([

@@ -84,6 +84,25 @@ function dodgeTelemetry(pose: Key, vw: number, vh: number): Key {
   return toPose(pose, box.cx, cy, vw, vh, s);
 }
 
+/** Keep the network craft inside the map, clear of the school cards. */
+function parkOnMap(pose: Key, vw: number, vh: number): Key {
+  if (pose.opacity < 0.05) return pose;
+  const map = document.querySelector("#sec-network .city-map");
+  if (!(map instanceof Element)) return pose;
+  const rect = map.getBoundingClientRect();
+  if (rect.width < 40 || rect.bottom < vh * 0.12 || rect.top > vh * 0.82) return pose;
+  const grid = document.querySelector("#sec-network .logo-grid");
+  const gridRect = grid instanceof Element ? grid.getBoundingClientRect() : null;
+  const s = Math.min(pose.s, 0.1);
+  const rad = 0.34 * s * vh;
+  let cx = rect.left + rect.width * 0.62;
+  let cy = rect.top + Math.min(rect.height * 0.12, rad + 14);
+  if (gridRect && gridRect.width > 8 && cx + rad > gridRect.left - 10) cx = gridRect.left - rad - 18;
+  cx = Math.max(rect.left + rad + 8, Math.min(rect.right - rad - 8, cx));
+  cy = Math.max(rect.top + rad + 10, Math.min(rect.bottom - rad - 8, cy));
+  return toPose(pose, cx, cy, vw, vh, s);
+}
+
 /** Keep the craft off a block of copy. Prefers the gap underneath it. */
 function dodgeCopy(pose: Key, selector: string, vw: number, vh: number): Key {
   if (pose.opacity < 0.05) return pose;
@@ -222,8 +241,8 @@ export function useDroneStage(active: boolean) {
       const k6: Key = { ...k3, y: 0.06, s: stage - 0.06, yaw: deg(180), pitch: deg(62), blueprint: 0, sensor: 1 };
       const k7: Key = { x: -0.42, y: -0.42, s: 0.16, yaw: deg(-40), pitch: deg(12), roll: deg(14), explode: 0, blueprint: 0, sensor: 0, prop: 52, opacity: 1, altitude: 0.35 };
       const k8: Key = { x: 1.35, y: 0.8, s: 0.16, yaw: deg(-60), pitch: deg(16), roll: deg(20), explode: 0, blueprint: 0, sensor: 0, prop: 52, opacity: 0, altitude: 0.4 };
-      const k9: Key = { x: padX, y: padY + 0.2, s: 0.26, yaw: deg(18), pitch: deg(8), roll: 0, explode: 0, blueprint: 0, sensor: 0, prop: 36, opacity: 1, altitude: 0.22 };
-      const k10: Key = { ...k9, y: padY, s: 0.24, pitch: 0, prop: 0, altitude: 0 };
+      const k9: Key = { x: padX, y: padY + 0.2, s: 0.32, yaw: deg(12), pitch: deg(8), roll: 0, explode: 0, blueprint: 0, sensor: 0, prop: 20, opacity: 1, altitude: 0.2 };
+      const k10: Key = { ...k9, y: padY, s: 0.4, yaw: 0, pitch: 0, roll: 0, prop: 0, altitude: 0 };
 
       const heroSplit = heroTop + heroH * 0.4;
       let pose = k1;
@@ -244,15 +263,16 @@ export function useDroneStage(active: boolean) {
         pose = mix(k7, k8, easeInOut(u));
       } else if (padTarget) {
         const rect = padTarget.getBoundingClientRect();
-        const onPad = rect.top < vh * 0.78 && rect.bottom > vh * 0.22 && y > contactTop - 8;
+        const onPad = rect.height > 40 && rect.top < vh * 0.68 && rect.bottom > vh * 0.32;
         if (onPad) pose = k10;
         else if (rect.top < vh + 40) pose = k9;
         else pose = mix(k8, k9, expo(clamp01((y - (contactTop - vh * 0.4)) / Math.max(1, vh * 0.35))));
       } else pose = k10;
 
       pose = dodgeTelemetry(pose, width, vh);
-      pose = dodgeCopy(pose, "#sec-network h2, #sec-network .log-sub", width, vh);
       pose = dodgeHeading(pose, width, vh);
+      pose = parkOnMap(pose, width, vh);
+      document.documentElement.dataset.landed = pose.prop < 1 && pose.altitude < 0.02 ? "1" : "0";
       writePose(pose);
       publishPose();
     };

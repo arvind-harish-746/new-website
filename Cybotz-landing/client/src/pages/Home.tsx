@@ -66,6 +66,67 @@ const PINS = [
   { x: 480, y: 210, label: "RUAS" },
 ];
 
+/** Perimeter tour: convex hull, then tuck any interior pin onto the nearest edge. */
+function routeTour(pins: { x: number; y: number }[]) {
+  const cross = (o: { x: number; y: number }, a: { x: number; y: number }, b: { x: number; y: number }) =>
+    (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+  const sorted = [...pins].sort((a, b) => a.x - b.x || a.y - b.y);
+  const build = (list: typeof sorted) => {
+    const chain: typeof sorted = [];
+    for (const point of list) {
+      while (chain.length >= 2 && cross(chain[chain.length - 2], chain[chain.length - 1], point) <= 0) chain.pop();
+      chain.push(point);
+    }
+    return chain;
+  };
+  const hull = build(sorted).slice(0, -1).concat(build([...sorted].reverse()).slice(0, -1));
+  const ring = hull.length >= 3 ? hull.slice() : sorted.slice();
+  const onHull = new Set(ring);
+  const segDist = (point: { x: number; y: number }, a: { x: number; y: number }, b: { x: number; y: number }) => {
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const len = dx * dx + dy * dy || 1;
+    const t = Math.min(1, Math.max(0, ((point.x - a.x) * dx + (point.y - a.y) * dy) / len));
+    return Math.hypot(point.x - (a.x + t * dx), point.y - (a.y + t * dy));
+  };
+  for (const point of pins) {
+    if (onHull.has(point)) continue;
+    let at = 0;
+    let best = Infinity;
+    for (let i = 0; i < ring.length; i += 1) {
+      const dist = segDist(point, ring[i], ring[(i + 1) % ring.length]);
+      if (dist < best) {
+        best = dist;
+        at = i;
+      }
+    }
+    ring.splice(at + 1, 0, point);
+  }
+  return ring;
+}
+
+/** Closed curve that stays close to the tour so it cannot fold back on itself. */
+function routePath(pins: { x: number; y: number }[]) {
+  const ring = routeTour(pins);
+  const n = ring.length;
+  if (n < 2) return "";
+  let d = `M${ring[0].x} ${ring[0].y}`;
+  for (let i = 0; i < n; i += 1) {
+    const p0 = ring[(i - 1 + n) % n];
+    const p1 = ring[i];
+    const p2 = ring[(i + 1) % n];
+    const p3 = ring[(i + 2) % n];
+    const c1x = p1.x + (p2.x - p0.x) / 10;
+    const c1y = p1.y + (p2.y - p0.y) / 10;
+    const c2x = p2.x - (p3.x - p1.x) / 10;
+    const c2y = p2.y - (p3.y - p1.y) / 10;
+    d += ` C${c1x.toFixed(1)} ${c1y.toFixed(1)} ${c2x.toFixed(1)} ${c2y.toFixed(1)} ${p2.x} ${p2.y}`;
+  }
+  return d;
+}
+
+const FLIGHT_PATH = routePath(PINS);
+
 export default function Home() {
   const [, setLocation] = useLocation();
   useHomeMotion(true);
@@ -229,7 +290,7 @@ export default function Home() {
               <path
                 className="flight-route"
                 pathLength={1}
-                d={PINS.map((spot, index) => `${index === 0 ? "M" : "L"}${spot.x} ${spot.y}`).join(" ")}
+                d={FLIGHT_PATH}
                 fill="none"
               />
               <g className="route-craft">
@@ -238,7 +299,7 @@ export default function Home() {
                   dur="9s"
                   repeatCount="indefinite"
                   rotate="auto"
-                  path={PINS.map((spot, index) => `${index === 0 ? "M" : "L"}${spot.x} ${spot.y}`).join(" ")}
+                  path={FLIGHT_PATH}
                 />
               </g>
               {PINS.map((spot, index) => (
