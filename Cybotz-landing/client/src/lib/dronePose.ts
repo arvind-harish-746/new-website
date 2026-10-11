@@ -68,8 +68,10 @@ export function heroKey(width: number): Pick<DroneTarget, "x" | "y" | "s" | "yaw
   return { x: 0.46, y: 0.04, s: 0.62, yaw, pitch, roll: 0 };
 }
 
-/** Footage pose stands in for the Blender smash until that file exists. */
+/** Centered, large enough to read on the paper field while the intro flies. */
 export function approachKey(width: number): Pick<DroneTarget, "x" | "y" | "s" | "yaw" | "pitch" | "roll"> {
-  if (width < 768) return { x: 0, y: 0.05, s: 0.16, yaw: deg(8), pitch: deg(14), roll: 0 };
-  return { x: 0.02, y: 0.08, s: 0.22, yaw: deg(12), pitch: deg(16), roll: 0 };
+  const yaw = deg(22);
+  const pitch = deg(8);
+  if (width < 768) return { x: 0, y: 0, s: 0.78, yaw, pitch, roll: 0 };
+  return { x: 0, y: 0.02, s: 0.92, yaw, pitch, roll: 0 };
 }

@@ -20,12 +20,30 @@ function markStarted() {
   }
 }
 
+function settleHero() {
+  document.documentElement.dataset.introPhase = "settled";
+  delete document.documentElement.dataset.introLock;
+  setIntroDriving(false);
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  writePose({
+    ...heroKey(window.innerWidth),
+    explode: 0,
+    blueprint: 0,
+    sensor: 0,
+    prop: reduce ? 0 : 52,
+    opacity: 1,
+    altitude: 0.2,
+  });
+  window.dispatchEvent(new Event("cybotz-intro-settled"));
+}
+
 /**
- * Fixed intro overlay. The page paints underneath, so the overlay never shifts layout.
- * Until intro-1080.mp4 exists, the live drone flies the intro. No watermarked file is referenced.
+ * Fixed intro overlay. It stays off the page until the drone has drawn a frame
+ * (or a real intro clip is ready). If neither arrives within 600ms, the hero shows.
  */
 export function IntroOverlay() {
   const [active, setActive] = useState(() => mode() !== "off");
+  const [shown, setShown] = useState(false);
   const [skipOn, setSkipOn] = useState(false);
   const [soundOn, setSoundOn] = useState(false);
   const [clip, setClip] = useState(false);
@@ -35,18 +53,83 @@ export function IntroOverlay() {
   const soundOnRef = useRef(false);
   const playedRef = useRef(false);
   const doneRef = useRef(false);
+  const revealedRef = useRef(false);
+  const finishRef = useRef<(quick: boolean) => void>(() => undefined);
+  const flyTimerRef = useRef(0);
+  const clipRef = useRef(false);
 
   useEffect(() => {
     soundOnRef.current = soundOn;
   }, [soundOn]);
 
   useEffect(() => {
-    if (!active) return;
+    clipRef.current = clip;
+    if (clip) window.clearTimeout(flyTimerRef.current);
+  }, [clip]);
+
+  useEffect(() => {
+    if (!active || doneRef.current) return;
+    revealedRef.current = false;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    document.documentElement.dataset.introPhase = "flight";
-    document.documentElement.dataset.introLock = "1";
-    markStarted();
     setIntroDriving(true);
+    writePose({
+      ...approachKey(window.innerWidth),
+      explode: 0,
+      blueprint: 0,
+      sensor: 0,
+      prop: reduce ? 0 : 8,
+      opacity: 1,
+      altitude: 0.45,
+    });
+
+    let cancelled = false;
+    const reveal = () => {
+      if (cancelled || doneRef.current || revealedRef.current) return;
+      revealedRef.current = true;
+      document.documentElement.dataset.introPhase = "flight";
+      document.documentElement.dataset.introLock = "1";
+      markStarted();
+      setShown(true);
+    };
+
+    const abort = () => {
+      if (cancelled || revealedRef.current || doneRef.current) return;
+      doneRef.current = true;
+      setActive(false);
+      settleHero();
+    };
+
+    const onFrame = () => {
+      if (cancelled || doneRef.current || revealedRef.current) return;
+      revealedRef.current = true;
+      requestAnimationFrame(() => {
+        if (cancelled || doneRef.current) return;
+        document.documentElement.dataset.introPhase = "flight";
+        document.documentElement.dataset.introLock = "1";
+        markStarted();
+        setShown(true);
+      });
+    };
+    if (document.documentElement.dataset.droneFrame === "1") onFrame();
+    window.addEventListener("cybotz-drone-frame", onFrame);
+
+    const deadline = window.setTimeout(abort, 600);
+    void introClipReady().then((ok) => {
+      if (cancelled || doneRef.current || !ok) return;
+      setClip(true);
+      reveal();
+    });
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(deadline);
+      window.removeEventListener("cybotz-drone-frame", onFrame);
+    };
+  }, [active]);
+
+  useEffect(() => {
+    if (!active || !shown) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const from = { ...approachKey(window.innerWidth) };
     writePose({ ...from, explode: 0, blueprint: 0, sensor: 0, prop: reduce ? 0 : 8, opacity: 1, altitude: 0.45 });
 
@@ -91,11 +174,10 @@ export function IntroOverlay() {
       const veil = rootRef.current;
       const close = () => {
         setActive(false);
+        setShown(false);
         document.documentElement.dataset.introPhase = "settled";
         delete document.documentElement.dataset.introLock;
         setIntroDriving(false);
-        const h1 = document.querySelector<HTMLElement>("#sec-hero h1");
-        window.setTimeout(() => h1?.focus({ preventScroll: true }), 40);
         window.dispatchEvent(new Event("cybotz-intro-settled"));
       };
       if (veil) {
@@ -108,11 +190,12 @@ export function IntroOverlay() {
         });
       } else close();
     };
+    finishRef.current = finish;
 
     const onSkip = (event: Event) => {
       if (doneRef.current) return;
       if (event.target instanceof Element && event.target.closest("input, textarea, select, .intro-sound, .intro-skip")) {
-        if (!(event.target instanceof Element) || !event.target.closest(".intro-skip")) return;
+        if (!event.target.closest(".intro-skip")) return;
       }
       if (event.type === "keydown") {
         const key = (event as KeyboardEvent).key;
@@ -125,36 +208,27 @@ export function IntroOverlay() {
       finish(true);
     };
 
-    const onSkipClick = () => finish(true);
     const onClipEnd = () => finish(false);
     window.addEventListener("keydown", onSkip);
     window.addEventListener("wheel", onSkip, { passive: false });
     window.addEventListener("touchstart", onSkip, { passive: false });
     window.addEventListener("cybotz-intro-clip-end", onClipEnd);
-    rootRef.current?.querySelector(".intro-skip")?.addEventListener("click", onSkipClick);
 
     const droneTimer = window.setTimeout(() => hit(), reduce ? 0 : 900);
-    const flyTimer = window.setTimeout(() => finish(false), reduce ? 160 : 1700);
-
-    let cancelled = false;
-    void introClipReady().then((ok) => {
-      if (cancelled || doneRef.current || !ok) return;
-      window.clearTimeout(droneTimer);
-      window.clearTimeout(flyTimer);
-      setClip(true);
-    });
+    if (!clipRef.current) {
+      flyTimerRef.current = window.setTimeout(() => finish(false), reduce ? 160 : 1700);
+    }
 
     return () => {
-      cancelled = true;
       window.clearTimeout(skipTimer);
       window.clearTimeout(droneTimer);
-      window.clearTimeout(flyTimer);
+      window.clearTimeout(flyTimerRef.current);
       window.removeEventListener("keydown", onSkip);
       window.removeEventListener("wheel", onSkip);
       window.removeEventListener("touchstart", onSkip);
       window.removeEventListener("cybotz-intro-clip-end", onClipEnd);
     };
-  }, [active]);
+  }, [active, shown]);
 
   useEffect(() => {
     if (!clip || !active) return;
@@ -194,19 +268,7 @@ export function IntroOverlay() {
 
   useEffect(() => {
     if (mode() !== "off") return;
-    document.documentElement.dataset.introPhase = "settled";
-    setIntroDriving(false);
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    writePose({
-      ...heroKey(window.innerWidth),
-      explode: 0,
-      blueprint: 0,
-      sensor: 0,
-      prop: reduce ? 0 : 52,
-      opacity: 1,
-      altitude: 0.2,
-    });
-    window.dispatchEvent(new Event("cybotz-intro-settled"));
+    settleHero();
   }, []);
 
   const toggleSound = () => {
@@ -217,7 +279,7 @@ export function IntroOverlay() {
     setSoundOn((on) => !on);
   };
 
-  if (!active) return null;
+  if (!active || !shown) return null;
 
   return (
     <div ref={rootRef} className="intro-overlay" role="dialog" aria-label="Flight intro">
@@ -227,7 +289,7 @@ export function IntroOverlay() {
           <source src={INTRO_VIDEO} type="video/mp4" />
         </video>
       )}
-      <button type="button" className={`intro-skip${skipOn ? " is-on" : ""}`} onClick={() => undefined}>
+      <button type="button" className={`intro-skip${skipOn ? " is-on" : ""}`} onClick={() => finishRef.current(true)}>
         Skip intro
       </button>
       <button type="button" className="intro-sound" aria-pressed={soundOn} onClick={toggleSound}>

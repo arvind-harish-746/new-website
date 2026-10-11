@@ -3,7 +3,7 @@ import Footer from "@/components/Footer";
 import { Calendar } from "@/elements/calendar";
 import CybotzTerminal from "@/components/CybotzTerminal";
 import { useLocation } from "wouter";
-import { useState, useEffect, useRef, lazy, Suspense } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Send, Mail, Phone, MapPin, ArrowRight, CheckCircle } from "lucide-react";
 import { INSTITUTIONS } from "@/data";
 import { captureUtmParams } from "@/lib/utm";
@@ -13,12 +13,11 @@ import { SectionTrace } from "@/components/home/SectionTrace";
 import { IntroOverlay } from "@/components/home/IntroOverlay";
 import { useHomeMotion } from "@/components/home/useHomeMotion";
 import { useDroneStage } from "@/components/home/useDroneStage";
+import { HeroCraft } from "@/components/home/HeroCraft";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
-
-const HeroCraft = lazy(() => import("@/components/home/HeroCraft").then((mod) => ({ default: mod.HeroCraft })));
 
 interface ContactFormData {
   name: string;
@@ -144,9 +143,7 @@ export default function Home() {
       </div>
       <Header />
       <IntroOverlay />
-      <Suspense fallback={null}>
-        <HeroCraft />
-      </Suspense>
+      <HeroCraft />
 
       <main id="main-content" className="log-main">
         <section id="sec-hero" className="log-hero">

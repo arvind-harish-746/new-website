@@ -182,6 +182,7 @@ function DroneModel({ reduce, layerRef }: { reduce: boolean; layerRef: React.Ref
   const spinRate = useRef(0);
   const axes = useRef({ right: new THREE.Vector3(), up: new THREE.Vector3() });
   const tickerAt = useRef(0);
+  const told = useRef(false);
 
   useEffect(() => {
     notifyModelReady();
@@ -368,6 +369,12 @@ function DroneModel({ reduce, layerRef }: { reduce: boolean; layerRef: React.Ref
 
     if (layerRef.current) layerRef.current.style.opacity = live.opacity.toFixed(3);
 
+    if (!told.current) {
+      told.current = true;
+      document.documentElement.dataset.droneFrame = "1";
+      window.dispatchEvent(new Event("cybotz-drone-frame"));
+    }
+
     if (t - tickerAt.current > 0.1) {
       tickerAt.current = t;
       const ticker = document.getElementById("flight-ticker");
@@ -399,7 +406,7 @@ function DroneModel({ reduce, layerRef }: { reduce: boolean; layerRef: React.Ref
   );
 }
 
-function Lights() {
+function RigLights() {
   const { gl, scene } = useThree();
   useLayoutEffect(() => {
     gl.toneMapping = THREE.AgXToneMapping ?? THREE.ACESFilmicToneMapping;
@@ -410,7 +417,6 @@ function Lights() {
   }, [gl, scene]);
   return (
     <>
-      <Environment files="/env/studio_small_09_1k.hdr" />
       <directionalLight position={[-3, 5.5, 3.5]} intensity={2.2} color="#FFF4E8" />
       <directionalLight position={[2.5, 1.5, -4]} intensity={1.6} color="#9FD4FF" />
       <directionalLight position={[0, -2, 3]} intensity={0.25} color="#FFFFFF" />
@@ -463,8 +469,11 @@ function HeroCanvas({ reduce }: { reduce: boolean }) {
           }}
         >
           <PerformanceMonitor onDecline={() => setDpr(1)} />
+          <RigLights />
           <Suspense fallback={null}>
-            <Lights />
+            <Environment files="/env/studio_small_09_1k.hdr" />
+          </Suspense>
+          <Suspense fallback={null}>
             <DroneModel reduce={reduce} layerRef={layerRef} />
           </Suspense>
         </Canvas>

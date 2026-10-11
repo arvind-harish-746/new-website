@@ -21,7 +21,7 @@ export default function CookieBanner() {
         const actions = document.querySelector(".hero-actions");
         if (actions) {
           const rect = actions.getBoundingClientRect();
-          const barTop = window.innerHeight - (window.innerWidth < 768 ? 72 : 80);
+          const barTop = window.innerHeight - (window.innerWidth < 768 ? 96 : 88);
           if (rect.bottom > barTop && rect.top < window.innerHeight) {
             arm();
             return;
@@ -32,7 +32,9 @@ export default function CookieBanner() {
       }, 2500);
     };
 
-    if (document.documentElement.dataset.introPhase === "flight") {
+    const intro = document.documentElement.dataset.intro;
+    const phase = document.documentElement.dataset.introPhase;
+    if (intro && intro !== "off" && phase !== "settled") {
       window.addEventListener("cybotz-intro-settled", arm, { once: true });
     } else {
       arm();

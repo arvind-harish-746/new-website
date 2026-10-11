@@ -30,7 +30,9 @@
       (function(){var d=document.documentElement,s;try{s=sessionStorage.getItem('cybotz-intro-autoplay')}catch(e){}
       var rm=matchMedia('(prefers-reduced-motion: reduce)').matches;
       var c=navigator.connection, slow=c&&(c.saveData||/2g|3g/.test(c.effectiveType||''));
-      d.dataset.intro=(s==='1'||rm)?'off':(slow?'stills':'video');})();
+      d.dataset.intro=(s==='1'||rm)?'off':(slow?'stills':'video');
+      if(d.dataset.intro!=='off'){['/models/drone.glb','/draco/draco_wasm_wrapper.js','/draco/draco_decoder.wasm'].forEach(function(href){var l=document.createElement('link');l.rel='preload';l.as='fetch';l.href=href;l.crossOrigin='anonymous';document.head.appendChild(l);});}
+      })();
     </script>
 
     <!-- JSON-LD Structured Data: Organization + Services -->
