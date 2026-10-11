@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { ShieldCheck, X } from 'lucide-react';
+import { useEffect, useState } from "react";
 
-const COOKIE_CONSENT_KEY = 'cybotz_cookie_consent';
+const COOKIE_CONSENT_KEY = "cybotz_cookie_consent";
 
 export default function CookieBanner() {
   const [isVisible, setIsVisible] = useState(false);
@@ -16,88 +15,49 @@ export default function CookieBanner() {
     if (consent) return;
 
     let timer = 0;
-    let observer: MutationObserver | null = null;
-    const showLater = (delay: number) => {
-      timer = window.setTimeout(() => setIsVisible(true), delay);
+    const arm = () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        const actions = document.querySelector(".hero-actions");
+        if (actions) {
+          const rect = actions.getBoundingClientRect();
+          const barTop = window.innerHeight - (window.innerWidth < 768 ? 72 : 80);
+          if (rect.bottom > barTop && rect.top < window.innerHeight) {
+            arm();
+            return;
+          }
+        }
+        setIsVisible(true);
+        document.documentElement.classList.add("cookie-open");
+      }, 2500);
     };
 
-    if (document.documentElement.dataset.splash === "on") {
-      observer = new MutationObserver(() => {
-        if (document.documentElement.dataset.splash !== "on") {
-          observer?.disconnect();
-          observer = null;
-          showLater(700);
-        }
-      });
-      observer.observe(document.documentElement, {
-        attributes: true,
-        attributeFilter: ["data-splash"],
-      });
+    if (document.documentElement.dataset.introPhase === "flight") {
+      window.addEventListener("cybotz-intro-settled", arm, { once: true });
     } else {
-      showLater(1200);
+      arm();
     }
 
-    return () => {
-      window.clearTimeout(timer);
-      observer?.disconnect();
-    };
+    return () => window.clearTimeout(timer);
   }, []);
 
-  const handleAccept = () => {
+  const save = (value: string) => {
     try {
-      localStorage.setItem(COOKIE_CONSENT_KEY, 'true');
-    } catch {}
+      localStorage.setItem(COOKIE_CONSENT_KEY, value);
+    } catch {
+      /* storage blocked */
+    }
     setIsVisible(false);
-  };
-
-  const handleDismiss = () => {
-    try {
-      localStorage.setItem(COOKIE_CONSENT_KEY, 'dismissed');
-    } catch {}
-    setIsVisible(false);
+    document.documentElement.classList.remove("cookie-open");
   };
 
   if (!isVisible) return null;
 
   return (
-    <aside
-      aria-label="Cookie consent banner"
-      className="fixed bottom-4 left-4 right-4 md:left-6 md:right-auto md:max-w-md z-50 p-4 bg-white/95 border border-cyan-500/30 rounded-2xl shadow-[0_10px_28px_rgba(16,32,51,0.08)] backdrop-blur-md font-mono text-[#102033] animate-fade-in"
-    >
-      <div className="flex items-start gap-3">
-        <div className="p-2 rounded-lg bg-cyan-500/10 text-[#0460A9] border border-cyan-500/30 shrink-0 mt-0.5">
-          <ShieldCheck className="w-5 h-5" />
-        </div>
-        <div className="space-y-2 text-xs flex-1">
-          <div className="flex items-center justify-between">
-            <h4 className="font-bold text-[#0460A9] text-sm">Privacy & Session Storage</h4>
-            <button
-              onClick={handleDismiss}
-              className="text-[#3E5168] hover:text-[#0460A9] p-1 rounded-md transition-colors cursor-pointer"
-              aria-label="Dismiss cookie notice"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-          <p className="text-[#3E5168] leading-relaxed text-[11px] font-sans">
-            We use essential local storage and security tokens to enable trial session booking, preserve your preferences, and protect owner portal sessions.
-          </p>
-          <div className="flex items-center gap-2 pt-1">
-            <button
-              onClick={handleAccept}
-              className="px-3.5 py-1.5 bg-[#F97405] hover:bg-[#ff8614] text-[#102033] font-bold rounded-lg text-xs transition-all shadow-[0_6px_16px_rgba(249,116,5,0.16)] cursor-pointer"
-            >
-              Accept All
-            </button>
-            <button
-              onClick={handleDismiss}
-              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-[#3E5168] rounded-lg text-xs transition-colors cursor-pointer"
-            >
-              Essential Only
-            </button>
-          </div>
-        </div>
-      </div>
+    <aside className="cookie-bar" aria-label="Cookie consent banner">
+      <p>Essential storage for booking and sessions.</p>
+      <button type="button" className="yes" onClick={() => save("true")}>Accept</button>
+      <button type="button" className="no" onClick={() => save("essential")}>Essential only</button>
     </aside>
   );
 }

@@ -1,0 +1,75 @@
+/** Shared spring target. Scroll and the intro write it; the canvas only reads it. */
+
+export type DroneTarget = {
+  x: number;
+  y: number;
+  s: number;
+  yaw: number;
+  pitch: number;
+  roll: number;
+  explode: number;
+  blueprint: number;
+  sensor: number;
+  prop: number;
+  opacity: number;
+  altitude: number;
+  rim: string;
+};
+
+export const deg = (n: number) => (n * Math.PI) / 180;
+
+export const live: DroneTarget = {
+  x: 0.46,
+  y: 0.04,
+  s: 0.62,
+  yaw: deg(28),
+  pitch: deg(8),
+  roll: 0,
+  explode: 0,
+  blueprint: 0,
+  sensor: 0,
+  prop: 52,
+  opacity: 1,
+  altitude: 0.35,
+  rim: "",
+};
+
+/** While true, the scroll sampler must not overwrite the intro tween. */
+export let introDriving = false;
+
+export function setIntroDriving(on: boolean) {
+  introDriving = on;
+}
+
+export function writePose(partial: Partial<DroneTarget>) {
+  Object.assign(live, partial);
+}
+
+type Listener = () => void;
+const listeners = new Set<Listener>();
+
+export function subscribePose(fn: Listener) {
+  listeners.add(fn);
+  return () => {
+    listeners.delete(fn);
+  };
+}
+
+export function publishPose() {
+  listeners.forEach((fn) => fn());
+}
+
+export function heroKey(width: number): Pick<DroneTarget, "x" | "y" | "s" | "yaw" | "pitch" | "roll"> {
+  const yaw = deg(28);
+  const pitch = deg(8);
+  if (width < 768) return { x: 0, y: -0.12, s: 0.4, yaw, pitch, roll: 0 };
+  if (width < 1024) return { x: 0, y: -0.3, s: 0.46, yaw, pitch, roll: 0 };
+  if (width < 1280) return { x: 0.48, y: 0.04, s: 0.54, yaw, pitch, roll: 0 };
+  return { x: 0.46, y: 0.04, s: 0.62, yaw, pitch, roll: 0 };
+}
+
+/** Footage pose stands in for the Blender smash until that file exists. */
+export function approachKey(width: number): Pick<DroneTarget, "x" | "y" | "s" | "yaw" | "pitch" | "roll"> {
+  if (width < 768) return { x: 0, y: 0.05, s: 0.16, yaw: deg(8), pitch: deg(14), roll: 0 };
+  return { x: 0.02, y: 0.08, s: 0.22, yaw: deg(12), pitch: deg(16), roll: 0 };
+}

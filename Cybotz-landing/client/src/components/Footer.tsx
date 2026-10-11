@@ -148,8 +148,8 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 sm:gap-4 text-sm text-[#3E5168]">
             <p>© {new Date().getFullYear()} CYBOTZ. All rights reserved.</p>
-            <p className="w-full basis-full text-[11px] leading-relaxed text-[#3E5168] font-sans normal-case tracking-normal">
-              3D model: This work is based on{" "}
+            <p className="w-full basis-full text-[11px] leading-relaxed text-[#43566A] font-sans normal-case tracking-normal">
+              Drone model: &quot;Dji FPV by SDC&quot; by SDC PERFORMANCE™️, CC BY 4.0. This work is based on{" "}
               <a
                 href="https://sketchfab.com/3d-models/dji-fpv-by-sdc-high-performance-drone-d471ea8c6235457b8e131842e2cf3783"
                 className="underline"

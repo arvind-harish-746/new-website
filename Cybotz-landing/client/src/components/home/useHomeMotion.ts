@@ -57,50 +57,8 @@ export function useHomeMotion(active: boolean) {
     );
     if (!reduce) counters.forEach((el) => counterObserver.observe(el));
 
-    const onPointerMove = (event: PointerEvent) => {
-      if (event.pointerType !== "mouse" || reduce) return;
-      const card = (event.target as HTMLElement | null)?.closest?.<HTMLElement>(".flight-card");
-      if (!card || !root.contains(card)) return;
-      const rect = card.getBoundingClientRect();
-      const px = (event.clientX - rect.left) / rect.width - 0.5;
-      const py = (event.clientY - rect.top) / rect.height - 0.5;
-      card.style.setProperty("--mx", `${event.clientX - rect.left}px`);
-      card.style.setProperty("--my", `${event.clientY - rect.top}px`);
-      card.style.setProperty("--rx", `${(-py * 5).toFixed(2)}deg`);
-      card.style.setProperty("--ry", `${(px * 7).toFixed(2)}deg`);
-    };
-
-    const onPointerOut = (event: PointerEvent) => {
-      const card = (event.target as HTMLElement | null)?.closest?.<HTMLElement>(".flight-card");
-      if (!card) return;
-      if (event.relatedTarget instanceof Node && card.contains(event.relatedTarget)) return;
-      card.style.removeProperty("--rx");
-      card.style.removeProperty("--ry");
-    };
-
-    root.addEventListener("pointermove", onPointerMove);
-    root.addEventListener("pointerout", onPointerOut);
-
     const mm = gsap.matchMedia();
     mm.add("(min-width: 1024px) and (prefers-reduced-motion: no-preference)", () => {
-      const scans = gsap.utils.toArray<HTMLElement>(".service-card .card-scan");
-      if (scans.length) {
-        const sequence = gsap.timeline({
-          scrollTrigger: {
-            trigger: ".services-pin",
-            start: "top 96px",
-            end: "+=65%",
-            pin: true,
-            scrub: 0.4,
-            anticipatePin: 1,
-            invalidateOnRefresh: true,
-          },
-        });
-        scans.forEach((scan, index) => {
-          sequence.fromTo(scan, { scaleX: 0 }, { scaleX: 1, ease: "none", duration: 0.6 }, index * 0.28);
-        });
-      }
-
       gsap.utils.toArray<HTMLElement>(".home-stage .scroll-in").forEach((el) => {
         gsap.from(el, {
           y: 26,
@@ -154,8 +112,6 @@ export function useHomeMotion(active: boolean) {
     return () => {
       window.clearTimeout(refresh);
       counterObserver.disconnect();
-      root.removeEventListener("pointermove", onPointerMove);
-      root.removeEventListener("pointerout", onPointerOut);
       mm.revert();
     };
   }, [active]);

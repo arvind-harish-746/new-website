@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" style="background-color:#E7F2FA">
+<html lang="en" style="background-color:#F5F8FA">
 
   <head>
     <meta charset="UTF-8" />
@@ -23,12 +23,15 @@
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23F4F7FB'/><text x='50%25' y='55%25' text-anchor='middle' dominant-baseline='central' font-size='18' font-weight='bold' fill='%230575CE'>C</text></svg>" />
 
-    <!-- Google Fonts: Space Mono (display) and Inter (body) -->
     <link rel="preload" as="image" href="/logos/cybotz_transparent.png" />
-
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/clash-grotesk-600.woff2" crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/inter-var.woff2" crossorigin />
+    <script>
+      (function(){var d=document.documentElement,s;try{s=sessionStorage.getItem('cybotz-intro-autoplay')}catch(e){}
+      var rm=matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var c=navigator.connection, slow=c&&(c.saveData||/2g|3g/.test(c.effectiveType||''));
+      d.dataset.intro=(s==='1'||rm)?'off':(slow?'stills':'video');})();
+    </script>
 
     <!-- JSON-LD Structured Data: Organization + Services -->
     <script type="application/ld+json">
@@ -95,7 +98,7 @@
     </script>
   </head>
 
-  <body style="margin:0;background-color:#E7F2FA">
+  <body style="margin:0;background-color:#F5F8FA">
     <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-cyan-500 focus:text-slate-900 focus:rounded-lg focus:font-bold">
       Skip to main content
     </a>
