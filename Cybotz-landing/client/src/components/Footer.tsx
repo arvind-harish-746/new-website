@@ -37,7 +37,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="relative z-10 bg-[#F4F7FB] border-t border-[#D5E0EA] py-12 md:py-16 mt-auto">
+    <footer className="relative z-10 bg-[#E7F2FA] border-t border-[#C9DDEC] py-12 md:py-16 mt-auto">
       <AdminModal isOpen={isAdminOpen} onClose={() => setIsAdminOpen(false)} />
       <div className="container px-4 md:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
@@ -124,7 +124,7 @@ export default function Footer() {
                       href={link.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-10 h-10 rounded-lg bg-[#F4F7FB] border border-[#D5E0EA] hover:border-cyan-500 hover:text-[#0460A9] text-[#3E5168] flex items-center justify-center transition-all duration-300 hover:shadow-[0_8px_20px_rgba(249,116,5,0.18)]"
+                      className="w-10 h-10 rounded-lg bg-[#E7F2FA] border border-[#C9DDEC] hover:border-cyan-500 hover:text-[#0460A9] text-[#3E5168] flex items-center justify-center transition-all duration-300 hover:shadow-[0_8px_20px_rgba(249,116,5,0.18)]"
                       aria-label={`Follow Cybotz on ${link.label}`}
                       title={link.label}
                     >
@@ -142,7 +142,7 @@ export default function Footer() {
         </div>
 
         {/* Divider */}
-        <div className="border-t border-[#D5E0EA] my-8" />
+        <div className="border-t border-[#C9DDEC] my-8" />
 
         {/* Bottom Section */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">

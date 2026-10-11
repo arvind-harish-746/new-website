@@ -184,12 +184,12 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   const formattedTime = getFormattedTimeString(selectedHour, selectedMinute);
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 bg-[#F4F7FB]/60 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 bg-[#E7F2FA]/60 backdrop-blur-sm animate-fade-in">
       {/* Smaller compact floating modal window hovering over calendar */}
-      <div className="relative w-full max-w-md rounded-2xl border border-[#D5E0EA] bg-[#F4F7FB] p-5 shadow-[0_0_40px_rgba(5,117,206,0.25)] text-[#102033] overflow-hidden my-auto">
+      <div className="relative w-full max-w-md rounded-2xl border border-[#C9DDEC] bg-[#E7F2FA] p-5 shadow-[0_0_40px_rgba(5,117,206,0.25)] text-[#102033] overflow-hidden my-auto">
         
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#D5E0EA]">
+        <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#C9DDEC]">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-[#0460A9]">
               <CalendarIcon className="w-5 h-5" />
@@ -205,7 +205,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-[#3E5168] hover:text-[#0460A9] hover:bg-[#E7EEF6] transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-[#3E5168] hover:text-[#0460A9] hover:bg-[#E4F1F8] transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -224,7 +224,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
               Your booking request for <span className="text-[#0460A9] font-semibold">{selectedDate.fullDateStr}</span> at <span className="text-[#0460A9] font-semibold">{formattedTime}</span> has been confirmed.
             </p>
 
-            <div className="w-full bg-white/85 p-3 rounded-xl border border-[#D5E0EA] text-left text-xs font-mono space-y-1 my-1">
+            <div className="w-full bg-white/85 p-3 rounded-xl border border-[#C9DDEC] text-left text-xs font-mono space-y-1 my-1">
               <p><span className="text-[#3E5168]">Date:</span> {selectedDate.fullDateStr}</p>
               <p><span className="text-[#3E5168]">Time:</span> {formattedTime}</p>
               {schoolName && <p><span className="text-[#3E5168]">School:</span> {schoolName}</p>}
@@ -248,7 +248,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
             <button
               onClick={onClose}
-              className="w-full mt-1 px-6 py-2 rounded-lg border border-[#D5E0EA] text-[#3E5168] hover:text-[#0460A9] hover:bg-[#E7EEF6] font-mono text-xs transition-all cursor-pointer"
+              className="w-full mt-1 px-6 py-2 rounded-lg border border-[#C9DDEC] text-[#3E5168] hover:text-[#0460A9] hover:bg-[#E4F1F8] font-mono text-xs transition-all cursor-pointer"
             >
               Done
             </button>
@@ -275,14 +275,14 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 </span>
               </label>
 
-              <div className="grid grid-cols-2 gap-2 bg-white/85 p-2.5 rounded-xl border border-[#D5E0EA]">
+              <div className="grid grid-cols-2 gap-2 bg-white/85 p-2.5 rounded-xl border border-[#C9DDEC]">
                 {/* Hours Selection */}
                 <div>
                   <label className="block text-[10px] font-mono text-[#3E5168] mb-1">Hour</label>
                   <select
                     value={selectedHour}
                     onChange={(e) => handleHourChange(Number(e.target.value))}
-                    className="w-full bg-slate-800 border border-[#D5E0EA] rounded-lg p-2 text-[#102033] font-mono text-xs focus:border-cyan-400 focus:outline-none cursor-pointer"
+                    className="w-full bg-slate-800 border border-[#C9DDEC] rounded-lg p-2 text-[#102033] font-mono text-xs focus:border-cyan-400 focus:outline-none cursor-pointer"
                   >
                     {HOUR_OPTIONS.map((item) => (
                       <option key={item.hour24} value={item.hour24}>
@@ -298,7 +298,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                   <select
                     value={selectedMinute}
                     onChange={(e) => handleMinuteChange(Number(e.target.value))}
-                    className="w-full bg-slate-800 border border-[#D5E0EA] rounded-lg p-2 text-[#102033] font-mono text-xs focus:border-cyan-400 focus:outline-none cursor-pointer"
+                    className="w-full bg-slate-800 border border-[#C9DDEC] rounded-lg p-2 text-[#102033] font-mono text-xs focus:border-cyan-400 focus:outline-none cursor-pointer"
                   >
                     {MINUTE_OPTIONS.map((m) => (
                       <option key={m} value={m}>
@@ -318,7 +318,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
             </div>
 
             {/* Contact Details Section */}
-            <div className="space-y-2.5 pt-2 border-t border-[#D5E0EA]">
+            <div className="space-y-2.5 pt-2 border-t border-[#C9DDEC]">
               {/* School Name */}
               <div>
                 <label className="block text-xs font-mono text-[#3E5168] mb-1 flex items-center gap-1">
@@ -329,7 +329,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                   placeholder="e.g. St. Mary's Academy"
                   value={schoolName}
                   onChange={(e) => setSchoolName(e.target.value)}
-                  className="w-full bg-white border border-[#D5E0EA] rounded-lg px-3 py-1.5 text-xs text-[#102033] focus:border-cyan-400 focus:outline-none"
+                  className="w-full bg-white border border-[#C9DDEC] rounded-lg px-3 py-1.5 text-xs text-[#102033] focus:border-cyan-400 focus:outline-none"
                 />
               </div>
 
@@ -348,7 +348,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                     if (emailError) setEmailError(null);
                   }}
                   className={`w-full bg-white border rounded-lg px-3 py-1.5 text-xs text-[#102033] focus:outline-none ${
-                    emailError ? "border-rose-500" : "border-[#D5E0EA] focus:border-cyan-400"
+                    emailError ? "border-rose-500" : "border-[#C9DDEC] focus:border-cyan-400"
                   }`}
                 />
                 {emailError && (
@@ -369,7 +369,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                   <select
                     value={countryCode}
                     onChange={(e) => setCountryCode(e.target.value)}
-                    className="bg-slate-800 border border-[#D5E0EA] rounded-lg px-2 py-1.5 text-xs text-[#0460A9] font-mono focus:border-cyan-400 focus:outline-none cursor-pointer"
+                    className="bg-slate-800 border border-[#C9DDEC] rounded-lg px-2 py-1.5 text-xs text-[#0460A9] font-mono focus:border-cyan-400 focus:outline-none cursor-pointer"
                   >
                     {COUNTRY_CODES.map((c) => (
                       <option key={c.code} value={c.code}>
@@ -389,7 +389,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                       if (phoneError) setPhoneError(null);
                     }}
                     className={`flex-1 bg-white border rounded-lg px-3 py-1.5 text-xs text-[#102033] focus:outline-none ${
-                      phoneError ? "border-rose-500" : "border-[#D5E0EA] focus:border-cyan-400"
+                      phoneError ? "border-rose-500" : "border-[#C9DDEC] focus:border-cyan-400"
                     }`}
                   />
                 </div>
@@ -411,7 +411,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                   placeholder="Student count, topic interest, or specific requirements..."
                   value={additionalInfo}
                   onChange={(e) => setAdditionalInfo(e.target.value)}
-                  className="w-full bg-white border border-[#D5E0EA] rounded-lg px-3 py-1.5 text-xs text-[#102033] focus:border-cyan-400 focus:outline-none resize-none"
+                  className="w-full bg-white border border-[#C9DDEC] rounded-lg px-3 py-1.5 text-xs text-[#102033] focus:border-cyan-400 focus:outline-none resize-none"
                 />
               </div>
             </div>

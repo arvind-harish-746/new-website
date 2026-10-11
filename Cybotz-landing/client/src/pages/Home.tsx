@@ -31,6 +31,7 @@ const HeroCraft = lazy(() =>
   import("@/components/home/HeroCraft").then((mod) => ({ default: mod.HeroCraft }))
 );
 import { FlightRail, SectionTrace } from "@/components/home/SectionTrace";
+import { ScrollScrub } from "@/components/home/ScrollScrub";
 import { useHomeMotion } from "@/components/home/useHomeMotion";
 
 interface ContactFormData {
@@ -49,11 +50,20 @@ export default function Home() {
   useHomeMotion(!suspendBackground);
 
   useEffect(() => {
-    if (suspendBackground) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const id = window.setTimeout(() => setAccentPlay(true), splashCoveredOnLoad ? 160 : 80);
-    return () => window.clearTimeout(id);
-  }, [suspendBackground, splashCoveredOnLoad]);
+    const hero = document.getElementById("sec-hero");
+    if (!hero) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return;
+        setAccentPlay(true);
+        observer.disconnect();
+      },
+      { threshold: 0.4 }
+    );
+    observer.observe(hero);
+    return () => observer.disconnect();
+  }, []);
 
   usePageMeta(
     "Cybotz | Empowering Young Minds with Real-World STEM Skills",
@@ -138,19 +148,20 @@ export default function Home() {
       <div className="fixed inset-0 z-0 pointer-events-none w-full h-full">
         <AetherFlowHero showContent={false} densityMultiplier={0.55} suspended={suspendBackground} />
         {/* Transparent overlays to ensure text readability while letting dense aether shine through */}
-        <div className="absolute inset-0 bg-gradient-to-t from-white/70 via-transparent to-[#F4F7FB]/75" />
-        <div className="absolute inset-0 bg-radial-at-c from-transparent via-white/40 to-[#F4F7FB]/75" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#C5DCEC]/80 via-[#E7F2FA]/35 to-[#F7FBFE]/80" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.55),transparent_62%)]" />
       </div>
 
       <Header />
 
       <main className="flex-grow relative z-10">
+        <ScrollScrub />
         <FlightRail />
         {/* HERO SECTION */}
         <section id="sec-hero" className="relative min-h-[100dvh] flex items-center justify-center pt-16 pb-8 sm:pt-20 sm:pb-12 overflow-visible">
           {/* Subtle overlay over hero section */}
           <div className="absolute inset-0 z-0 opacity-80 pointer-events-none">
-            <div className="absolute inset-0 bg-gradient-to-t from-white/40 via-transparent to-[#F4F7FB]/75" />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#C5DCEC]/55 via-transparent to-[#F7FBFE]/70" />
           </div>
 
           {/* Mobile-only Ambient Radial Glow to eliminate black dead space */}
@@ -197,15 +208,15 @@ export default function Home() {
 
               {/* Mobile-Only Feature / Stat Pills */}
               <div className="flex sm:hidden flex-wrap items-center justify-center gap-2 max-w-sm mt-1">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/85 border border-[#D5E0EA] text-xs font-mono text-[#0460A9] backdrop-blur-sm">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/85 border border-[#C9DDEC] text-xs font-mono text-[#0460A9] backdrop-blur-sm">
                   <Zap size={13} className="text-[#0460A9]" />
                   <span>100% Practical</span>
                 </div>
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/85 border border-[#D5E0EA] text-xs font-mono text-[#0460A9] backdrop-blur-sm">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/85 border border-[#C9DDEC] text-xs font-mono text-[#0460A9] backdrop-blur-sm">
                   <Shield size={13} className="text-[#0460A9]" />
                   <span>1:15 Mentorship</span>
                 </div>
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/85 border border-[#D5E0EA] text-xs font-mono text-[#0460A9] backdrop-blur-sm">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/85 border border-[#C9DDEC] text-xs font-mono text-[#0460A9] backdrop-blur-sm">
                   <Cpu size={13} className="text-[#0460A9]" />
                   <span>Zero Play-Kits</span>
                 </div>
@@ -260,14 +271,14 @@ export default function Home() {
                   </button>
                   <button
                     onClick={() => handlePageNavigation("/labs")}
-                    className="py-2.5 px-2 bg-white/90 border border-[#D5E0EA] hover:border-cyan-500/30 text-[#3E5168] font-bold font-mono text-xs tracking-wider rounded-lg text-center backdrop-blur-sm active:bg-slate-800 transition-colors cursor-pointer"
+                    className="py-2.5 px-2 bg-white/90 border border-[#C9DDEC] hover:border-cyan-500/30 text-[#3E5168] font-bold font-mono text-xs tracking-wider rounded-lg text-center backdrop-blur-sm active:bg-slate-800 transition-colors cursor-pointer"
                   >
                     Setup a Lab
                   </button>
                 </div>
 
                 {/* Mobile Hardware Telemetry Strip */}
-                <div className="mt-2 px-3 py-1.5 rounded-lg bg-white/80 border border-[#D5E0EA] backdrop-blur-md flex items-center justify-between text-xs font-mono text-[#3E5168]">
+                <div className="mt-2 px-3 py-1.5 rounded-lg bg-white/80 border border-[#C9DDEC] backdrop-blur-md flex items-center justify-between text-xs font-mono text-[#3E5168]">
                   <span className="flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                     Bangalore Lab Active
@@ -295,7 +306,7 @@ export default function Home() {
         <SectionTrace />
 
         {/* SERVICES ("Glimpse Of What We Do") */}
-        <section id="sec-services" className="py-16 md:py-20 bg-white/70 backdrop-blur-sm border-t border-[#D5E0EA]">
+        <section id="sec-services" className="py-16 md:py-20 bg-white/70 backdrop-blur-sm border-t border-[#C9DDEC]">
           <div className="services-pin container px-4 md:px-8 mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold font-mono tracking-wider mb-4">Glimpse Of What We Do</h2>
@@ -306,7 +317,7 @@ export default function Home() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {/* Drone Workshop */}
-              <div className="flight-card service-card p-8 rounded-xl bg-white/80 border border-[#D5E0EA] backdrop-blur-md hover:border-cyan-500/50 transition-colors duration-300 group flex flex-col justify-between">
+              <div className="flight-card service-card p-8 rounded-xl bg-white/80 border border-[#C9DDEC] backdrop-blur-md hover:border-cyan-500/50 transition-colors duration-300 group flex flex-col justify-between">
                 <span className="card-scan" aria-hidden="true" />
                 <div>
                   <div className="w-12 h-12 rounded-lg bg-cyan-500/10 flex items-center justify-center text-[#0460A9] mb-6 group-hover:scale-110 transition-transform">
@@ -326,7 +337,7 @@ export default function Home() {
               </div>
 
               {/* STEM Education */}
-              <div className="flight-card service-card p-8 rounded-xl bg-white/80 border border-[#D5E0EA] backdrop-blur-md hover:border-cyan-500/50 transition-colors duration-300 group flex flex-col justify-between">
+              <div className="flight-card service-card p-8 rounded-xl bg-white/80 border border-[#C9DDEC] backdrop-blur-md hover:border-cyan-500/50 transition-colors duration-300 group flex flex-col justify-between">
                 <span className="card-scan" aria-hidden="true" />
                 <div>
                   <div className="w-12 h-12 rounded-lg bg-cyan-500/10 flex items-center justify-center text-[#0460A9] mb-6 group-hover:scale-110 transition-transform">
@@ -346,7 +357,7 @@ export default function Home() {
               </div>
 
               {/* Robotics Training */}
-              <div className="flight-card service-card p-8 rounded-xl bg-white/80 border border-[#D5E0EA] backdrop-blur-md hover:border-cyan-500/50 transition-colors duration-300 group flex flex-col justify-between">
+              <div className="flight-card service-card p-8 rounded-xl bg-white/80 border border-[#C9DDEC] backdrop-blur-md hover:border-cyan-500/50 transition-colors duration-300 group flex flex-col justify-between">
                 <span className="card-scan" aria-hidden="true" />
                 <div>
                   <div className="w-12 h-12 rounded-lg bg-cyan-500/10 flex items-center justify-center text-[#0460A9] mb-6 group-hover:scale-110 transition-transform">
@@ -371,7 +382,7 @@ export default function Home() {
         <SectionTrace />
 
         {/* SOCIAL PROOF / TRUSTED BY */}
-        <section id="sec-network" className="py-24 relative overflow-hidden bg-[#E7EEF6] border-t border-b border-[#D5E0EA]">
+        <section id="sec-network" className="py-24 relative overflow-hidden bg-[#E4F1F8] border-t border-b border-[#C9DDEC]">
           {/* Glowing Ambient Background Lights */}
           <div className="home-parallax absolute inset-0 pointer-events-none z-0">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-cyan-500/10 rounded-full blur-[140px]" />
@@ -399,7 +410,7 @@ export default function Home() {
               {INSTITUTIONS.map((inst, index) => (
                 <div
                   key={index}
-                  className="flight-card scroll-in group relative p-6 rounded-2xl bg-gradient-to-b from-white/70 via-white/60 to-[#E7EEF6]/90 border border-[#D5E0EA] hover:border-cyan-500/50 shadow-xl transition-colors duration-300 hover:shadow-[0_12px_28px_rgba(16,32,51,0.08)] backdrop-blur-md flex flex-col justify-between overflow-hidden"
+                  className="flight-card scroll-in group relative p-6 rounded-2xl bg-gradient-to-b from-white/70 via-white/60 to-[#E4F1F8]/90 border border-[#C9DDEC] hover:border-cyan-500/50 shadow-xl transition-colors duration-300 hover:shadow-[0_12px_28px_rgba(16,32,51,0.08)] backdrop-blur-md flex flex-col justify-between overflow-hidden"
                 >
                   {/* Subtle top card glow line */}
                   <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent group-hover:via-cyan-400 transition-all duration-500 opacity-0 group-hover:opacity-100" />
@@ -449,7 +460,7 @@ export default function Home() {
                   </div>
 
                   {/* Highlights section with cyber styling */}
-                  <div className="mt-4 pt-3 border-t border-[#D5E0EA] flex items-center justify-between">
+                  <div className="mt-4 pt-3 border-t border-[#C9DDEC] flex items-center justify-between">
                     <span className="inline-flex items-center gap-1.5 text-sm text-slate-300 font-sans line-clamp-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shrink-0" />
                       <InstitutionLine text={inst.text} />
@@ -463,7 +474,7 @@ export default function Home() {
               ))}
 
               {/* 9th CTA Card to perfectly complete the 3x3 Grid */}
-              <div className="flight-card scroll-in group relative p-6 rounded-2xl bg-gradient-to-br from-[#0575CE]/10 via-white/50 to-[#E7EEF6]/90 border border-cyan-500/40 hover:border-cyan-400 shadow-xl transition-colors duration-300 hover:shadow-[0_12px_28px_rgba(5,117,206,0.14)] backdrop-blur-md flex flex-col justify-between overflow-hidden">
+              <div className="flight-card scroll-in group relative p-6 rounded-2xl bg-gradient-to-br from-[#0575CE]/10 via-white/50 to-[#E4F1F8]/90 border border-cyan-500/40 hover:border-cyan-400 shadow-xl transition-colors duration-300 hover:shadow-[0_12px_28px_rgba(5,117,206,0.14)] backdrop-blur-md flex flex-col justify-between overflow-hidden">
                 <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-cyan-500 to-blue-500" />
 
                 <div className="flex items-start gap-4">
@@ -498,7 +509,7 @@ export default function Home() {
         <SectionTrace />
 
         {/* VALUE PROP & PILLARS ("NO AI : Core Fundamentals Only!") */}
-        <section id="sec-mastery" className="py-12 sm:py-20 bg-white/70 backdrop-blur-sm border-t border-[#D5E0EA]">
+        <section id="sec-mastery" className="py-12 sm:py-20 bg-white/70 backdrop-blur-sm border-t border-[#C9DDEC]">
           <div className="container px-4 md:px-8 mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
 
@@ -544,7 +555,7 @@ export default function Home() {
                     desc: "Trusted by leading institutions, principals, and academic coordinators across Bangalore for our uncompromising standards."
                   }
                 ].map((pillar, idx) => (
-                  <div key={idx} className="flight-card scroll-in p-6 rounded-xl bg-white/80 border border-[#D5E0EA] backdrop-blur-md hover:border-cyan-500/40 transition-colors duration-300">
+                  <div key={idx} className="flight-card scroll-in p-6 rounded-xl bg-white/80 border border-[#C9DDEC] backdrop-blur-md hover:border-cyan-500/40 transition-colors duration-300">
                     <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center text-[#0460A9] mb-4">
                       <pillar.icon size={20} />
                     </div>
@@ -561,7 +572,7 @@ export default function Home() {
         {/* BOOKING CALENDAR & CONTACT FORM */}
         <SectionTrace />
 
-        <section id="sec-contact" className="py-20 bg-white/70 backdrop-blur-sm border-t border-[#D5E0EA]">
+        <section id="sec-contact" className="py-20 bg-white/70 backdrop-blur-sm border-t border-[#C9DDEC]">
           <div className="container px-4 md:px-8 mx-auto" id="reach-us">
             <div className="text-center mb-16 scroll-in">
               <span className="text-sm font-bold font-mono text-[#0460A9] tracking-widest uppercase">Get in Touch</span>
@@ -583,7 +594,7 @@ export default function Home() {
 
                 {/* Direct Contacts Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl bg-white/84 border border-[#D5E0EA] backdrop-blur-md flex flex-col gap-2">
+                  <div className="p-4 rounded-xl bg-white/84 border border-[#C9DDEC] backdrop-blur-md flex flex-col gap-2">
                     <div className="w-8 h-8 rounded-full bg-cyan-500/10 flex items-center justify-center text-[#0460A9]">
                       <MapPin size={16} />
                     </div>
@@ -593,7 +604,7 @@ export default function Home() {
                     </span>
                   </div>
 
-                  <div className="p-4 rounded-xl bg-white/84 border border-[#D5E0EA] backdrop-blur-md flex flex-col gap-2">
+                  <div className="p-4 rounded-xl bg-white/84 border border-[#C9DDEC] backdrop-blur-md flex flex-col gap-2">
                     <div className="w-8 h-8 rounded-full bg-cyan-500/10 flex items-center justify-center text-[#0460A9]">
                       <Phone size={16} />
                     </div>
@@ -603,7 +614,7 @@ export default function Home() {
                     </a>
                   </div>
 
-                  <div className="p-4 rounded-xl bg-white/84 border border-[#D5E0EA] backdrop-blur-md flex flex-col gap-2">
+                  <div className="p-4 rounded-xl bg-white/84 border border-[#C9DDEC] backdrop-blur-md flex flex-col gap-2">
                     <div className="w-8 h-8 rounded-full bg-cyan-500/10 flex items-center justify-center text-[#0460A9]">
                       <Mail size={16} />
                     </div>
@@ -617,7 +628,7 @@ export default function Home() {
               </div>
 
               {/* Right Side: Consultation Request Form (col-5) */}
-              <div className="scroll-in lg:col-span-5 p-8 rounded-2xl bg-white/88 border border-[#D5E0EA] backdrop-blur-md flex flex-col justify-between shadow-xl">
+              <div className="scroll-in lg:col-span-5 p-8 rounded-2xl bg-white/88 border border-[#C9DDEC] backdrop-blur-md flex flex-col justify-between shadow-xl">
                 <div>
                   <h3 className="text-xl font-bold font-mono tracking-wider text-[#0460A9] mb-6 uppercase">Consultation Request</h3>
 
@@ -632,7 +643,7 @@ export default function Home() {
                           Your email client has been opened with your inquiry draft addressed to <span className="text-[#0460A9] font-mono">info@cybotz.tech</span>.
                         </p>
                       </div>
-                      <div className="p-3 bg-white/88 rounded-xl border border-[#D5E0EA] text-left text-xs font-mono space-y-1 text-[#3E5168]">
+                      <div className="p-3 bg-white/88 rounded-xl border border-[#C9DDEC] text-left text-xs font-mono space-y-1 text-[#3E5168]">
                         <p><span className="text-gray-500">From:</span> {formData.name}</p>
                         <p><span className="text-gray-500">School:</span> {formData.school}</p>
                         <p><span className="text-gray-500">Email:</span> {formData.email}</p>
@@ -663,7 +674,7 @@ export default function Home() {
                             setFormData(prev => ({ ...prev, name: e.target.value }));
                             if (formErrors.name) setFormErrors(prev => ({ ...prev, name: undefined }));
                           }}
-                          className={`w-full px-4 py-2.5 bg-white/80 backdrop-blur-sm border rounded-lg text-[#102033] text-base placeholder-[#8AA0B5] focus:outline-none transition-all duration-300 ${formErrors.name ? "border-rose-500 focus:border-rose-400" : "border-[#D5E0EA] focus:border-cyan-500"
+                          className={`w-full px-4 py-2.5 bg-white/80 backdrop-blur-sm border rounded-lg text-[#102033] text-base placeholder-[#8AA0B5] focus:outline-none transition-all duration-300 ${formErrors.name ? "border-rose-500 focus:border-rose-400" : "border-[#C9DDEC] focus:border-cyan-500"
                             }`}
                           placeholder="John Doe"
                         />
@@ -685,7 +696,7 @@ export default function Home() {
                             setFormData(prev => ({ ...prev, school: e.target.value }));
                             if (formErrors.school) setFormErrors(prev => ({ ...prev, school: undefined }));
                           }}
-                          className={`w-full px-4 py-2.5 bg-white/80 backdrop-blur-sm border rounded-lg text-[#102033] text-base placeholder-[#8AA0B5] focus:outline-none transition-all duration-300 ${formErrors.school ? "border-rose-500 focus:border-rose-400" : "border-[#D5E0EA] focus:border-cyan-500"
+                          className={`w-full px-4 py-2.5 bg-white/80 backdrop-blur-sm border rounded-lg text-[#102033] text-base placeholder-[#8AA0B5] focus:outline-none transition-all duration-300 ${formErrors.school ? "border-rose-500 focus:border-rose-400" : "border-[#C9DDEC] focus:border-cyan-500"
                             }`}
                           placeholder="Canadian International School"
                         />
@@ -707,7 +718,7 @@ export default function Home() {
                             setFormData(prev => ({ ...prev, email: e.target.value }));
                             if (formErrors.email) setFormErrors(prev => ({ ...prev, email: undefined }));
                           }}
-                          className={`w-full px-4 py-2.5 bg-white/80 backdrop-blur-sm border rounded-lg text-[#102033] text-base placeholder-[#8AA0B5] focus:outline-none transition-all duration-300 ${formErrors.email ? "border-rose-500 focus:border-rose-400" : "border-[#D5E0EA] focus:border-cyan-500"
+                          className={`w-full px-4 py-2.5 bg-white/80 backdrop-blur-sm border rounded-lg text-[#102033] text-base placeholder-[#8AA0B5] focus:outline-none transition-all duration-300 ${formErrors.email ? "border-rose-500 focus:border-rose-400" : "border-[#C9DDEC] focus:border-cyan-500"
                             }`}
                           placeholder="john@example.com"
                         />
@@ -729,7 +740,7 @@ export default function Home() {
                             setFormData(prev => ({ ...prev, message: e.target.value }));
                             if (formErrors.message) setFormErrors(prev => ({ ...prev, message: undefined }));
                           }}
-                          className={`w-full px-4 py-2.5 bg-white/80 backdrop-blur-sm border rounded-lg text-[#102033] text-base placeholder-[#8AA0B5] focus:outline-none transition-all duration-300 resize-none ${formErrors.message ? "border-rose-500 focus:border-rose-400" : "border-[#D5E0EA] focus:border-cyan-500"
+                          className={`w-full px-4 py-2.5 bg-white/80 backdrop-blur-sm border rounded-lg text-[#102033] text-base placeholder-[#8AA0B5] focus:outline-none transition-all duration-300 resize-none ${formErrors.message ? "border-rose-500 focus:border-rose-400" : "border-[#C9DDEC] focus:border-cyan-500"
                             }`}
                           placeholder="Tell us about the grades, estimate student count, or timing preferences..."
                         />
@@ -791,7 +802,7 @@ function Stat({
   label: string;
 }) {
   return (
-    <div className="flight-card scroll-in rounded-xl border border-[#D5E0EA] bg-white/80 p-4 backdrop-blur-md md:p-5">
+    <div className="flight-card scroll-in rounded-xl border border-[#C9DDEC] bg-white/80 p-4 backdrop-blur-md md:p-5">
       <dt className="font-mono text-2xl font-bold tracking-wide text-[#A04B03] md:text-3xl">
         {prefix}
         <span data-count={value} data-suffix={suffix}>

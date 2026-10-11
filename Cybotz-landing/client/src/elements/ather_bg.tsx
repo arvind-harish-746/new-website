@@ -31,11 +31,11 @@ const AetherFlowHero = ({ showContent = true, densityMultiplier = 2.4, suspended
         };
 
         const cyanPalette = [
-            'rgba(5, 117, 206, 0.55)',
-            'rgba(4, 96, 169, 0.45)',
-            'rgba(61, 143, 212, 0.4)',
-            'rgba(249, 116, 5, 0.42)',
-            'rgba(160, 75, 3, 0.35)'
+            'rgba(5, 117, 206, 0.4)',
+            'rgba(197, 220, 236, 0.72)',
+            'rgba(255, 255, 255, 0.62)',
+            'rgba(249, 116, 5, 0.32)',
+            'rgba(110, 139, 98, 0.38)'
         ];
 
         class Particle {

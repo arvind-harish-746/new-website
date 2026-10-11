@@ -963,7 +963,7 @@ export const PortalGalleryWindow: React.FC<PortalGalleryWindowProps> = ({
               <button
                 type="button"
                 onClick={() => setActivePhoto(null)}
-                className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-white/88 border border-cyan-500/40 flex items-center justify-center text-gray-300 hover:text-white hover:bg-[#E7EEF6] transition-colors cursor-pointer"
+                className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-white/88 border border-cyan-500/40 flex items-center justify-center text-gray-300 hover:text-white hover:bg-[#E4F1F8] transition-colors cursor-pointer"
                 title="Close"
               >
                 ✕

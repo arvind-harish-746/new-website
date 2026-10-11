@@ -35,34 +35,38 @@
 }
 
 :root {
-  /* Light theme. Cyan and orange sampled from the CYBOTZ wordmark. */
+  /* Daylight classroom, sampled from the window footage.
+     Brand cyan and orange stay the accents. */
   --primary: #0575CE;
   --primary-foreground: #FFFFFF;
   --chart-1: #0575CE;
   --chart-2: #F97405;
-  --chart-3: #E7EEF6;
-  --chart-4: #D5E0EA;
+  --chart-3: #E4F1F8;
+  --chart-4: #C9DDEC;
   --chart-5: #3E5168;
   --radius: 0.5rem;
-  --background: #F4F7FB;
+  --background: #E7F2FA;
   --foreground: #102033;
-  --card: #FFFFFF;
+  --card: rgba(247, 251, 254, 0.72);
   --card-foreground: #102033;
-  --popover: #FFFFFF;
+  --popover: #F7FBFE;
   --popover-foreground: #102033;
   --secondary: #F97405;
   --secondary-foreground: #102033;
-  --muted: #E7EEF6;
+  --muted: #E4F1F8;
   --muted-foreground: #3E5168;
   --accent: #0575CE;
   --accent-foreground: #FFFFFF;
   --destructive: #EF4444;
   --destructive-foreground: #FFFFFF;
-  --border: #D5E0EA;
-  --input: #D5E0EA;
+  --border: #C9DDEC;
+  --input: #C9DDEC;
   --ring: #0575CE;
-  --paper: #F4F7FB;
+  --paper: #E7F2FA;
   --ink: #102033;
+  --sky: #C5DCEC;
+  --frost: #F7FBFE;
+  --foliage: #6E8B62;
   --cyan: #0575CE;
   --cyan-ink: #0460A9;
   --orange: #F97405;
@@ -78,8 +82,16 @@ html {
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
     font-family: 'Inter', sans-serif;
+    background:
+      radial-gradient(880px 420px at 100% -8%, rgba(110, 139, 98, 0.16), transparent 62%),
+      radial-gradient(720px 480px at 0% 0%, rgba(197, 220, 236, 0.95), transparent 58%),
+      linear-gradient(180deg, #d4e6f4 0%, #e7f2fa 46%, #f7fbfe 100%);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.92), 0 0 1px rgba(180, 204, 220, 0.55);
   }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
@@ -249,6 +261,7 @@ html {
   .flight-canvas,
   .video-splash,
   .intro-veil,
+  #sec-scrub,
   .card-scan {
     display: none !important;
   }
@@ -954,10 +967,11 @@ html[data-splash="on"] header img[alt="Cybotz"] {
 .home-rail-path,
 .home-trace-path {
   fill: none;
-  stroke: #0575ce;
-  stroke-width: 1.5;
+  stroke: rgba(255, 255, 255, 0.92);
+  stroke-width: 1.25;
   stroke-linejoin: round;
   stroke-linecap: round;
+  filter: drop-shadow(0 0 5px rgba(5, 117, 206, 0.45));
 }
 
 .home-trace {
@@ -969,7 +983,7 @@ html[data-splash="on"] header img[alt="Cybotz"] {
 
 .home-trace svg { width: 100%; height: 100%; display: block; }
 
-.trace-node { fill: #ffffff; stroke: #0575ce; stroke-width: 1.5; }
+.trace-node { fill: rgba(247, 251, 254, 0.95); stroke: rgba(5, 117, 206, 0.7); stroke-width: 1.25; }
 
 .trace-packet { fill: #f97405; }
 
@@ -1012,7 +1026,7 @@ html[data-splash="on"] header img[alt="Cybotz"] {
   height: 2px;
   transform-origin: 0 50%;
   transform: scaleX(0);
-  background: linear-gradient(90deg, transparent, #0575ce, #3d8fd4);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.95), rgba(5, 117, 206, 0.85));
   pointer-events: none;
 }
 
@@ -1108,4 +1122,237 @@ html[data-splash="on"] header img[alt="Cybotz"] {
   .home-rail-path {
     stroke-dashoffset: 0;
   }
+
+  .scrub-shard,
+  .scrub-shards i {
+    animation: none !important;
+  }
+}
+
+/* Daylight glass. Brand cyan and orange utilities stay as written. */
+header {
+  background: rgba(231, 242, 250, 0.72) !important;
+  backdrop-filter: blur(18px) saturate(1.3);
+  border-bottom-color: rgba(255, 255, 255, 0.72) !important;
+}
+
+footer {
+  background: linear-gradient(180deg, rgba(231, 242, 250, 0.35), rgba(197, 220, 236, 0.72)) !important;
+  backdrop-filter: blur(12px) saturate(1.2);
+}
+
+.flight-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(228, 241, 248, 0.52)) !important;
+  backdrop-filter: blur(18px) saturate(1.35);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.88), 0 14px 32px rgba(90, 122, 148, 0.12);
+}
+
+.scrub-section {
+  position: relative;
+  z-index: 25;
+  height: 380vh;
+  margin-bottom: -100vh;
+}
+
+.scrub-section.is-still {
+  height: auto;
+  min-height: 100dvh;
+  margin-bottom: 0;
+}
+
+.scrub-pin {
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.scrub-section.is-still .scrub-pin {
+  position: relative;
+}
+
+.scrub-fade,
+.scrub-picture {
+  position: absolute;
+  inset: 0;
+}
+
+.scrub-picture {
+  background: #e7f2fa;
+}
+
+.scrub-media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.scrub-poster { z-index: 0; }
+
+video.scrub-media {
+  z-index: 1;
+  opacity: 0;
+}
+
+.scrub-frost {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  opacity: 0;
+  background:
+    radial-gradient(120% 80% at 50% 12%, rgba(255, 255, 255, 0.55), transparent 52%),
+    linear-gradient(180deg, rgba(197, 220, 236, 0.72), rgba(231, 242, 250, 0.94) 70%, rgba(247, 251, 254, 0.98));
+}
+
+.scrub-hint,
+.scrub-copy,
+.scrub-word {
+  position: absolute;
+  z-index: 3;
+  left: 0;
+  right: 0;
+  margin: 0;
+  text-align: center;
+  font-family: "Space Mono", ui-monospace, monospace;
+  pointer-events: none;
+}
+
+.scrub-hint {
+  bottom: 7vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  color: #102033;
+  font-size: 0.72rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  opacity: 1;
+}
+
+.scrub-hint i {
+  display: block;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-right: 2px solid #0575ce;
+  border-bottom: 2px solid #0575ce;
+  transform: rotate(45deg);
+}
+
+.scrub-copy {
+  bottom: 14vh;
+  height: 4.5rem;
+}
+
+.scrub-copy p {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  margin: 0;
+  opacity: 0;
+}
+
+.scrub-copy span {
+  display: inline-block;
+  max-width: min(92vw, 46rem);
+  padding: 0.45rem 1.15rem;
+  border-radius: 999px;
+  background: rgba(247, 251, 254, 0.78);
+  color: #102033;
+  font-size: clamp(1.15rem, 3.2vw, 2.35rem);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0.04em;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 10px 28px rgba(16, 32, 51, 0.08);
+  backdrop-filter: blur(10px);
+}
+
+.scrub-word {
+  top: max(18vh, 5.5rem);
+  display: flex;
+  justify-content: center;
+  gap: 0.04em;
+  font-size: clamp(2.6rem, 8vw, 6.4rem);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  line-height: 0.9;
+  text-indent: 0.16em;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85), 0 10px 28px rgba(231, 242, 250, 0.8);
+  opacity: 0;
+}
+
+.scrub-shards {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.scrub-shards i {
+  position: absolute;
+  display: block;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(197, 220, 236, 0.15));
+  clip-path: polygon(50% 0, 100% 72%, 42% 100%, 0 48%);
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.85));
+  animation: shard-drift 2.8s ease-in-out infinite alternate;
+}
+
+.scrub-load {
+  position: absolute;
+  z-index: 5;
+  left: 50%;
+  bottom: 6.5vh;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 9rem;
+  color: #102033;
+  font-family: "Space Mono", ui-monospace, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.scrub-load-track {
+  width: 9rem;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(16, 32, 51, 0.12);
+  overflow: hidden;
+}
+
+.scrub-load-track div {
+  width: 0;
+  height: 100%;
+  background: #0575ce;
+}
+
+.scrub-section.is-still .scrub-hint { display: none; }
+
+.scrub-section.is-still .scrub-copy {
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.scrub-section.is-still .scrub-copy p,
+.scrub-section.is-still .scrub-word {
+  position: static;
+  opacity: 1;
+}
+
+@keyframes shard-drift {
+  from { translate: 0 0; }
+  to { translate: 10px -16px; }
 }

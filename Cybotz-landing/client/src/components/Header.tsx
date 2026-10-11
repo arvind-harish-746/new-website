@@ -56,7 +56,7 @@ export default function Header() {
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
           ? 'bg-white/95 backdrop-blur-md border-b border-cyan-500/20 shadow-[0_8px_24px_rgba(16,32,51,0.06)]'
-          : 'bg-[#F4F7FB]/92 backdrop-blur-sm border-b border-[#D5E0EA]'
+          : 'bg-[#E7F2FA]/92 backdrop-blur-sm border-b border-[#C9DDEC]'
       }`}
     >
       <div className="container flex items-center justify-between h-20 px-4 md:px-8">
@@ -127,7 +127,7 @@ export default function Header() {
           {/* Hamburger Menu Toggle Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2.5 rounded-lg bg-white/90 border border-[#D5E0EA] text-[#0460A9] hover:text-[#0460A9] hover:border-cyan-500/40 transition-all duration-300 cursor-pointer"
+            className="p-2.5 rounded-lg bg-white/90 border border-[#C9DDEC] text-[#0460A9] hover:text-[#0460A9] hover:border-cyan-500/40 transition-all duration-300 cursor-pointer"
             aria-expanded={mobileMenuOpen}
             aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
           >
@@ -140,7 +140,7 @@ export default function Header() {
       {mobileMenuOpen && (
         <>
           <div
-            className="fixed inset-0 top-20 bg-[#F4F7FB]/60 backdrop-blur-sm z-40 lg:hidden animate-fade-in"
+            className="fixed inset-0 top-20 bg-[#E7F2FA]/60 backdrop-blur-sm z-40 lg:hidden animate-fade-in"
             onClick={() => setMobileMenuOpen(false)}
             aria-hidden="true"
           />
@@ -155,7 +155,7 @@ export default function Header() {
                     className={`relative text-left text-sm font-semibold font-mono tracking-wider transition-all duration-200 py-3 px-4 rounded-xl cursor-pointer bg-transparent border-none outline-none select-none flex items-center justify-between ${
                       isActive
                         ? 'text-[#0460A9] drop-shadow-[0_0_8px_rgba(5,117,206,0.35)] bg-cyan-500/10 border border-cyan-500/30'
-                        : 'text-[#3E5168] hover:text-[#0460A9] hover:bg-[#E7EEF6]/80'
+                        : 'text-[#3E5168] hover:text-[#0460A9] hover:bg-[#E4F1F8]/80'
                     }`}
                     aria-current={isActive ? 'page' : undefined}
                   >
@@ -168,7 +168,7 @@ export default function Header() {
               })}
               <button
                 onClick={() => handleNavigation('#reach-us')}
-                className="text-left text-sm font-semibold font-mono tracking-wider text-[#3E5168] hover:text-[#0460A9] hover:bg-[#E7EEF6]/80 py-3 px-4 rounded-xl cursor-pointer bg-transparent border-none outline-none select-none"
+                className="text-left text-sm font-semibold font-mono tracking-wider text-[#3E5168] hover:text-[#0460A9] hover:bg-[#E4F1F8]/80 py-3 px-4 rounded-xl cursor-pointer bg-transparent border-none outline-none select-none"
               >
                 Contact
               </button>

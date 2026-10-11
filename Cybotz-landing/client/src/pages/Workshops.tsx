@@ -130,10 +130,10 @@ export default function Workshops() {
   const ActiveIcon = activeTrivia.icon;
 
   return (
-    <div className="relative text-[#102033] min-h-screen flex flex-col font-sans bg-[#F4F7FB]">
+    <div className="relative text-[#102033] min-h-screen flex flex-col font-sans bg-[#E7F2FA]">
       {/* Elegant Dark Gradient Background */}
       <div className="fixed inset-0 z-0 pointer-events-none w-full h-full overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(5,117,206,0.08),transparent_55%),linear-gradient(#F4F7FB,#E7EEF6)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(5,117,206,0.08),transparent_55%),linear-gradient(#E7F2FA,#E4F1F8)]" />
       </div>
 
       {/* 3D RobotHero fixed background (placed on top of DarkGradientBg) */}
@@ -178,15 +178,15 @@ export default function Workshops() {
 
               {/* Mobile-Only Feature Chips */}
               <div className="flex sm:hidden flex-wrap gap-2">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/85 border border-[#D5E0EA] text-xs font-mono text-[#0460A9]">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/85 border border-[#C9DDEC] text-xs font-mono text-[#0460A9]">
                   <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
                   FPV Drone Piloting
                 </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/85 border border-[#D5E0EA] text-xs font-mono text-[#0460A9]">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/85 border border-[#C9DDEC] text-xs font-mono text-[#0460A9]">
                   <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
                   Benchtop Soldering
                 </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/85 border border-[#D5E0EA] text-xs font-mono text-[#0460A9]">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/85 border border-[#C9DDEC] text-xs font-mono text-[#0460A9]">
                   <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
                   1-Day Bootcamps
                 </span>
@@ -197,7 +197,7 @@ export default function Workshops() {
         </section>
 
         {/* CURRICULUMS */}
-        <section className="py-20 border-t border-[#D5E0EA]/40 bg-transparent">
+        <section className="py-20 border-t border-[#C9DDEC]/40 bg-transparent">
           <div className="container px-4 md:px-8 mx-auto">
             <div className="text-center mb-16">
               <span className="text-sm font-bold font-mono text-[#0460A9] tracking-widest uppercase">Featured Packages</span>
@@ -213,7 +213,7 @@ export default function Workshops() {
                 return (
                   <div
                     key={idx}
-                    className="p-8 rounded-2xl bg-white/80 border border-[#D5E0EA] hover:border-cyan-500/40 backdrop-blur-md transition-all duration-300 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start"
+                    className="p-8 rounded-2xl bg-white/80 border border-[#C9DDEC] hover:border-cyan-500/40 backdrop-blur-md transition-all duration-300 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start"
                   >
                     {/* Left: Component Details (col-5) */}
                     <div className="lg:col-span-5 flex flex-col gap-4">
@@ -230,8 +230,8 @@ export default function Workshops() {
                     </div>
 
                     {/* Right: Interactive Syllabus Outline (col-7) */}
-                    <div className="lg:col-span-7 rounded-xl border border-[#D5E0EA] bg-white/70 backdrop-blur-sm p-6">
-                      <h4 className="text-xs font-bold font-mono text-[#3E5168] uppercase tracking-wider mb-4 border-b border-[#D5E0EA] pb-2">
+                    <div className="lg:col-span-7 rounded-xl border border-[#C9DDEC] bg-white/70 backdrop-blur-sm p-6">
+                      <h4 className="text-xs font-bold font-mono text-[#3E5168] uppercase tracking-wider mb-4 border-b border-[#C9DDEC] pb-2">
                         Syllabus Outline
                       </h4>
                       <div className="space-y-4">
@@ -256,7 +256,7 @@ export default function Workshops() {
         </section>
 
         {/* SNEAK PEEK GALLERY WINDOW */}
-        <section className="py-16 md:py-24 border-t border-[#D5E0EA] bg-[#E7EEF6]/40 backdrop-blur-sm relative overflow-hidden">
+        <section className="py-16 md:py-24 border-t border-[#C9DDEC] bg-[#E4F1F8]/40 backdrop-blur-sm relative overflow-hidden">
           <div className="w-full px-2 sm:px-4 md:px-8 max-w-[1440px] mx-auto">
             <div className="text-center mb-8">
               <span className="text-sm font-bold font-mono text-[#0460A9] tracking-widest uppercase">Action Reel</span>
@@ -277,7 +277,7 @@ export default function Workshops() {
         </section>
 
         {/* TRIVIA LEDGER (Interactive Dashboard) */}
-        <section className="py-20 bg-transparent border-t border-[#D5E0EA]/40">
+        <section className="py-20 bg-transparent border-t border-[#C9DDEC]/40">
           <div className="container px-4 md:px-8 mx-auto">
             <div className="text-center mb-16">
               <span className="text-sm font-bold font-mono text-[#0460A9] tracking-widest uppercase">Information Ledger</span>
@@ -300,7 +300,7 @@ export default function Workshops() {
                       onClick={() => setActiveTriviaId(t.id)}
                       className={`w-full flex items-center justify-between p-4 rounded-lg border font-mono text-sm tracking-wider transition-all duration-300 text-left cursor-pointer bg-transparent ${isActive
                           ? "border-cyan-500/50 bg-cyan-500/10 text-[#0460A9] font-bold shadow-[0_0_15px_rgba(5,117,206,0.08)]"
-                          : "border-[#D5E0EA] hover:border-cyan-500/20 text-[#3E5168] hover:text-[#0460A9]"
+                          : "border-[#C9DDEC] hover:border-cyan-500/20 text-[#3E5168] hover:text-[#0460A9]"
                         }`}
                     >
                       <span className="flex items-center gap-3">
@@ -316,14 +316,14 @@ export default function Workshops() {
               </div>
 
               {/* Right Column: Telemetry Monitor (col-7) */}
-              <div className="lg:col-span-7 p-8 rounded-2xl border border-[#D5E0EA] bg-white/80 backdrop-blur-md flex flex-col justify-between shadow-2xl relative overflow-hidden group">
+              <div className="lg:col-span-7 p-8 rounded-2xl border border-[#C9DDEC] bg-white/80 backdrop-blur-md flex flex-col justify-between shadow-2xl relative overflow-hidden group">
                 {/* Visual grid decor */}
                 <div className="absolute inset-0 bg-grid-white/[0.01] pointer-events-none" />
                 <div className="absolute top-4 right-4 text-gray-700 font-mono text-[10px]">MONITOR: RX_LINK</div>
 
                 <div className="relative z-10 flex flex-col gap-6">
                   {/* Icon and title header */}
-                  <div className="flex items-center gap-4 border-b border-[#D5E0EA] pb-4">
+                  <div className="flex items-center gap-4 border-b border-[#C9DDEC] pb-4">
                     <div className="w-12 h-12 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-[#0460A9] flex items-center justify-center animate-pulse">
                       <ActiveIcon size={24} />
                     </div>
@@ -359,7 +359,7 @@ export default function Workshops() {
                 </div>
 
                 {/* Sub corner telemetry stats */}
-                <div className="relative z-10 flex justify-between text-[11px] font-mono text-slate-400 border-t border-[#D5E0EA] pt-4 mt-8">
+                <div className="relative z-10 flex justify-between text-[11px] font-mono text-slate-400 border-t border-[#C9DDEC] pt-4 mt-8">
                   <span>CRC_CHECK: [OK]</span>
                   <span>TEL_SPEED: 57600bps</span>
                   <span>FLOW: COMPLETED</span>
@@ -371,7 +371,7 @@ export default function Workshops() {
         </section>
 
         {/* INTERNAL CROSS-LINK: Labs */}
-        <section className="py-16 bg-transparent border-t border-[#D5E0EA]/40">
+        <section className="py-16 bg-transparent border-t border-[#C9DDEC]/40">
           <div className="container px-4 md:px-8 mx-auto">
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-2xl md:text-3xl font-bold font-mono tracking-wider mb-4">Want Something More Permanent?</h2>

@@ -4,7 +4,7 @@
  * Colors are the light site theme. Cyan and orange are sampled from the
  * CYBOTZ wordmark (client/public/logos/cybotz_transparent.png):
  *   cyan #0575CE, orange #F97405. Small text uses darker same-hue inks
- *   so it clears WCAG AA on paper #F4F7FB.
+ *   so it clears WCAG AA on paper #E7F2FA.
  * Fonts are Space Mono (display) and Inter (body), already loaded in index.html.
  *
  * Designed runtime is `exitAt + flight` seconds (about 3.6s), inside the 2.5–4s window.
@@ -15,7 +15,7 @@ export const SPLASH_STORAGE_KEY = "cybotz-splash-seen";
 
 export const SPLASH_COLORS = {
   /** Same fill as the homepage aether canvas so the handoff doesn't flash. */
-  void: "#F4F7FB",
+  void: "#E7F2FA",
   /** Logo cyan. Graphics, traces, and large marks. */
   cyan: "#0575CE",
   /** Darker cyan for small text on paper (AA). */
@@ -28,10 +28,10 @@ export const SPLASH_COLORS = {
   /** Page ink. Also the text color on orange fills (white-on-orange fails AA). */
   ink: "#102033",
   muted: "#3E5168",
-  paper: "#F4F7FB",
+  paper: "#E7F2FA",
   raised: "#FFFFFF",
-  section: "#E7EEF6",
-  line: "#D5E0EA",
+  section: "#E4F1F8",
+  line: "#C9DDEC",
 } as const;
 
 export const SPLASH_TIMING = {

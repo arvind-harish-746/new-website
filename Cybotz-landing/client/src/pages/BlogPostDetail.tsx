@@ -224,7 +224,7 @@ export default function BlogPostDetail() {
         {blocks.map((block, idx) => {
           if (block.type === "header") {
             return (
-              <div key={idx} className="pt-6 border-t border-[#D5E0EA]">
+              <div key={idx} className="pt-6 border-t border-[#C9DDEC]">
                 <h3 className="text-xl sm:text-2xl font-bold font-mono text-[#0460A9] flex items-center gap-2.5">
                   <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 shrink-0" />
                   {block.content}
@@ -240,7 +240,7 @@ export default function BlogPostDetail() {
             return (
               <div key={idx} className="relative rounded-xl overflow-hidden border border-cyan-500/30 bg-[#050811] shadow-2xl my-5">
                 {/* Code Block Header */}
-                <div className="flex items-center justify-between px-4 py-2.5 bg-white/90 border-b border-[#D5E0EA] text-sm font-mono text-[#3E5168]">
+                <div className="flex items-center justify-between px-4 py-2.5 bg-white/90 border-b border-[#C9DDEC] text-sm font-mono text-[#3E5168]">
                   <div className="flex items-center gap-2">
                     <Terminal size={15} className="text-[#0460A9]" />
                     <span className="uppercase text-xs tracking-wider text-[#0460A9] font-bold">{block.lang || "python"}</span>
@@ -297,7 +297,7 @@ export default function BlogPostDetail() {
       {/* RidgeParallax Background */}
       <div className="fixed inset-0 z-0 pointer-events-none w-full h-full">
         <RidgeParallax
-          background="#F4F7FB"
+          background="#E7F2FA"
           baseColor="#0575CE"
           accentColor="#3D8FD4"
           density={200}
@@ -329,18 +329,18 @@ export default function BlogPostDetail() {
           
           {/* Back Button */}
           <Link href="/blogs">
-            <button className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-[#E7EEF6] text-sm font-mono font-bold text-[#0460A9] border border-[#D5E0EA] hover:border-cyan-500/30 transition-all cursor-pointer mb-8">
+            <button className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-[#E4F1F8] text-sm font-mono font-bold text-[#0460A9] border border-[#C9DDEC] hover:border-cyan-500/30 transition-all cursor-pointer mb-8">
               <ArrowLeft size={16} />
               Back to All Articles
             </button>
           </Link>
 
           {isLoading ? (
-            <div className="p-12 text-center border border-[#D5E0EA] rounded-2xl bg-[#E7EEF6]/80 font-mono text-[#0460A9] animate-pulse text-base">
+            <div className="p-12 text-center border border-[#C9DDEC] rounded-2xl bg-[#E4F1F8]/80 font-mono text-[#0460A9] animate-pulse text-base">
               Loading article details...
             </div>
           ) : !post ? (
-            <div className="p-12 text-center border border-dashed border-[#D5E0EA] rounded-2xl bg-[#E7EEF6]/80 font-mono">
+            <div className="p-12 text-center border border-dashed border-[#C9DDEC] rounded-2xl bg-[#E4F1F8]/80 font-mono">
               <BookOpen size={40} className="mx-auto text-gray-600 mb-4" />
               <h2 className="text-xl font-bold text-[#102033] mb-2">Article Not Found</h2>
               <p className="text-[#3E5168] text-sm mb-6">The requested engineering guide could not be located.</p>
@@ -351,10 +351,10 @@ export default function BlogPostDetail() {
               </Link>
             </div>
           ) : (
-            <article className="p-6 sm:p-10 md:p-14 rounded-2xl sm:rounded-3xl bg-white/75 border border-[#D5E0EA] shadow-2xl backdrop-blur-md space-y-6 sm:space-y-8">
+            <article className="p-6 sm:p-10 md:p-14 rounded-2xl sm:rounded-3xl bg-white/75 border border-[#C9DDEC] shadow-2xl backdrop-blur-md space-y-6 sm:space-y-8">
               
               {/* Header Details */}
-              <div className="space-y-4 border-b border-[#D5E0EA] pb-6">
+              <div className="space-y-4 border-b border-[#C9DDEC] pb-6">
                 <div className="flex flex-wrap gap-2">
                   {post.tags.map((tag) => (
                     <span
@@ -410,7 +410,7 @@ export default function BlogPostDetail() {
               </div>
 
               {/* Article Footer Navigation */}
-              <div className="pt-8 border-t border-[#D5E0EA] flex items-center justify-between">
+              <div className="pt-8 border-t border-[#C9DDEC] flex items-center justify-between">
                 <Link href="/blogs">
                   <button className="flex items-center gap-2 text-sm sm:text-base font-mono font-bold text-[#0460A9] hover:text-[#0460A9] cursor-pointer bg-transparent border-none p-0">
                     <ArrowLeft size={16} />

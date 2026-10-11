@@ -6,16 +6,16 @@ export function SectionTrace() {
         <path
           className="home-trace-path"
           pathLength={1}
-          d="M0 28 H260 L300 10 H560 L600 28 H860 L900 46 H1200"
+          d="M0 30 C160 30 210 12 340 16 S560 42 720 24 S980 10 1200 28"
         />
-        <circle className="trace-node" cx="300" cy="10" r="4" />
-        <circle className="trace-node" cx="600" cy="28" r="4" />
-        <circle className="trace-node" cx="900" cy="46" r="4" />
+        <circle className="trace-node" cx="340" cy="16" r="3.5" />
+        <circle className="trace-node" cx="720" cy="24" r="3.5" />
+        <circle className="trace-node" cx="1040" cy="18" r="3.5" />
         <circle className="trace-packet" r="4">
           <animateMotion
             dur="5.5s"
             repeatCount="indefinite"
-            path="M0 28 H260 L300 10 H560 L600 28 H860 L900 46 H1200"
+            path="M0 30 C160 30 210 12 340 16 S560 42 720 24 S980 10 1200 28"
           />
         </circle>
       </svg>
@@ -31,7 +31,7 @@ export function FlightRail() {
         <path
           className="home-rail-path"
           pathLength={1}
-          d="M22 0 V140 H8 V300 H32 V480 H10 V680 H28 V860 H18 V1000"
+          d="M20 0 C18 120 8 160 14 280 C22 420 34 460 16 620 C8 760 28 820 18 1000"
         />
       </svg>
     </div>

@@ -101,7 +101,7 @@ export default function Labs() {
       {/* Wire Terrain Cyber Canyon Background */}
       <div className="fixed inset-0 z-0 pointer-events-none w-full h-full overflow-hidden">
         <WireTerrain
-          background="#F4F7FB"
+          background="#E7F2FA"
           lineColor="#11B3D9"
           accent="#0575CE"
           relief={98}
@@ -113,7 +113,7 @@ export default function Labs() {
           globalPointer={true}
         />
         {/* Soft vignette & gradient overlay to preserve optimal contrast for text & cards */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#F4F7FB]/72 via-[#F4F7FB]/45 to-[#F4F7FB]/88 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#E7F2FA]/72 via-[#E7F2FA]/45 to-[#E7F2FA]/88 pointer-events-none" />
       </div>
 
       <Header />
@@ -140,15 +140,15 @@ export default function Labs() {
 
               {/* Mobile-Only Feature Chips */}
               <div className="flex sm:hidden flex-wrap gap-2">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/85 border border-[#D5E0EA] text-xs font-mono text-[#0460A9]">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/85 border border-[#C9DDEC] text-xs font-mono text-[#0460A9]">
                   <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
                   Hardware-First
                 </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/85 border border-[#D5E0EA] text-xs font-mono text-[#0460A9]">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/85 border border-[#C9DDEC] text-xs font-mono text-[#0460A9]">
                   <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
                   Zero AI Gimmicks
                 </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/85 border border-[#D5E0EA] text-xs font-mono text-[#0460A9]">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/85 border border-[#C9DDEC] text-xs font-mono text-[#0460A9]">
                   <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
                   9-Month Path
                 </span>
@@ -159,7 +159,7 @@ export default function Labs() {
         </section>
 
         {/* CURRICULUM LEVEL CARDS */}
-        <section className="py-20 border-t border-[#D5E0EA] bg-[#F4F7FB]/20 backdrop-blur-sm">
+        <section className="py-20 border-t border-[#C9DDEC] bg-[#E7F2FA]/20 backdrop-blur-sm">
           <div className="container px-4 md:px-8 mx-auto">
             <div className="text-center mb-16">
               <span className="text-sm font-bold font-mono text-[#0460A9] tracking-widest uppercase">Progressive Learning</span>
@@ -175,7 +175,7 @@ export default function Labs() {
                 return (
                   <div
                     key={index}
-                    className="p-5 sm:p-8 rounded-2xl bg-white/80 border border-[#D5E0EA] hover:border-cyan-500/40 backdrop-blur-md transition-all duration-300 flex flex-col justify-between"
+                    className="p-5 sm:p-8 rounded-2xl bg-white/80 border border-[#C9DDEC] hover:border-cyan-500/40 backdrop-blur-md transition-all duration-300 flex flex-col justify-between"
                   >
                     <div>
                       {/* Badge / Timeline Header */}
@@ -220,7 +220,7 @@ export default function Labs() {
         </section>
 
         {/* SNEAK PEEK GALLERY WINDOW */}
-        <section className="py-16 md:py-24 border-t border-[#D5E0EA] bg-[#E7EEF6]/40 backdrop-blur-sm relative overflow-hidden">
+        <section className="py-16 md:py-24 border-t border-[#C9DDEC] bg-[#E4F1F8]/40 backdrop-blur-sm relative overflow-hidden">
           <div className="w-full px-2 sm:px-4 md:px-8 max-w-[1440px] mx-auto">
             <div className="text-center mb-8">
               <span className="text-sm font-bold font-mono text-[#0460A9] tracking-widest uppercase">Visual Archive</span>
@@ -241,7 +241,7 @@ export default function Labs() {
         </section>
 
         {/* COMPARISON: HOW WE DIFFER */}
-        <section className="py-20 bg-white/70 border-t border-[#D5E0EA] backdrop-blur-sm">
+        <section className="py-20 bg-white/70 border-t border-[#C9DDEC] backdrop-blur-sm">
           <div className="container px-4 md:px-8 mx-auto">
             <div className="text-center mb-16">
               <span className="text-sm font-bold font-mono text-[#0460A9] tracking-widest uppercase">The Comparison</span>
@@ -328,7 +328,7 @@ export default function Labs() {
         </section>
 
         {/* FAQs */}
-        <section className="py-20 border-t border-[#D5E0EA] bg-[#F4F7FB]/20 backdrop-blur-sm">
+        <section className="py-20 border-t border-[#C9DDEC] bg-[#E7F2FA]/20 backdrop-blur-sm">
           <div className="container px-4 md:px-8 mx-auto">
             <div className="text-center mb-16">
               <span className="text-sm font-bold font-mono text-[#0460A9] tracking-widest uppercase">FAQ</span>
@@ -344,7 +344,7 @@ export default function Labs() {
                 return (
                   <div
                     key={index}
-                    className="rounded-xl border border-[#D5E0EA] bg-white/70 backdrop-blur-sm overflow-hidden transition-all duration-300"
+                    className="rounded-xl border border-[#C9DDEC] bg-white/70 backdrop-blur-sm overflow-hidden transition-all duration-300"
                   >
                     <button
                       onClick={() => toggleFaq(index)}
@@ -358,7 +358,7 @@ export default function Labs() {
                     </button>
 
                     {isOpen && (
-                      <div className="px-5 pb-5 pt-1 text-[#3E5168] text-sm md:text-base leading-relaxed border-t border-[#D5E0EA]/50">
+                      <div className="px-5 pb-5 pt-1 text-[#3E5168] text-sm md:text-base leading-relaxed border-t border-[#C9DDEC]/50">
                         {faq.a}
                       </div>
                     )}
@@ -370,7 +370,7 @@ export default function Labs() {
         </section>
 
         {/* INTERNAL CROSS-LINK: Workshops */}
-        <section className="py-16 bg-white/70 backdrop-blur-sm border-t border-[#D5E0EA]">
+        <section className="py-16 bg-white/70 backdrop-blur-sm border-t border-[#C9DDEC]">
           <div className="container px-4 md:px-8 mx-auto">
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-2xl md:text-3xl font-bold font-mono tracking-wider mb-4">Not Ready for a Full Lab Yet?</h2>

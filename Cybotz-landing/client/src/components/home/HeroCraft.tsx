@@ -17,8 +17,7 @@ import {
 import { createPortal } from "react-dom";
 import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
-import { useSplashGate, type IntroMode } from "@/components/SplashScreen";
-import { ReducedSplash, VideoSplash, type SplashHandoff } from "@/components/home/VideoSplash";
+import { useSplashGate } from "@/components/SplashScreen";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -67,22 +66,27 @@ const NDC_LIMIT = 0.76;
 type Key = { x: number; y: number; s: number };
 
 /** Big left / right / left sweeps. Rotation comes from spring velocity, not these keys. */
+/** Stay on the right so the copy on the left stays clear. The first key is replaced by the hero slot. */
 const DESKTOP_PATH: Key[] = [
-  { x: 0.46, y: 0.02, s: 0.76 },
-  { x: -0.78, y: 0.48, s: 0.5 },
-  { x: 0.82, y: -0.5, s: 0.58 },
-  { x: -0.74, y: 0.4, s: 0.46 },
-  { x: 0.78, y: -0.36, s: 0.44 },
-  { x: 0.52, y: -0.5, s: 0.4 },
+  { x: 0.52, y: 0.02, s: 0.76 },
+  { x: 0.68, y: 0.24, s: 0.5 },
+  { x: 0.4, y: -0.16, s: 0.52 },
+  { x: 0.74, y: 0.18, s: 0.44 },
+  { x: 0.46, y: -0.3, s: 0.4 },
+  { x: 0.62, y: -0.46, s: 0.36 },
 ];
 
-/** Mobile still crosses the screen, with the hero pose large under the headline. */
+/** Smaller and lower-right, clear of the stacked headline. */
 const MOBILE_PATH: Key[] = [
-  { x: 0.0, y: -0.08, s: 0.62 },
-  { x: 0.7, y: 0.36, s: 0.44 },
-  { x: -0.64, y: -0.32, s: 0.4 },
-  { x: 0.46, y: -0.58, s: 0.36 },
+  { x: 0.42, y: -0.34, s: 0.38 },
+  { x: 0.58, y: -0.12, s: 0.3 },
+  { x: 0.36, y: -0.48, s: 0.28 },
+  { x: 0.52, y: -0.6, s: 0.24 },
 ];
+
+/** Where the video drone is hovering when the glass clears: near frame center. */
+const HOVER_DESKTOP: Key = { x: -0.04, y: 0.05, s: 1.05 };
+const HOVER_MOBILE: Key = { x: 0.0, y: 0.02, s: 0.74 };
 
 function posedCorners(box: THREE.Box3) {
   const base: THREE.Vector3[] = [];
@@ -163,9 +167,12 @@ function shadowTexture() {
   return texture;
 }
 
-function smooth(t: number) {
-  const x = THREE.MathUtils.clamp(t, 0, 1);
-  return x * x * (3 - 2 * x);
+/** 0 while the scroll-scrub video covers the page, 1 once the hero drone should show. */
+function droneReveal() {
+  const raw = document.documentElement.dataset.droneReveal;
+  if (raw == null || raw === "") return 1;
+  const value = Number(raw);
+  return Number.isFinite(value) ? THREE.MathUtils.clamp(value, 0, 1) : 1;
 }
 
 function catmull(keys: Key[], t: number, field: keyof Key) {
@@ -220,9 +227,13 @@ function flightTarget(progress: number, mobile: boolean, reduce: boolean): Key {
   }
   const keys = (mobile ? MOBILE_PATH : DESKTOP_PATH).map((key) => ({ ...key }));
   if (slot) {
-    const cap = mobile ? 0.68 : 0.86;
-    const gain = mobile ? 1.7 : 2;
-    keys[0] = { x: slot.x, y: slot.y, s: Math.min(cap, slot.s * gain) };
+    const cap = mobile ? 0.42 : 0.86;
+    const gain = mobile ? 1.15 : 2;
+    keys[0] = {
+      x: mobile ? Math.max(0.34, slot.x + 0.22) : slot.x,
+      y: mobile ? slot.y - 0.28 : slot.y,
+      s: Math.min(cap, slot.s * gain),
+    };
   }
   return samplePath(keys, progress);
 }
@@ -272,14 +283,10 @@ function DroneModel({
   reduce,
   progressRef,
   layerRef,
-  introRef,
-  handoffRef,
 }: {
   reduce: boolean;
   progressRef: MutableRefObject<number>;
   layerRef: RefObject<HTMLDivElement | null>;
-  introRef: MutableRefObject<IntroMode>;
-  handoffRef: MutableRefObject<SplashHandoff>;
 }) {
   const { scene } = useGLTF(MODEL, "/draco/", false);
   const flight = useRef<THREE.Group>(null);
@@ -334,53 +341,22 @@ function DroneModel({
     if (!craft || !body) return;
     const dt = Math.min(rawDt, 0.05);
     const persp = camera as THREE.PerspectiveCamera;
-    const mode = introRef.current;
     const mobile = size.width < 768;
     const { right, up } = axes.current;
     body.rotation.order = "YXZ";
-
-    const blend = mode === "video" ? THREE.MathUtils.clamp(handoffRef.current.blend, 0, 1) : 0;
-    const showShadow = mode === "none" || mode === "reduced" || (mode === "video" && blend > 0.35);
-    if (shadowRef.current) shadowRef.current.visible = showShadow;
-
-    if (mode === "pending" || mode === "classic" || (mode === "video" && blend <= 0)) {
-      craft.scale.setScalar(0.001);
-      if (layerRef.current) layerRef.current.style.opacity = "0";
-      return;
-    }
-
-    if (mode === "video") {
-      const k = smooth(blend);
-      const pose = flightTarget(0, mobile, false);
-      const now = {
-        x: THREE.MathUtils.lerp(0, pose.x, k),
-        y: THREE.MathUtils.lerp(0.04, pose.y, k),
-        s: THREE.MathUtils.lerp(Math.min(0.98, pose.s * 1.42), pose.s, k),
-      };
-      const spr = spring.current;
-      spr.x = now.x;
-      spr.y = now.y;
-      spr.s = now.s;
-      spr.vx = 0;
-      spr.vy = 0;
-      spr.vs = 0;
-      spr.ready = true;
-      placeOnView(craft, persp, now, 0, right, up);
-      body.rotation.y = THREE.MathUtils.damp(body.rotation.y, 0.48, 6, dt);
-      body.rotation.x = THREE.MathUtils.damp(body.rotation.x, 0.1, 6, dt);
-      body.rotation.z = THREE.MathUtils.damp(body.rotation.z, 0, 6, dt);
-      const step = dt * 52;
-      for (const node of spins.current) node.rotateY(step);
-      if (layerRef.current) {
-        layerRef.current.style.backgroundColor = "transparent";
-        layerRef.current.style.opacity = k.toFixed(3);
-      }
-      return;
-    }
-
+    const reveal = droneReveal();
+    const appear = reduce ? 1 : THREE.MathUtils.smoothstep(reveal, 0.02, 0.45);
+    if (shadowRef.current) shadowRef.current.visible = appear > 0.4;
     if (layerRef.current) layerRef.current.style.backgroundColor = "transparent";
 
-    const target = flightTarget(reduce ? 0 : progressRef.current, mobile, reduce);
+    const slot = flightTarget(reduce ? 0 : progressRef.current, mobile, reduce);
+    const hover = mobile ? HOVER_MOBILE : HOVER_DESKTOP;
+    const handoff = reduce ? 1 : THREE.MathUtils.smoothstep(reveal, 0.34, 1);
+    const target = {
+      x: THREE.MathUtils.lerp(hover.x, slot.x, handoff),
+      y: THREE.MathUtils.lerp(hover.y, slot.y, handoff),
+      s: THREE.MathUtils.lerp(hover.s, slot.s, handoff),
+    };
     const spr = spring.current;
     if (!spr.ready || reduce) {
       spr.x = target.x;
@@ -415,8 +391,8 @@ function DroneModel({
       for (const node of spins.current) node.rotateY(step);
     }
 
-    const cover = 1 - THREE.MathUtils.smoothstep(Math.abs(spr.x), 0.2, 0.68);
-    const opacity = reduce ? 1 : (1 - cover * 0.42) * contactFade();
+    const cover = reveal < 0.98 ? 0 : 1 - THREE.MathUtils.smoothstep(Math.abs(spr.x), 0.2, 0.68);
+    const opacity = (reduce ? 1 : (1 - cover * 0.42) * contactFade()) * appear;
     if (layerRef.current) layerRef.current.style.opacity = opacity.toFixed(3);
   });
 
@@ -442,13 +418,10 @@ function markHeroWebgl(on: boolean) {
 }
 
 function HeroCanvas({ reduce }: { reduce: boolean }) {
-  const { intro, finishIntro } = useSplashGate();
+  const { intro } = useSplashGate();
   const layerRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef(0);
-  const introRef = useRef(intro);
-  const handoffRef = useRef<SplashHandoff>({ blend: 0 });
   const [hidden, setHidden] = useState(false);
-  introRef.current = intro;
   const live = !hidden && intro !== "classic";
 
   useEffect(() => {
@@ -486,7 +459,7 @@ function HeroCanvas({ reduce }: { reduce: boolean }) {
   const frameloop = !live || reduce ? "demand" : "always";
 
   const canvas = (
-    <div ref={layerRef} className="flight-canvas" aria-hidden="true">
+    <div ref={layerRef} className="flight-canvas" style={{ opacity: reduce ? 1 : 0 }} aria-hidden="true">
       <Canvas
         dpr={mobile ? [1, 1.1] : [1, 1.25]}
         frameloop={frameloop}
@@ -497,13 +470,7 @@ function HeroCanvas({ reduce }: { reduce: boolean }) {
         }}
       >
         <StudioLights />
-        <DroneModel
-          reduce={reduce}
-          progressRef={progressRef}
-          layerRef={layerRef}
-          introRef={introRef}
-          handoffRef={handoffRef}
-        />
+        <DroneModel reduce={reduce} progressRef={progressRef} layerRef={layerRef} />
       </Canvas>
     </div>
   );
@@ -512,8 +479,6 @@ function HeroCanvas({ reduce }: { reduce: boolean }) {
     <>
       <div className="hero-flight-slot" />
       {createPortal(canvas, document.body)}
-      {intro === "video" && <VideoSplash handoffRef={handoffRef} onDone={finishIntro} />}
-      {intro === "reduced" && <ReducedSplash onDone={finishIntro} />}
     </>
   );
 }

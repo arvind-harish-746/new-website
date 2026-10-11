@@ -18,7 +18,7 @@ export default function NotFound() {
   };
 
   return (
-    <div className="relative text-[#102033] min-h-screen flex flex-col font-sans bg-[#F4F7FB]">
+    <div className="relative text-[#102033] min-h-screen flex flex-col font-sans bg-[#E7F2FA]">
       <Header />
 
       <main className="flex-grow flex items-center justify-center px-4 py-20">
@@ -100,7 +100,7 @@ export default function NotFound() {
           </button>
 
           {/* Quick navigation links */}
-          <div className="border-t border-[#D5E0EA] pt-6">
+          <div className="border-t border-[#C9DDEC] pt-6">
             <p className="text-xs text-gray-500 font-mono uppercase tracking-wider mb-4">Quick Links</p>
             <div className="flex flex-wrap justify-center gap-3">
               {[
@@ -112,7 +112,7 @@ export default function NotFound() {
                 <button
                   key={link.path}
                   onClick={() => handleNavigate(link.path)}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/80 border border-[#D5E0EA] hover:border-cyan-500/50 text-[#3E5168] hover:text-[#0460A9] text-xs font-mono transition-all duration-300 cursor-pointer"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/80 border border-[#C9DDEC] hover:border-cyan-500/50 text-[#3E5168] hover:text-[#0460A9] text-xs font-mono transition-all duration-300 cursor-pointer"
                 >
                   {link.label} <ArrowRight size={12} />
                 </button>

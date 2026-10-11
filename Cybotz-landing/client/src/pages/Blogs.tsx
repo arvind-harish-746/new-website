@@ -113,7 +113,7 @@ export default function Blogs() {
       {/* RidgeParallax Background */}
       <div className="fixed inset-0 z-0 pointer-events-none w-full h-full">
         <RidgeParallax
-          background="#F4F7FB"
+          background="#E7F2FA"
           baseColor="#0575CE"
           accentColor="#3D8FD4"
           density={200}
@@ -162,11 +162,11 @@ export default function Blogs() {
 
               {/* Mobile-Only Feature Chips */}
               <div className="flex sm:hidden flex-wrap gap-2">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/85 border border-[#D5E0EA] text-xs font-mono text-[#0460A9]">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/85 border border-[#C9DDEC] text-xs font-mono text-[#0460A9]">
                   <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
                   Step-by-Step Syllabi
                 </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/85 border border-[#D5E0EA] text-xs font-mono text-[#0460A9]">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/85 border border-[#C9DDEC] text-xs font-mono text-[#0460A9]">
                   <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
                   Real Hardware Guides
                 </span>
@@ -177,7 +177,7 @@ export default function Blogs() {
         </section>
 
         {/* SECTION 1: COURSE CURRICULUMS */}
-        <section className="py-16 border-t border-[#D5E0EA] bg-white/70 backdrop-blur-sm">
+        <section className="py-16 border-t border-[#C9DDEC] bg-white/70 backdrop-blur-sm">
           <div className="container px-4 md:px-8 mx-auto">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
               <div>
@@ -197,7 +197,7 @@ export default function Blogs() {
                       className={`px-3.5 py-1.5 rounded-lg font-mono text-sm cursor-pointer transition-all duration-300 ${
                         isActive
                           ? "bg-[#F97405] text-[#102033] font-bold shadow-[0_6px_16px_rgba(5,117,206,0.12)]"
-                          : "bg-white/72 border border-[#D5E0EA] text-[#3E5168] hover:text-[#0460A9] backdrop-blur-sm"
+                          : "bg-white/72 border border-[#C9DDEC] text-[#3E5168] hover:text-[#0460A9] backdrop-blur-sm"
                       }`}
                     >
                       {level}
@@ -211,7 +211,7 @@ export default function Blogs() {
             {isLoading ? (
               <CurriculumSkeleton count={3} />
             ) : filteredCurriculums.length === 0 ? (
-              <div className="text-center py-20 rounded-xl border border-dashed border-[#D5E0EA] bg-white/70 backdrop-blur-sm">
+              <div className="text-center py-20 rounded-xl border border-dashed border-[#C9DDEC] bg-white/70 backdrop-blur-sm">
                 <BookOpen size={40} className="text-gray-600 mx-auto mb-4" />
                 <h3 className="text-xl font-bold font-mono text-[#102033] mb-2">No curriculums found</h3>
                 <p className="text-[#3E5168] text-sm">No courses currently matched the selected level filter.</p>
@@ -223,7 +223,7 @@ export default function Blogs() {
                   return (
                     <div
                       key={curr.id}
-                      className="p-8 rounded-2xl bg-white/80 border border-[#D5E0EA] hover:border-cyan-500/40 backdrop-blur-md transition-all duration-300 flex flex-col justify-between shadow-xl"
+                      className="p-8 rounded-2xl bg-white/80 border border-[#C9DDEC] hover:border-cyan-500/40 backdrop-blur-md transition-all duration-300 flex flex-col justify-between shadow-xl"
                     >
                       <div>
                         <div className="flex items-center justify-between gap-2 mb-4">
@@ -251,10 +251,10 @@ export default function Blogs() {
 
                         {/* Expandable Modules */}
                         {isExpanded && curr.modules && curr.modules.length > 0 && (
-                          <div className="border-t border-[#D5E0EA] pt-4 mb-6 space-y-3 animate-fade-in">
+                          <div className="border-t border-[#C9DDEC] pt-4 mb-6 space-y-3 animate-fade-in">
                             <h4 className="text-sm font-bold font-mono text-[#0460A9] uppercase tracking-wider">Syllabus Modules</h4>
                             {curr.modules.map((m, idx) => (
-                              <div key={idx} className="p-3.5 rounded-lg bg-white/72 border border-[#D5E0EA] backdrop-blur-sm text-sm space-y-1.5">
+                              <div key={idx} className="p-3.5 rounded-lg bg-white/72 border border-[#C9DDEC] backdrop-blur-sm text-sm space-y-1.5">
                                 <span className="font-bold font-mono text-[#102033] block">{m.title}</span>
                                 <p className="text-[#3E5168] text-xs sm:text-sm leading-relaxed">{m.desc}</p>
                               </div>
@@ -281,7 +281,7 @@ export default function Blogs() {
         </section>
 
         {/* SECTION 2: ARTICLES & GUIDES */}
-        <section className="py-16 border-t border-[#D5E0EA] bg-[#F4F7FB]/20 backdrop-blur-sm">
+        <section className="py-16 border-t border-[#C9DDEC] bg-[#E7F2FA]/20 backdrop-blur-sm">
           <div className="container px-4 md:px-8 mx-auto">
             <div className="mb-10">
               <span className="text-sm font-bold font-mono text-[#0460A9] tracking-widest uppercase">Articles</span>
@@ -295,7 +295,7 @@ export default function Blogs() {
                   className={`px-3.5 py-1.5 rounded-lg font-mono text-sm cursor-pointer transition-colors duration-300 ${
                     selectedTag === null
                       ? "bg-[#F97405] text-[#102033] font-bold"
-                      : "bg-white border border-[#D5E0EA] text-[#3E5168] hover:text-[#0460A9]"
+                      : "bg-white border border-[#C9DDEC] text-[#3E5168] hover:text-[#0460A9]"
                   }`}
                 >
                   All Articles
@@ -307,7 +307,7 @@ export default function Blogs() {
                     className={`px-3.5 py-1.5 rounded-lg font-mono text-sm cursor-pointer transition-colors duration-300 ${
                       selectedTag === tag
                         ? "bg-[#F97405] text-[#102033] font-bold"
-                        : "bg-white border border-[#D5E0EA] text-[#3E5168] hover:text-[#0460A9]"
+                        : "bg-white border border-[#C9DDEC] text-[#3E5168] hover:text-[#0460A9]"
                     }`}
                   >
                     {tag}
@@ -320,7 +320,7 @@ export default function Blogs() {
             {isLoading ? (
               <BlogCardSkeleton count={3} />
             ) : filteredBlogs.length === 0 ? (
-              <div className="text-center py-20 rounded-xl border border-dashed border-[#D5E0EA] bg-white/70 backdrop-blur-sm">
+              <div className="text-center py-20 rounded-xl border border-dashed border-[#C9DDEC] bg-white/70 backdrop-blur-sm">
                 <BookOpen size={40} className="text-gray-600 mx-auto mb-4" />
                 <h3 className="text-xl font-bold font-mono text-[#102033] mb-2">No articles found</h3>
                 <p className="text-[#3E5168] text-sm">Try selecting a different topic filter above.</p>
@@ -332,11 +332,11 @@ export default function Blogs() {
                   const safeImage = (post.image || "").replace(/\\/g, "/").replace(/^["']+|["']+$/g, "").trim();
                   return (
                     <a key={blogId} href={`/blogs/${blogId}`} target="_blank" rel="noopener noreferrer" aria-label={`Read article: ${post.title}`}>
-                      <article className="p-8 rounded-2xl bg-white/80 border border-[#D5E0EA] hover:border-cyan-500/40 backdrop-blur-md transition-all duration-300 flex flex-col justify-between h-full group hover:shadow-[0_0_20px_rgba(5,117,206,0.08)] cursor-pointer">
+                      <article className="p-8 rounded-2xl bg-white/80 border border-[#C9DDEC] hover:border-cyan-500/40 backdrop-blur-md transition-all duration-300 flex flex-col justify-between h-full group hover:shadow-[0_0_20px_rgba(5,117,206,0.08)] cursor-pointer">
                         <div>
                           {/* Image for blog post with Liquid Glass Skeleton */}
                           {safeImage && (
-                            <div className="w-full h-48 rounded-xl overflow-hidden mb-5 border border-cyan-500/20 bg-[#F4F7FB]">
+                            <div className="w-full h-48 rounded-xl overflow-hidden mb-5 border border-cyan-500/20 bg-[#E7F2FA]">
                               <LiquidGlassImage
                                 src={safeImage}
                                 alt={post.title}
@@ -370,7 +370,7 @@ export default function Blogs() {
                       </div>
 
                       {/* Metadata */}
-                      <div className="border-t border-[#D5E0EA] pt-4 mt-4">
+                      <div className="border-t border-[#C9DDEC] pt-4 mt-4">
                         <div className="flex items-center justify-between text-xs sm:text-sm text-[#3E5168] mb-3 font-mono">
                           <div className="flex items-center gap-1.5">
                             <User size={14} className="text-[#0460A9]" />
@@ -397,7 +397,7 @@ export default function Blogs() {
         </section>
 
         {/* INTERNAL CROSS-LINK: Workshops */}
-        <section className="py-16 bg-white/70 backdrop-blur-sm border-t border-[#D5E0EA]">
+        <section className="py-16 bg-white/70 backdrop-blur-sm border-t border-[#C9DDEC]">
           <div className="container px-4 md:px-8 mx-auto">
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-2xl md:text-3xl font-bold font-mono tracking-wider mb-4">Interested in Hands-On Learning?</h2>

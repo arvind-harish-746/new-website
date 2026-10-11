@@ -236,9 +236,9 @@ export function Calendar() {
           </div>
           <div className="transition-all duration-500 ease-out">
             <div>
-              <div className="h-full w-full max-w-[550px] rounded-[24px] border border-[#D5E0EA] bg-white/80 p-2 transition-colors duration-100 group-hover:border-cyan-500/50">
+              <div className="h-full w-full max-w-[550px] rounded-[24px] border border-[#C9DDEC] bg-white/80 p-2 transition-colors duration-100 group-hover:border-cyan-500/50">
                 <div
-                  className="h-full rounded-2xl border border-[#D5E0EA] p-3"
+                  className="h-full rounded-2xl border border-[#C9DDEC] p-3"
                   style={{ boxShadow: "0px 2px 1.5px 0px rgba(5,117,206,0.05) inset" }}
                 >
                   {/* Month Navigation & Selector Header */}
@@ -248,7 +248,7 @@ export function Calendar() {
                       <select
                         value={monthOffset}
                         onChange={(e) => setMonthOffset(Number(e.target.value))}
-                        className="bg-white/88 border border-[#D5E0EA]/60 rounded-lg px-2.5 py-1 text-xs sm:text-sm font-bold font-mono text-[#102033] hover:border-cyan-500/60 focus:outline-none focus:border-cyan-400 transition-all cursor-pointer"
+                        className="bg-white/88 border border-[#C9DDEC]/60 rounded-lg px-2.5 py-1 text-xs sm:text-sm font-bold font-mono text-[#102033] hover:border-cyan-500/60 focus:outline-none focus:border-cyan-400 transition-all cursor-pointer"
                         aria-label="Select calendar month"
                       >
                         {monthOptions.map((opt) => (
@@ -267,7 +267,7 @@ export function Calendar() {
                         disabled={monthOffset === 0}
                         aria-label="Previous month"
                         title={monthOffset === 0 ? "Cannot view past months" : "Previous Month"}
-                        className="p-1.5 rounded-lg border border-[#D5E0EA] bg-white/80 text-[#3E5168] hover:text-[#0460A9] hover:border-cyan-500/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
+                        className="p-1.5 rounded-lg border border-[#C9DDEC] bg-white/80 text-[#3E5168] hover:text-[#0460A9] hover:border-cyan-500/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
                       >
                         <ChevronLeft size={16} />
                       </button>
@@ -278,7 +278,7 @@ export function Calendar() {
                         disabled={monthOffset >= 12}
                         aria-label="Next month"
                         title={monthOffset >= 12 ? "Registrations open up to 1 year in advance" : "Next Month"}
-                        className="p-1.5 rounded-lg border border-[#D5E0EA] bg-white/80 text-[#3E5168] hover:text-[#0460A9] hover:border-cyan-500/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
+                        className="p-1.5 rounded-lg border border-[#C9DDEC] bg-white/80 text-[#3E5168] hover:text-[#0460A9] hover:border-cyan-500/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
                       >
                         <ChevronRight size={16} />
                       </button>
@@ -301,7 +301,7 @@ export function Calendar() {
                   </div>
 
                   {/* Legend Indicator */}
-                  <div className="mt-4 pt-3 border-t border-[#D5E0EA] flex flex-wrap items-center justify-between gap-2 text-[10px] font-mono text-slate-400 px-1">
+                  <div className="mt-4 pt-3 border-t border-[#C9DDEC] flex flex-wrap items-center justify-between gap-2 text-[10px] font-mono text-slate-400 px-1">
                     <div className="flex items-center gap-1">
                       <span className="w-2 h-2 rounded-full bg-cyan-400" />
                       <span>Available</span>

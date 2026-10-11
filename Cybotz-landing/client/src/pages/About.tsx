@@ -64,8 +64,8 @@ export default function About() {
       <div className="fixed inset-0 z-0 pointer-events-none w-full h-full">
         <StarfieldCanvas starColor="multi" baseSpeed={2} />
         {/* Refined subtle gradient overlays preserving high translucency for stars to shine through */}
-        <div className="absolute inset-0 bg-[#F4F7FB]/15 pointer-events-none" />
-        <div className="absolute inset-0 bg-radial-at-c from-transparent via-white/40 to-[#F4F7FB]/70 pointer-events-none" />
+        <div className="absolute inset-0 bg-[#E7F2FA]/15 pointer-events-none" />
+        <div className="absolute inset-0 bg-radial-at-c from-transparent via-white/40 to-[#E7F2FA]/70 pointer-events-none" />
       </div>
 
       <Header />
@@ -140,12 +140,12 @@ export default function About() {
         </section>
 
         {/* PHILOSOPHY SECTION */}
-        <section className="py-20 border-t border-[#D5E0EA] bg-white/70 backdrop-blur-sm">
+        <section className="py-20 border-t border-[#C9DDEC] bg-white/70 backdrop-blur-sm">
           <div className="container px-4 md:px-8 mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
               {/* The AI Shortcut Problem */}
-              <div className="p-8 rounded-2xl bg-white/80 border border-[#D5E0EA] backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.2)] hover:border-rose-500/40 transition-all duration-300 flex flex-col gap-4">
+              <div className="p-8 rounded-2xl bg-white/80 border border-[#C9DDEC] backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.2)] hover:border-rose-500/40 transition-all duration-300 flex flex-col gap-4">
                 <div className="inline-flex items-center gap-2 text-rose-400 font-mono text-sm uppercase tracking-wider">
                   <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.8)]" />
                   The AI Shortcut Problem
@@ -157,7 +157,7 @@ export default function About() {
               </div>
 
               {/* Our Pedagogy */}
-              <div className="p-8 rounded-2xl bg-white/80 border border-[#D5E0EA] backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.2)] hover:border-cyan-500/40 transition-all duration-300 flex flex-col gap-4">
+              <div className="p-8 rounded-2xl bg-white/80 border border-[#C9DDEC] backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.2)] hover:border-cyan-500/40 transition-all duration-300 flex flex-col gap-4">
                 <div className="inline-flex items-center gap-2 text-[#0460A9] font-mono text-sm uppercase tracking-wider">
                   <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(5,117,206,0.8)]" />
                   Our Pedagogy
@@ -173,7 +173,7 @@ export default function About() {
         </section>
 
         {/* IMPACT METRICS */}
-        <section className="py-16 bg-[#F4F7FB]/15 border-t border-[#D5E0EA] backdrop-blur-sm">
+        <section className="py-16 bg-[#E7F2FA]/15 border-t border-[#C9DDEC] backdrop-blur-sm">
           <div className="container px-4 md:px-8 mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
               {[
@@ -183,7 +183,7 @@ export default function About() {
               ].map((m, idx) => (
                 <div
                   key={idx}
-                  className="p-6 rounded-xl bg-white/80 border border-[#D5E0EA] backdrop-blur-md shadow-lg hover:border-cyan-500/40 transition-all duration-300 flex flex-col gap-2"
+                  className="p-6 rounded-xl bg-white/80 border border-[#C9DDEC] backdrop-blur-md shadow-lg hover:border-cyan-500/40 transition-all duration-300 flex flex-col gap-2"
                 >
                   <span className="text-4xl md:text-5xl font-extrabold font-mono text-[#0460A9] tracking-wider glow-cyan-text">{m.count}</span>
                   <span className="font-bold text-[#102033] font-mono text-base">{m.label}</span>
@@ -195,7 +195,7 @@ export default function About() {
         </section>
 
         {/* TIMELINE ("Our Journey in Bangalore") */}
-        <section className="py-20 border-t border-[#D5E0EA] bg-[#F4F7FB]/15 backdrop-blur-sm">
+        <section className="py-20 border-t border-[#C9DDEC] bg-[#E7F2FA]/15 backdrop-blur-sm">
           <div className="container px-4 md:px-8 mx-auto">
             <div className="text-center mb-16">
               <span className="text-sm font-bold font-mono text-[#0460A9] tracking-widest uppercase">Chronicle</span>
@@ -205,13 +205,13 @@ export default function About() {
               </p>
             </div>
 
-            <div className="relative border-l-2 border-[#D5E0EA] max-w-3xl mx-auto pl-6 md:pl-10 space-y-12">
+            <div className="relative border-l-2 border-[#C9DDEC] max-w-3xl mx-auto pl-6 md:pl-10 space-y-12">
               {timelineEvents.map((ev, index) => (
                 <div key={index} className="relative">
                   {/* Timeline node */}
-                  <span className="absolute -left-[31px] md:-left-[47px] top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#F4F7FB] border-2 border-cyan-400 shadow-[0_0_10px_rgba(5,117,206,0.5)]" />
+                  <span className="absolute -left-[31px] md:-left-[47px] top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#E7F2FA] border-2 border-cyan-400 shadow-[0_0_10px_rgba(5,117,206,0.5)]" />
 
-                  <div className="flex flex-col gap-1.5 p-4 rounded-xl bg-white/60 border border-[#D5E0EA]/40 backdrop-blur-sm hover:border-cyan-500/30 transition-all">
+                  <div className="flex flex-col gap-1.5 p-4 rounded-xl bg-white/60 border border-[#C9DDEC]/40 backdrop-blur-sm hover:border-cyan-500/30 transition-all">
                     <span className="text-lg font-mono font-bold text-[#0460A9]">{ev.year}</span>
                     <h4 className="text-xl font-bold font-mono text-[#102033]">{ev.title}</h4>
                     <p className="text-[#3E5168] text-sm md:text-base leading-relaxed">{ev.desc}</p>
@@ -223,7 +223,7 @@ export default function About() {
         </section>
 
         {/* MEET THE HERO */}
-        <section id="sec-team" className="py-20 md:py-24 bg-white/70 border-t border-[#D5E0EA] backdrop-blur-sm">
+        <section id="sec-team" className="py-20 md:py-24 bg-white/70 border-t border-[#C9DDEC] backdrop-blur-sm">
           <div className="container px-4 md:px-8 mx-auto">
             <div className="text-center mb-12 md:mb-16">
               <span className="text-sm font-bold font-mono text-[#0460A9] tracking-widest uppercase">Leadership</span>
@@ -237,7 +237,7 @@ export default function About() {
               {MENTORS.map((mentor, index) => (
                 <div
                   key={index}
-                  className="p-0 rounded-2xl bg-white/84 backdrop-blur-md border border-[#D5E0EA] flex flex-col-reverse md:flex-row items-stretch justify-between overflow-hidden shadow-2xl group hover:border-cyan-500/40 transition-all duration-500"
+                  className="p-0 rounded-2xl bg-white/84 backdrop-blur-md border border-[#C9DDEC] flex flex-col-reverse md:flex-row items-stretch justify-between overflow-hidden shadow-2xl group hover:border-cyan-500/40 transition-all duration-500"
                 >
                   {/* Left Side: Text Description */}
                   <div className="p-8 md:p-10 lg:p-14 xl:p-16 md:w-7/12 lg:w-3/5 flex flex-col justify-center text-left space-y-6 lg:space-y-7 z-10 bg-white/72 backdrop-blur-md">
@@ -267,10 +267,10 @@ export default function About() {
                   </div>
 
                   {/* Right Side: Prasanna's Photo scaled up & blended into background */}
-                  <div className="relative md:w-5/12 lg:w-2/5 min-h-[340px] md:min-h-[440px] lg:min-h-[520px] xl:min-h-[550px] bg-[#F4F7FB]/40 flex items-center justify-center overflow-hidden">
+                  <div className="relative md:w-5/12 lg:w-2/5 min-h-[340px] md:min-h-[440px] lg:min-h-[520px] xl:min-h-[550px] bg-[#E7F2FA]/40 flex items-center justify-center overflow-hidden">
                     {/* Seamless Blending Gradient Overlays */}
-                    <div className="absolute inset-0 z-20 bg-gradient-to-t md:bg-gradient-to-r from-[#F4F7FB] via-white/55 to-transparent pointer-events-none w-full h-full" />
-                    <div className="absolute inset-0 z-20 bg-gradient-to-b from-transparent via-transparent to-[#E7EEF6]/85 pointer-events-none w-full h-full" />
+                    <div className="absolute inset-0 z-20 bg-gradient-to-t md:bg-gradient-to-r from-[#E7F2FA] via-white/55 to-transparent pointer-events-none w-full h-full" />
+                    <div className="absolute inset-0 z-20 bg-gradient-to-b from-transparent via-transparent to-[#E4F1F8]/85 pointer-events-none w-full h-full" />
 
                     <LiquidGlassImage
                       src={mentor.image}
@@ -286,7 +286,7 @@ export default function About() {
         </section>
 
         {/* INTERNAL CROSS-LINKS CTA */}
-        <section className="py-16 bg-white/70 backdrop-blur-sm border-t border-[#D5E0EA]">
+        <section className="py-16 bg-white/70 backdrop-blur-sm border-t border-[#C9DDEC]">
           <div className="container px-4 md:px-8 mx-auto">
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-2xl md:text-3xl font-bold font-mono tracking-wider mb-4">Ready to See Us in Action?</h2>
@@ -308,7 +308,7 @@ export default function About() {
                 </button>
                 <button
                   onClick={() => handleNavigate("/blogs")}
-                  className="flex items-center justify-center gap-2 px-6 py-3 border border-[#D5E0EA] text-[#3E5168] font-bold font-mono text-sm tracking-wider rounded-lg hover:border-cyan-500/50 hover:text-[#0460A9] transition-all duration-300 cursor-pointer"
+                  className="flex items-center justify-center gap-2 px-6 py-3 border border-[#C9DDEC] text-[#3E5168] font-bold font-mono text-sm tracking-wider rounded-lg hover:border-cyan-500/50 hover:text-[#0460A9] transition-all duration-300 cursor-pointer"
                 >
                   Read Our Blog <ArrowRight size={16} />
                 </button>
