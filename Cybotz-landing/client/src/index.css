@@ -840,6 +840,11 @@ html[data-splash="on"] header img[alt="Cybotz"] {
   overflow: visible;
 }
 
+.flight-canvas,
+.flight-canvas canvas {
+  pointer-events: none;
+}
+
 .flight-canvas canvas {
   display: block;
   width: 100% !important;

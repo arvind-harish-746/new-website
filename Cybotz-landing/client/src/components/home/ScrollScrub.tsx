@@ -182,7 +182,7 @@ export function ScrollScrub() {
       current += (target - current) * LERP;
       if (Math.abs(target - current) < 0.0005) current = target;
       const video = videoRef.current;
-      if (video && video.readyState >= 1 && Number.isFinite(video.duration) && video.duration > 0) {
+      if (video && video.readyState >= 1 && Number.isFinite(video.duration) && video.duration > 0 && !video.seeking) {
         const next = current * video.duration;
         if (Math.abs(video.currentTime - next) > SEEK_GAP) video.currentTime = next;
       }

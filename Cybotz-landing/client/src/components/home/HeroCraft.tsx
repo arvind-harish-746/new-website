@@ -422,12 +422,25 @@ function HeroCanvas({ reduce }: { reduce: boolean }) {
   const layerRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef(0);
   const [hidden, setHidden] = useState(false);
+  const [revealOn, setRevealOn] = useState(false);
   const live = !hidden && intro !== "classic";
 
   useEffect(() => {
     const onVis = () => setHidden(document.hidden);
     document.addEventListener("visibilitychange", onVis);
     return () => document.removeEventListener("visibilitychange", onVis);
+  }, []);
+
+  useEffect(() => {
+    let raf = 0;
+    const watch = () => {
+      const value = Number(document.documentElement.dataset.droneReveal || "1");
+      const on = value > 0.01;
+      setRevealOn((prev) => (prev === on ? prev : on));
+      raf = requestAnimationFrame(watch);
+    };
+    raf = requestAnimationFrame(watch);
+    return () => cancelAnimationFrame(raf);
   }, []);
 
   useEffect(() => {
@@ -456,22 +469,24 @@ function HeroCanvas({ reduce }: { reduce: boolean }) {
   }, [reduce, intro]);
 
   const mobile = typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches;
-  const frameloop = !live || reduce ? "demand" : "always";
+  const frameloop = !live || reduce || !revealOn ? "demand" : "always";
 
   const canvas = (
     <div ref={layerRef} className="flight-canvas" style={{ opacity: reduce ? 1 : 0 }} aria-hidden="true">
-      <Canvas
-        dpr={mobile ? [1, 1.1] : [1, 1.25]}
-        frameloop={frameloop}
-        camera={{ position: [1.6, 0.9, 2.1], fov: 32, near: 0.05, far: 80 }}
-        gl={{ alpha: true, antialias: !mobile, powerPreference: "high-performance" }}
-        onCreated={({ gl }) => {
-          gl.setClearColor(0x000000, 0);
-        }}
-      >
-        <StudioLights />
-        <DroneModel reduce={reduce} progressRef={progressRef} layerRef={layerRef} />
-      </Canvas>
+      {(reduce || revealOn) && (
+        <Canvas
+          dpr={mobile ? [1, 1.1] : [1, 1.25]}
+          frameloop={frameloop}
+          camera={{ position: [1.6, 0.9, 2.1], fov: 32, near: 0.05, far: 80 }}
+          gl={{ alpha: true, antialias: !mobile, powerPreference: "high-performance" }}
+          onCreated={({ gl }) => {
+            gl.setClearColor(0x000000, 0);
+          }}
+        >
+          <StudioLights />
+          <DroneModel reduce={reduce} progressRef={progressRef} layerRef={layerRef} />
+        </Canvas>
+      )}
     </div>
   );
 
