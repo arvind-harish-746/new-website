@@ -384,10 +384,20 @@ export const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose, onRefre
       if (res.ok) {
         const data = await res.json();
         setChangelogs(data.changelogs || []);
+        setIsAuthenticated(true);
         if (data.userRole) {
           setUserRole(data.userRole);
           sessionStorage.setItem("owner_auth_role", data.userRole);
         }
+      } else if (res.status === 401) {
+        setIsAuthenticated(false);
+        sessionStorage.removeItem("owner_auth_token");
+        sessionStorage.removeItem("owner_auth_role");
+        sessionStorage.removeItem("owner_auth_user");
+        setAuthToken("");
+        setUserRole("");
+        setCurrentUsername("");
+        setAuthError("Session expired or invalid credentials.");
       }
     } catch (err) {
       console.error("Failed to fetch changelogs:", err);
@@ -606,7 +616,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose, onRefre
       const data = await res.json();
       if (res.ok) {
         setRegStep("otp");
-        setRegMessage({ text: "Verification code sent to WhatsApp group chat.", isError: false });
+        setRegMessage({ text: data.message || "Verification code generated.", isError: false });
       } else {
         setRegMessage({ text: data.error || "Failed to request verification code.", isError: true });
       }
@@ -689,7 +699,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose, onRefre
       const data = await res.json();
       if (res.ok) {
         setModalRegStep("otp");
-        setModalRegMessage({ text: "Verification code sent to WhatsApp group chat.", isError: false });
+        setModalRegMessage({ text: data.message || "Verification code generated.", isError: false });
       } else {
         setModalRegMessage({ text: data.error || "Failed to request code.", isError: true });
       }
@@ -915,7 +925,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose, onRefre
   const handleCancelBooking = (date: string) => {
     setConfirmModal({
       title: "Cancel Reservation",
-      message: `Are you sure you want to cancel the reservation for "${date}"? This will unblock the date for new client bookings and dispatch an automated WhatsApp notification.`,
+      message: `Are you sure you want to cancel the reservation for "${date}"? This will unblock the date for new client bookings.`,
       confirmText: "Cancel Reservation",
       onConfirm: async () => {
         // Optimistic update
@@ -1452,7 +1462,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose, onRefre
               <p className="text-xs text-gray-400">
                 {authMode === "login"
                   ? "Please enter your credentials to access management controls."
-                  : "Set up a portal account verified through the team WhatsApp."}
+                  : "Set up a portal account."}
               </p>
             </div>
 
@@ -1637,9 +1647,9 @@ export const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose, onRefre
                   /* Step 2: OTP Entry */
                   <form onSubmit={handleVerifyOtp} className="space-y-4">
                     <div className="p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs text-center space-y-1">
-                      <p className="font-bold">WhatsApp Verification Code Sent</p>
+                      <p className="font-bold">Verification Code Sent</p>
                       <p className="text-[11px] text-gray-400">
-                        Check the Cybotz team WhatsApp group chat for the 6-digit code.
+                        Enter the 6-digit verification code to complete account setup.
                       </p>
                     </div>
 
@@ -2850,9 +2860,9 @@ export const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose, onRefre
                         ) : (
                           <form onSubmit={handleModalVerifyOtp} className="space-y-4 text-xs">
                             <div className="p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-center space-y-1">
-                              <p className="font-bold">WhatsApp Verification Code Sent</p>
+                              <p className="font-bold">Verification Code Sent</p>
                               <p className="text-[11px] text-gray-400">
-                                Check the Cybotz team WhatsApp group chat for the 6-digit code.
+                                Enter the 6-digit verification code to complete account setup.
                               </p>
                             </div>
 

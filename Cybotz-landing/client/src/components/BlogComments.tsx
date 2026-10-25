@@ -376,7 +376,7 @@ export default function BlogComments({ blogId, initialComments = [] }: BlogComme
 
           <div className="flex items-center justify-between pt-1">
             <span className="text-xs text-slate-400">
-              Need a password? Set it via the Portal with your WhatsApp OTP.
+              Need a password? Set it via the Student Portal.
             </span>
             <button
               type="submit"

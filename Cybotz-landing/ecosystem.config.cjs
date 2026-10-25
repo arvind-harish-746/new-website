@@ -11,28 +11,6 @@ module.exports = {
         NODE_ENV: "production",
         PORT: 5000
       }
-    },
-    {
-      name: "cybotz-worker",
-      script: "npx",
-      args: "tsx server/worker.ts",
-      autorestart: true,
-      watch: false,
-      max_memory_restart: "300M",
-      env: {
-        NODE_ENV: "production"
-      }
-    },
-    {
-      name: "cybotz-wa-runner",
-      script: "npx",
-      args: "tsx server/run-whatsapp.ts",
-      autorestart: true,
-      watch: false,
-      max_memory_restart: "400M",
-      env: {
-        NODE_ENV: "production"
-      }
     }
   ]
 };

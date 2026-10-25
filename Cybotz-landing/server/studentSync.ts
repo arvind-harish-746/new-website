@@ -3,7 +3,6 @@ import path from "path";
 import bcrypt from "bcrypt";
 import { fileURLToPath } from "url";
 import { User } from "./models/User.js";
-import { enqueueWhatsAppMessage } from "./queue.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -122,7 +121,7 @@ export async function parseStudentFile(filePath: string): Promise<StudentRow[]> 
 }
 
 /**
- * Reconciles and syncs student records into MongoDB & sends WhatsApp notifications
+ * Reconciles and syncs student records into MySQL database
  */
 export async function syncStudents(studentsList: StudentRow[]): Promise<{
   created: number;
@@ -176,18 +175,6 @@ export async function syncStudents(studentsList: StudentRow[]): Promise<{
 
     created++;
     details.push(`Created account for ${student.name} (${finalUsername})`);
-
-    // Clean emoji-free WhatsApp Welcome Notification
-    const messageText = `CYBOTZ Robotics & STEM Portal\n--------------------------------\nHello ${student.name}, your student account has been created.\n\nUsername: ${finalUsername}\nPortal URL: https://cybotz.in/portal\n--------------------------------\nNext Step: Visit the link above to set your password and join our blog discussions.`;
-
-    try {
-      await enqueueWhatsAppMessage({
-        phone: normalizedPhone,
-        messageText,
-      });
-    } catch (msgErr) {
-      console.warn(`[StudentSync] WhatsApp notification failed for ${normalizedPhone}:`, msgErr);
-    }
   }
 
   return { created, skipped, total: studentsList.length, details };

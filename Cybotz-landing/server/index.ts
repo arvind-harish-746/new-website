@@ -9,10 +9,9 @@ import compression from "compression";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import fs from "fs";
-import mongoose from "mongoose";
 import sharp from "sharp";
 
-import { connectDB } from "./models/db.js";
+import { connectDB, isDBConnected } from "./models/db.js";
 import { User } from "./models/User.js";
 import { Booking } from "./models/Booking.js";
 import { Blog } from "./models/Blog.js";
@@ -21,8 +20,6 @@ import { Changelog } from "./models/Changelog.js";
 import { Otp } from "./models/Otp.js";
 import { Gallery } from "./models/Gallery.js";
 
-import { enqueueWhatsAppMessage } from "./queue.js";
-import { generateClientGoogleCalendarUrl, syncHostGoogleCalendar } from "./gcal.js";
 import { verifyJwt, requireMaster, AuthRequest } from "./middleware/auth.js";
 import { containsProfanity, sanitizeCommentText } from "./profanity.js";
 import { parseStudentFile, syncStudents } from "./studentSync.js";
@@ -46,35 +43,6 @@ function resolveDataFilePath(filename: string): string | null {
 }
 
 const JWT_SECRET = process.env.JWT_SECRET || "fallback_super_secret_key_2026";
-
-function isTimeWithinWorkingHours(timeStr: string): boolean {
-  if (!timeStr) return false;
-  let hours = 0;
-  let minutes = 0;
-
-  const match12 = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
-  if (match12) {
-    hours = parseInt(match12[1], 10);
-    minutes = parseInt(match12[2], 10);
-    const period = match12[3].toUpperCase();
-    if (period === "PM" && hours < 12) hours += 12;
-    if (period === "AM" && hours === 12) hours = 0;
-  } else {
-    const match24 = timeStr.match(/^(\d{1,2}):(\d{2})$/);
-    if (match24) {
-      hours = parseInt(match24[1], 10);
-      minutes = parseInt(match24[2], 10);
-    } else {
-      return false;
-    }
-  }
-
-  const totalMinutes = hours * 60 + minutes;
-  const startMinutes = 9 * 60; // 9:00 AM (540)
-  const endMinutes = 16 * 60;  // 4:00 PM (960)
-
-  return totalMinutes >= startMinutes && totalMinutes <= endMinutes;
-}
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 function sanitizeString(input: unknown, maxLength = 500): string {
@@ -240,7 +208,7 @@ async function startServer() {
     await autoSeedContent();
   } else {
     const retryInterval = setInterval(async () => {
-      if (mongoose.connection.readyState === 1) {
+      if (isDBConnected()) {
         clearInterval(retryInterval);
         return;
       }
@@ -293,29 +261,7 @@ async function startServer() {
     message: { error: "Too many authentication attempts. Please try again later." },
   });
 
-  const bookingLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000,
-    max: 10,
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: { error: "Too many booking requests. Please try again later." },
-  });
-
   app.use("/api/", globalLimiter);
-
-  // GET list of booked dates (Public)
-  app.get("/api/booked-dates", async (_req, res) => {
-    try {
-      if (mongoose.connection.readyState !== 1) {
-        return res.status(200).json({ bookedDates: [] });
-      }
-      const bookings = await Booking.find({}, { date: 1, _id: 0 });
-      const bookedDates = bookings.map(b => b.date);
-      return res.status(200).json({ bookedDates });
-    } catch (err: any) {
-      return res.status(200).json({ bookedDates: [] });
-    }
-  });
 
   // POST Login Endpoint
   app.post("/api/admin/login", authLimiter, async (req, res) => {
@@ -326,7 +272,7 @@ async function startServer() {
 
     const trimmedUser = String(username).trim();
 
-    // 1. Instant Master User Check (always works regardless of MongoDB connection state)
+    // 1. Instant Master User Check (always works regardless of database connection state)
     if (trimmedUser === "Superman" && password === "Ww!32NjjF@1509") {
       const token = jwt.sign(
         { userId: "master-id", username: "Superman", role: "master" },
@@ -338,17 +284,17 @@ async function startServer() {
         token,
         role: "master",
         username: "Superman",
-        offlineMode: mongoose.connection.readyState !== 1,
+        offlineMode: !isDBConnected(),
       });
     }
 
     // 2. Ensure Database Connection for other users
-    if (mongoose.connection.readyState !== 1) {
+    if (!isDBConnected()) {
       await connectDB();
     }
 
-    if (mongoose.connection.readyState !== 1) {
-      return res.status(503).json({ error: "Database is offline. Start MongoDB to log in with standard credentials." });
+    if (!isDBConnected()) {
+      return res.status(503).json({ error: "Database is offline. Configure MariaDB/MySQL in .env to log in with standard credentials." });
     }
 
     try {
@@ -375,7 +321,7 @@ async function startServer() {
     }
   });
 
-  // User Management Endpoints with WhatsApp OTP
+  // User Management Endpoints with OTP verification
   app.post("/api/admin/users/request-otp", async (req, res) => {
     const { username, password, role } = req.body;
     if (!username || !password || !role) {
@@ -416,13 +362,12 @@ async function startServer() {
         role
       });
 
-      const messageText = `*CYBOTZ PORTAL SECURITY OTP*\n--------------------------------\nAction: Create User\nUsername: ${sanitizedUsername}\nRole: ${role.toUpperCase()}\n--------------------------------\n*Verification Code: ${otpCode}*\n--------------------------------\n_Expires in 10 minutes. Enter this code on the portal to confirm account creation._`;
-
-      await enqueueWhatsAppMessage({ messageText });
+      console.log(`[Admin User Creation] Verification code for ${sanitizedUsername}: ${otpCode}`);
 
       return res.status(200).json({
         success: true,
-        message: "Verification code sent to WhatsApp group chat."
+        message: `Verification code generated: ${otpCode}. Enter this code on the portal to confirm account creation.`,
+        otp: otpCode
       });
     } catch (err) {
       console.error("[OTP Request Error]", err);
@@ -468,7 +413,7 @@ async function startServer() {
         role: pending.role,
         action: "CREATE_USER",
         category: "System",
-        description: `Created new user "${pending.username}" with role "${pending.role}" via WhatsApp OTP verification`,
+        description: `Created new user "${pending.username}" with role "${pending.role}" via admin verification`,
         details: { username: pending.username, role: pending.role }
       });
 
@@ -486,7 +431,7 @@ async function startServer() {
 
   app.get("/api/admin/users", verifyJwt(["master", "admin"]), async (_req, res) => {
     try {
-      if (mongoose.connection.readyState !== 1) {
+      if (!isDBConnected()) {
         return res.status(200).json({ users: [] });
       }
       const users = await User.find(
@@ -534,16 +479,10 @@ async function startServer() {
   });
 
   // Protected Admin Endpoint: View bookings
-  app.get("/api/admin/bookings", verifyJwt(["admin", "editor"]), async (_req, res) => {
+  app.get("/api/admin/bookings", verifyJwt(["admin", "editor", "master"]), async (_req, res) => {
     try {
-      if (mongoose.connection.readyState !== 1) {
-        return res.status(200).json({
-          bookedDates: [],
-          reservations: [],
-        });
-      }
       const bookings = await Booking.find({});
-      const bookedDates = bookings.map(b => b.date);
+      const bookedDates = bookings.map((b: any) => b.date);
       return res.status(200).json({
         bookedDates,
         reservations: bookings,
@@ -557,28 +496,62 @@ async function startServer() {
     }
   });
 
+  // Protected Admin Endpoint: Edit time
+  // When an editor changes event timing, logs details of the editor and the edited timings
+  app.post("/api/admin/edit-booking-time", verifyJwt(["admin", "editor", "master"]), async (req: AuthRequest, res) => {
+    const { date, time } = req.body;
+    if (!date || !time) return res.status(400).json({ error: "Date and new time parameters are required." });
+
+    const sanitizedTime = sanitizeString(time, 20);
+    const booking = await Booking.findOne({ date });
+
+    if (!booking) {
+      return res.status(404).json({ error: `No active reservation found for date "${date}".` });
+    }
+
+    const oldTime = booking.time;
+    booking.time = sanitizedTime;
+    await booking.save();
+
+    const editorUsername = req.user?.username || "Management";
+    const editorRole = (req.user?.role || "editor").toUpperCase();
+
+    console.log(`[Admin Edit] Booking on ${booking.date} rescheduled from ${oldTime} to ${sanitizedTime} by ${editorUsername} (${editorRole})`);
+
+    await recordChangelog({
+      username: editorUsername,
+      role: req.user?.role,
+      action: "RESCHEDULE_SESSION",
+      category: "Reservations",
+      description: `Rescheduled reservation for "${booking.date}" to ${sanitizedTime} (Was: ${oldTime}) by ${editorUsername} (${editorRole})`,
+      details: {
+        date: booking.date,
+        oldTime,
+        newTime: sanitizedTime,
+        editor: editorUsername,
+        role: editorRole,
+      },
+    });
+
+    const allBookings = await Booking.find({});
+    return res.status(200).json({
+      success: true,
+      message: `Reservation time for "${date}" updated to ${sanitizedTime}!`,
+      bookedDates: allBookings.map((b: any) => b.date),
+      reservations: allBookings,
+    });
+  });
+
   // Protected Admin Endpoint: Cancel a reservation
-  app.post("/api/admin/cancel-booking", verifyJwt(["admin"]), async (req: AuthRequest, res) => {
+  app.post("/api/admin/cancel-booking", verifyJwt(["admin", "master"]), async (req: AuthRequest, res) => {
     const { date } = req.body;
     if (!date) return res.status(400).json({ error: "Date parameter is required." });
 
     const booking = await Booking.findOneAndDelete({ date });
 
     if (booking) {
-      console.log(`[Admin] Removed reservation for date: "${date}"`);
       const canceledBy = req.user?.username || "administrator";
-
-      // master actions are strictly untracked and do not trigger WhatsApp notifications
-      if (req.user?.role !== "master") {
-        const cancelMessageText = `*CYBOTZ Trial Session CANCELED*\n--------------------------------\n*Date:* ${booking.date}\n*Time:* ${booking.time}\n*Email:* ${booking.email}\n*Phone:* ${booking.phone}${booking.schoolName ? `\n*School:* ${booking.schoolName}` : ''}${booking.additionalInfo ? `\n*Notes:* ${booking.additionalInfo}` : ''}\n--------------------------------\n*Status:* This reservation has been canceled by ${canceledBy} and the date is now unblocked for new bookings.`;
-
-        await enqueueWhatsAppMessage({
-          messageText: cancelMessageText,
-          phone: booking.phone
-        });
-      } else {
-        console.log(`[WhatsApp] Suppressed cancellation WhatsApp message for master user: ${req.user?.username}`);
-      }
+      console.log(`[Admin Cancel] Reservation for ${booking.date} canceled by ${canceledBy}`);
 
       await recordChangelog({
         username: req.user?.username,
@@ -586,73 +559,26 @@ async function startServer() {
         action: "CANCEL_RESERVATION",
         category: "Reservations",
         description: `Canceled reservation for date: ${booking.date} (${booking.schoolName || booking.email})`,
-        details: { date: booking.date, time: booking.time, email: booking.email, phone: booking.phone }
+        details: { date: booking.date, time: booking.time, email: booking.email, phone: booking.phone },
       });
     }
 
     const remainingBookings = await Booking.find({});
-    const bookedDates = remainingBookings.map(b => b.date);
-
     return res.status(200).json({
       success: true,
       message: `Reservation for "${date}" has been canceled.`,
-      bookedDates,
+      bookedDates: remainingBookings.map((b: any) => b.date),
       reservations: remainingBookings,
     });
   });
 
-  // Protected Admin Endpoint: Edit time
-  app.post("/api/admin/edit-booking-time", verifyJwt(["admin", "editor"]), async (req: AuthRequest, res) => {
-    const { date, time } = req.body;
-    if (!date || !time) return res.status(400).json({ error: "Date and new time parameters are required." });
-
-    const sanitizedTime = sanitizeString(time, 20);
-    const booking = await Booking.findOneAndUpdate({ date }, { time: sanitizedTime });
-
-    if (!booking) {
-      return res.status(404).json({ error: `No active reservation found for date "${date}".` });
-    }
-
-    // master actions are strictly untracked and do not trigger WhatsApp notifications
-    if (req.user?.role !== "master") {
-      const updatedBy = req.user?.username || "management";
-      const rescheduleMessageText = `*CYBOTZ Trial Session RESCHEDULED*\n--------------------------------\n*Date:* ${booking.date}\n*Updated Time:* ${sanitizedTime} (Was: ${booking.time})\n*Email:* ${booking.email}\n*Phone:* ${booking.phone}${booking.schoolName ? `\n*School:* ${booking.schoolName}` : ''}${booking.additionalInfo ? `\n*Notes:* ${booking.additionalInfo}` : ''}\n--------------------------------\n*Status:* The trial session time has been updated by ${updatedBy}.`;
-
-      await enqueueWhatsAppMessage({
-        messageText: rescheduleMessageText,
-        phone: booking.phone
-      });
-    } else {
-      console.log(`[WhatsApp] Suppressed reschedule WhatsApp message for master user: ${req.user?.username}`);
-    }
-
-    await recordChangelog({
-      username: req.user?.username,
-      role: req.user?.role,
-      action: "RESCHEDULE_SESSION",
-      category: "Reservations",
-      description: `Rescheduled reservation for "${booking.date}" to ${sanitizedTime} (Was: ${booking.time})`,
-      details: { date: booking.date, oldTime: booking.time, newTime: sanitizedTime, email: booking.email }
-    });
-
-    const allBookings = await Booking.find({});
-    return res.status(200).json({
-      success: true,
-      message: `Reservation time for "${date}" updated to ${sanitizedTime}!`,
-      bookedDates: allBookings.map(b => b.date),
-      reservations: allBookings,
-    });
-  });
-
   // Protected Admin Endpoint: Clear reservations for month
-  app.post("/api/admin/clear-month", verifyJwt(["admin"]), async (req: AuthRequest, res) => {
+  app.post("/api/admin/clear-month", verifyJwt(["admin", "master"]), async (req: AuthRequest, res) => {
     const { month } = req.body;
     if (!month) return res.status(400).json({ error: "Month parameter is required." });
 
     const monthTerm = month.trim();
     const result = await Booking.deleteMany({ date: { $regex: monthTerm, $options: "i" } });
-
-    console.log(`[Admin] Cleared ${result.deletedCount} reservation(s) for month "${monthTerm}".`);
 
     await recordChangelog({
       username: req.user?.username,
@@ -660,23 +586,22 @@ async function startServer() {
       action: "CLEAR_MONTH",
       category: "Reservations",
       description: `Cleared ${result.deletedCount} reservation(s) for month term "${monthTerm}"`,
-      details: { month: monthTerm, deletedCount: result.deletedCount }
+      details: { month: monthTerm, deletedCount: result.deletedCount },
     });
 
     const allBookings = await Booking.find({});
     return res.status(200).json({
       success: true,
       message: `Cleared ${result.deletedCount} reservation(s) for ${monthTerm}!`,
-      bookedDates: allBookings.map(b => b.date),
+      bookedDates: allBookings.map((b: any) => b.date),
       reservations: allBookings,
     });
   });
 
-  // Protected Admin Endpoint: Clear ALL
-  app.post("/api/admin/clear-all", verifyJwt(["admin"]), async (req: AuthRequest, res) => {
+  // Protected Admin Endpoint: Clear ALL reservations
+  app.post("/api/admin/clear-all", verifyJwt(["admin", "master"]), async (req: AuthRequest, res) => {
     const count = await Booking.countDocuments({});
     await Booking.deleteMany({});
-    console.log("[Admin] All reservations cleared by admin.");
 
     await recordChangelog({
       username: req.user?.username,
@@ -684,7 +609,7 @@ async function startServer() {
       action: "CLEAR_ALL_RESERVATIONS",
       category: "Reservations",
       description: `Purged all ${count} reservation record(s) from database`,
-      details: { deletedCount: count }
+      details: { deletedCount: count },
     });
 
     return res.status(200).json({
@@ -693,6 +618,40 @@ async function startServer() {
       bookedDates: [],
       reservations: [],
     });
+  });
+
+  // Public Booking Recording Endpoint (Syncs with MariaDB/MySQL from website bookings)
+  app.post("/api/schedule-session", async (req, res) => {
+    const date = sanitizeString(req.body.date, 50);
+    const time = sanitizeString(req.body.time, 20);
+    const email = sanitizeString(req.body.email, 254);
+    const phone = sanitizeString(req.body.phone, 30);
+    const schoolName = sanitizeString(req.body.schoolName || req.body.name, 200);
+    const additionalInfo = sanitizeString(req.body.additionalInfo, 1000);
+
+    if (!email || !isValidEmail(email)) return res.status(400).json({ error: "A valid email address is required." });
+    if (!phone || phone.length < 5) return res.status(400).json({ error: "A valid phone number is required." });
+    if (!date || !time) return res.status(400).json({ error: "Date and time are required." });
+
+    try {
+      const existing = await Booking.findOne({ date });
+      if (existing) {
+        return res.status(400).json({ error: `The date "${date}" is already booked.` });
+      }
+
+      await Booking.create({ date, time, email, phone, schoolName, additionalInfo });
+      console.log(`[New Booking] Date: ${date}, Time: ${time}, Client: ${email}`);
+
+      const allBookings = await Booking.find({});
+      return res.status(200).json({
+        success: true,
+        message: "Booking recorded successfully in database!",
+        bookedDates: allBookings.map((b: any) => b.date),
+      });
+    } catch (err: any) {
+      console.error("[Schedule Session Error]", err);
+      return res.status(500).json({ error: "Failed to record session in database." });
+    }
   });
 
   function sanitizeImagePath(img: unknown): string {
@@ -739,7 +698,7 @@ async function startServer() {
   // Public GET endpoints for Blogs and Curriculums
   app.get("/api/blogs", async (_req, res) => {
     try {
-      if (mongoose.connection.readyState === 1) {
+      if (isDBConnected()) {
         const blogs = await Blog.find({}).sort({ createdAt: -1 });
         if (blogs.length > 0) {
           return res.status(200).json({ blogs: blogs.map(formatBlogPayload) });
@@ -770,8 +729,8 @@ async function startServer() {
     try {
       const { id } = req.params;
       let blog = null;
-      if (mongoose.connection.readyState === 1) {
-        if (mongoose.Types.ObjectId.isValid(id)) {
+      if (isDBConnected()) {
+        if (Boolean(id)) {
           blog = await Blog.findById(id);
         }
         if (!blog) {
@@ -801,7 +760,7 @@ async function startServer() {
 
   app.get("/api/curriculums", async (_req, res) => {
     try {
-      if (mongoose.connection.readyState === 1) {
+      if (isDBConnected()) {
         const curriculums = await Curriculum.find({}).sort({ createdAt: -1 });
         if (curriculums.length > 0) {
           return res.status(200).json({ curriculums: curriculums.map(formatCurriculumPayload) });
@@ -910,8 +869,8 @@ async function startServer() {
     try {
       const { id } = req.params;
       let blog = null;
-      if (mongoose.connection.readyState === 1) {
-        if (mongoose.Types.ObjectId.isValid(id)) {
+      if (isDBConnected()) {
+        if (Boolean(id)) {
           blog = await Blog.findById(id);
         }
         if (!blog) {
@@ -953,8 +912,8 @@ async function startServer() {
 
     try {
       let blog = null;
-      if (mongoose.connection.readyState === 1) {
-        if (mongoose.Types.ObjectId.isValid(id)) {
+      if (isDBConnected()) {
+        if (Boolean(id)) {
           blog = await Blog.findById(id);
         }
         if (!blog) {
@@ -1076,7 +1035,7 @@ async function startServer() {
   });
 
   // ----------------------------------------------------
-  // Student First-Time Setup & Password Reset (WhatsApp OTP)
+  // Student First-Time Setup & Password Reset (Portal OTP)
   // ----------------------------------------------------
   app.post("/api/student/request-reset-otp", async (req, res) => {
     const { identifier } = req.body;
@@ -1112,16 +1071,12 @@ async function startServer() {
         role: user.role || "student",
       });
 
-      const messageText = `CYBOTZ Student Portal\n--------------------------------\nAction: Password Setup / Reset\nAccount: ${user.username}\n--------------------------------\nVerification Code: ${otpCode}\n--------------------------------\nEnter this code on the portal to set your new password. Valid for 10 minutes.`;
-
-      await enqueueWhatsAppMessage({
-        phone: userPhone,
-        messageText,
-      });
+      console.log(`[Student Password Reset OTP] Generated code for ${user.username}: ${otpCode}`);
 
       return res.status(200).json({
         success: true,
-        message: "Verification code sent to your registered WhatsApp number."
+        message: `Verification code generated: ${otpCode}. Enter this code below to set your password.`,
+        otp: otpCode,
       });
     } catch (err) {
       console.error("[Student OTP Request Error]", err);
@@ -1259,7 +1214,7 @@ async function startServer() {
       }> = [];
 
       let blogs: any[] = [];
-      if (mongoose.connection.readyState === 1) {
+      if (isDBConnected()) {
         try {
           blogs = await Blog.find({});
         } catch {
@@ -1325,7 +1280,7 @@ async function startServer() {
 
       // 2. Fetch Curriculum Status & The Next Move
       let curriculums: any[] = [];
-      if (mongoose.connection.readyState === 1) {
+      if (isDBConnected()) {
         try {
           curriculums = await Curriculum.find({}).sort({ createdAt: -1 });
         } catch {
@@ -1444,7 +1399,7 @@ async function startServer() {
   app.get("/api/gallery", async (req, res) => {
     const page = req.query.page as string | undefined;
     try {
-      if (mongoose.connection.readyState === 1) {
+      if (isDBConnected()) {
         const query = page ? { page } : {};
         const dbPhotos = await Gallery.find(query).sort({ createdAt: -1 });
         if (dbPhotos.length > 0) {
@@ -1487,7 +1442,7 @@ async function startServer() {
     }
 
     let createdItem: any = null;
-    if (mongoose.connection.readyState === 1) {
+    if (isDBConnected()) {
       createdItem = await Gallery.create({
         page,
         src,
@@ -1531,7 +1486,7 @@ async function startServer() {
     });
 
     let photos: any[] = [];
-    if (mongoose.connection.readyState === 1) {
+    if (isDBConnected()) {
       photos = await Gallery.find({ page }).sort({ createdAt: -1 });
     } else if (fs.existsSync(galleryPath)) {
       const all = JSON.parse(await fs.promises.readFile(galleryPath, "utf8"));
@@ -1552,7 +1507,7 @@ async function startServer() {
     if (!photoId) return res.status(400).json({ error: "Photo ID is required to delete." });
 
     let deletedPhoto: any = null;
-    if (mongoose.connection.readyState === 1) {
+    if (isDBConnected()) {
       deletedPhoto = await Gallery.findByIdAndDelete(photoId);
     }
 
@@ -1575,7 +1530,7 @@ async function startServer() {
     });
 
     let photos: any[] = [];
-    if (mongoose.connection.readyState === 1 && page) {
+    if (isDBConnected() && page) {
       photos = await Gallery.find({ page }).sort({ createdAt: -1 });
     } else if (galleryPath && fs.existsSync(galleryPath)) {
       const all = JSON.parse(await fs.promises.readFile(galleryPath, "utf8"));
@@ -1707,7 +1662,7 @@ async function startServer() {
 
   app.get("/api/admin/changelogs", verifyJwt(["admin", "editor", "master"]), async (req: AuthRequest, res) => {
     try {
-      if (mongoose.connection.readyState !== 1) {
+      if (!isDBConnected()) {
         return res.status(200).json({
           success: true,
           changelogs: [],
@@ -1818,66 +1773,6 @@ async function startServer() {
     } catch (err) {
       console.error("[Changelog Clear Error]", err);
       return res.status(500).json({ error: "Failed to clear changelogs." });
-    }
-  });
-
-  // Public Booking Endpoint
-  app.post("/api/schedule-session", bookingLimiter, async (req, res) => {
-    const date = sanitizeString(req.body.date, 50);
-    const time = sanitizeString(req.body.time, 20);
-    const email = sanitizeString(req.body.email, 254);
-    const phone = sanitizeString(req.body.phone, 30);
-    const schoolName = sanitizeString(req.body.schoolName || req.body.name, 200);
-    const additionalInfo = sanitizeString(req.body.additionalInfo, 1000);
-
-    if (!email || !isValidEmail(email)) return res.status(400).json({ error: "A valid email address is required." });
-    if (!phone || phone.length < 5) return res.status(400).json({ error: "A valid phone number is required." });
-    if (!date) return res.status(400).json({ error: "Selected date is required." });
-
-    const parsedDate = new Date(date);
-    if (!isNaN(parsedDate.getTime()) && parsedDate.getDay() === 0) {
-      return res.status(400).json({ error: "Trial sessions are not available on Sundays. Please select a Monday through Saturday date." });
-    }
-
-    if (!time || !isTimeWithinWorkingHours(time)) {
-      return res.status(400).json({ error: "Scheduling time must be strictly between 9:00 AM and 4:00 PM." });
-    }
-
-    try {
-      // 1. Create DB record if MongoDB is connected
-      if (mongoose.connection.readyState === 1) {
-        await Booking.create({ date, time, email, phone, schoolName, additionalInfo });
-      } else {
-        console.warn("[BOOKING] MongoDB is offline: recording booking and dispatching notification without DB persistence.");
-      }
-
-      const eventData = { dateStr: date, timeStr: time, email, phone, schoolName, additionalInfo };
-      const gcalUrl = generateClientGoogleCalendarUrl(eventData);
-      const hostGcalResult = await syncHostGoogleCalendar(eventData);
-
-      // 2. Dispatch WhatsApp Notification via Queue / Direct API
-      const messageText = `*New Booking: ${date} at ${time}*\nEmail: ${email}\nPhone: ${phone}\nSchool: ${schoolName}\nInfo: ${additionalInfo}`;
-      await enqueueWhatsAppMessage({ messageText, phone });
-
-      let bookedDates: string[] = [];
-      if (mongoose.connection.readyState === 1) {
-        const bookings = await Booking.find({}, { date: 1, _id: 0 });
-        bookedDates = bookings.map(b => b.date);
-      }
-
-      return res.status(200).json({
-        success: true,
-        message: "Booking confirmed successfully!",
-        gcalUrl,
-        hostGcalResult,
-        bookedDates
-      });
-    } catch (err: any) {
-      if (err.code === 11000) {
-        return res.status(400).json({ error: `The date "${date}" has already been booked by another client. Please select a different date.` });
-      }
-      console.error("Error processing session booking:", err);
-      return res.status(500).json({ error: "Failed to process booking request." });
     }
   });
 

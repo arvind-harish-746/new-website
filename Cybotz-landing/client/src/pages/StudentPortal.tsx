@@ -220,7 +220,7 @@ export default function StudentPortal() {
         setOtpMessage({ text: data.error || "Failed to send OTP.", isError: true });
       } else {
         setOtpStep("verify");
-        setOtpMessage({ text: "Verification code sent to your WhatsApp number!", isError: false });
+        setOtpMessage({ text: data.message || "Verification code generated successfully!", isError: false });
       }
     } catch {
       setOtpMessage({ text: "Network error sending OTP.", isError: true });
@@ -412,7 +412,7 @@ export default function StudentPortal() {
                       }}
                       className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors underline cursor-pointer bg-transparent border-none"
                     >
-                      First time login? Set your password via WhatsApp OTP
+                      First time login? Set your password via Portal OTP
                     </button>
                   </div>
                 </form>
@@ -457,7 +457,7 @@ export default function StudentPortal() {
                         disabled={otpLoading}
                         className="w-full py-2.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-xs hover:brightness-110 disabled:opacity-50 transition-all cursor-pointer border-none"
                       >
-                        {otpLoading ? "Sending OTP..." : "Send WhatsApp Verification Code"}
+                        {otpLoading ? "Generating OTP..." : "Get Verification Code"}
                       </button>
                     </form>
                   ) : (
