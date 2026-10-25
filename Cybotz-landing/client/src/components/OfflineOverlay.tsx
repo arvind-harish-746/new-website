@@ -49,7 +49,7 @@ export default function OfflineOverlay({ onRetry, isStandalonePage = false }: Of
     <div
       className={`${
         isStandalonePage ? "min-h-screen" : "fixed inset-0 z-[99999]"
-      } bg-[#F4F7FB] text-slate-200 flex flex-col items-center justify-center p-4 overflow-hidden select-none font-sans cockroach-cursor`}
+      } bg-[#0F172A] text-slate-200 flex flex-col items-center justify-center p-4 overflow-hidden select-none font-sans cockroach-cursor`}
       style={{
         cursor:
           "url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/28963/cockroach%20(2).ico'), url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cpath d='M14 6 C11 6 10 9 10 14 C10 19 11 22 14 22 C17 22 18 19 18 14 C18 9 17 6 14 6 Z' fill='%23b45309' stroke='%23451a03' stroke-width='1.2'/%3E%3Cpath d='M10 10 L4 7 M10 14 L3 14 M10 18 L4 21 M18 10 L24 7 M18 14 L25 14 M18 18 L24 21' stroke='%23451a03' stroke-width='1.2' stroke-linecap='round'/%3E%3Cpath d='M12 7 Q9 2 4 1 M16 7 Q19 2 24 1' stroke='%23451a03' stroke-width='1' fill='none' stroke-linecap='round'/%3E%3C/svg%3E\") 14 14, default",
@@ -60,7 +60,7 @@ export default function OfflineOverlay({ onRetry, isStandalonePage = false }: Of
         className="fixed inset-0 pointer-events-none opacity-40"
         style={{
           backgroundImage:
-            "linear-gradient(to right, rgba(5, 117, 206, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(5, 117, 206, 0.05) 1px, transparent 1px)",
+            "linear-gradient(to right, rgba(0, 240, 255, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 240, 255, 0.05) 1px, transparent 1px)",
           backgroundSize: "40px 40px",
         }}
       />
@@ -86,7 +86,7 @@ export default function OfflineOverlay({ onRetry, isStandalonePage = false }: Of
         </div>
 
         {/* Title */}
-        <h1 className="font-mono text-3xl sm:text-4xl font-bold text-[#102033] tracking-wide mt-2 mb-3">
+        <h1 className="font-mono text-3xl sm:text-4xl font-bold text-white tracking-wide mt-2 mb-3">
           You're Offline
         </h1>
 
@@ -100,7 +100,7 @@ export default function OfflineOverlay({ onRetry, isStandalonePage = false }: Of
         <button
           onClick={handleRetry}
           disabled={isRetrying || reconnected}
-          className="inline-flex items-center gap-2 px-8 py-3.5 bg-cyan-400 hover:bg-cyan-300 disabled:opacity-60 text-[#102033] font-mono font-bold text-xs sm:text-sm uppercase tracking-wider rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-[0_0_24px_rgba(5,117,206,0.4)] cursor-pointer"
+          className="inline-flex items-center gap-2 px-8 py-3.5 bg-cyan-400 hover:bg-cyan-300 disabled:opacity-60 text-slate-950 font-mono font-bold text-xs sm:text-sm uppercase tracking-wider rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-[0_0_24px_rgba(0,240,255,0.4)] cursor-pointer"
         >
           <RefreshCw size={16} className={isRetrying ? "animate-spin" : ""} />
           {reconnected

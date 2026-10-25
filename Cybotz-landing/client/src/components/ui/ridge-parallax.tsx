@@ -1372,8 +1372,8 @@ function __OriginkitBase_RidgeParallax(
 
 const __originkitPresetProps = {
   "background": "#0F172A",
-  "baseColor": "#0575CE",
-  "accentColor": "#3D8FD4",
+  "baseColor": "#00F0FF",
+  "accentColor": "#00C5E5",
   "pointer": 58,
   "range": {
     "fall": 300,

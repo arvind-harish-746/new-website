@@ -19,6 +19,7 @@ import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { useSplashGate, type IntroMode } from "@/components/SplashScreen";
 import { ReducedSplash, VideoSplash, type SplashHandoff } from "@/components/home/VideoSplash";
+import { useLocation } from "wouter";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -66,23 +67,18 @@ const NDC_LIMIT = 0.76;
 
 type Key = { x: number; y: number; s: number };
 
-/** Big left / right / left sweeps. Rotation comes from spring velocity, not these keys. */
-const DESKTOP_PATH: Key[] = [
-  { x: 0.46, y: 0.02, s: 0.76 },
-  { x: -0.78, y: 0.48, s: 0.5 },
-  { x: 0.82, y: -0.5, s: 0.58 },
-  { x: -0.74, y: 0.4, s: 0.46 },
-  { x: 0.78, y: -0.36, s: 0.44 },
-  { x: 0.52, y: -0.5, s: 0.4 },
-];
+const POS_TOP_LEFT: Key = { x: -0.74, y: 0.62, s: 0.50 };
+const POS_BOTTOM_RIGHT: Key = { x: 0.81, y: -0.73, s: 0.44 };
+const POS_BOTTOM_LEFT: Key = { x: -0.74, y: -0.62, s: 0.46 };
 
-/** Mobile still crosses the screen, with the hero pose large under the headline. */
-const MOBILE_PATH: Key[] = [
-  { x: 0.0, y: -0.08, s: 0.62 },
-  { x: 0.7, y: 0.36, s: 0.44 },
-  { x: -0.64, y: -0.32, s: 0.4 },
-  { x: 0.46, y: -0.58, s: 0.36 },
-];
+function lerpKey(a: Key, b: Key, t: number): Key {
+  const c = THREE.MathUtils.clamp(t, 0, 1);
+  return {
+    x: THREE.MathUtils.lerp(a.x, b.x, c),
+    y: THREE.MathUtils.lerp(a.y, b.y, c),
+    s: THREE.MathUtils.lerp(a.s, b.s, c),
+  };
+}
 
 function posedCorners(box: THREE.Box3) {
   const base: THREE.Vector3[] = [];
@@ -163,40 +159,6 @@ function shadowTexture() {
   return texture;
 }
 
-function smooth(t: number) {
-  const x = THREE.MathUtils.clamp(t, 0, 1);
-  return x * x * (3 - 2 * x);
-}
-
-function catmull(keys: Key[], t: number, field: keyof Key) {
-  const n = keys.length - 1;
-  const x = THREE.MathUtils.clamp(t, 0, 1) * n;
-  const i = Math.min(Math.floor(x), n - 1);
-  const u = x - i;
-  const pick = (index: number) => keys[THREE.MathUtils.clamp(index, 0, n)][field];
-  const p0 = pick(i - 1);
-  const p1 = pick(i);
-  const p2 = pick(i + 1);
-  const p3 = pick(i + 2);
-  const u2 = u * u;
-  const u3 = u2 * u;
-  return (
-    0.5 *
-    (2 * p1 +
-      (-p0 + p2) * u +
-      (2 * p0 - 5 * p1 + 4 * p2 - p3) * u2 +
-      (-p0 + 3 * p1 - 3 * p2 + p3) * u3)
-  );
-}
-
-function samplePath(keys: Key[], t: number): Key {
-  return {
-    x: catmull(keys, t, "x"),
-    y: catmull(keys, t, "y"),
-    s: Math.max(0.12, catmull(keys, t, "s")),
-  };
-}
-
 /** Hero cell in viewport NDC. Scale fits the framed sphere inside the slot. */
 function measureSlot(): Key | null {
   const el = document.querySelector(".hero-flight-slot");
@@ -209,30 +171,39 @@ function measureSlot(): Key | null {
   return {
     x: (cx / window.innerWidth) * 2 - 1,
     y: -((cy / window.innerHeight) * 2 - 1) + 0.045,
-    s: half / NDC_LIMIT,
+    s: Math.min(0.82, (half / NDC_LIMIT) * 1.8),
   };
 }
 
-function flightTarget(progress: number, mobile: boolean, reduce: boolean): Key {
-  const slot = measureSlot();
+function flightTarget(
+  isHome: boolean,
+  scrollProgress: number,
+  reduce: boolean
+): Key {
   if (reduce) {
-    return slot ?? (mobile ? MOBILE_PATH[0] : DESKTOP_PATH[0]);
+    return POS_BOTTOM_RIGHT;
   }
-  const keys = (mobile ? MOBILE_PATH : DESKTOP_PATH).map((key) => ({ ...key }));
-  if (slot) {
-    const cap = mobile ? 0.68 : 0.86;
-    const gain = mobile ? 1.7 : 2;
-    keys[0] = { x: slot.x, y: slot.y, s: Math.min(cap, slot.s * gain) };
-  }
-  return samplePath(keys, progress);
-}
 
-function contactFade() {
-  const contact = document.getElementById("sec-contact");
-  if (!contact) return 1;
-  const rect = contact.getBoundingClientRect();
-  if (rect.bottom > window.innerHeight * 0.42) return 1;
-  return THREE.MathUtils.clamp(rect.bottom / (window.innerHeight * 0.42), 0, 1);
+  if (isHome) {
+    const slot = measureSlot() ?? { x: 0.50, y: 0.08, s: 0.74 };
+    const p = THREE.MathUtils.clamp(scrollProgress, 0, 1);
+
+    // 1. At scroll = 0, stay at the gap next to title (slot).
+    // As scrolling begins (0 to 0.18): move from slot to top-left corner (POS_TOP_LEFT)
+    if (p <= 0.18) {
+      const t1 = p / 0.18;
+      const smooth1 = t1 * t1 * (3 - 2 * t1);
+      return lerpKey(slot, POS_TOP_LEFT, smooth1);
+    }
+
+    // 2. As scrolling down continues (0.18 to 0.52): move diagonally from top-left to bottom-right (POS_BOTTOM_RIGHT)
+    const t2 = THREE.MathUtils.clamp((p - 0.18) / (0.52 - 0.18), 0, 1);
+    const smooth2 = t2 * t2 * (3 - 2 * t2);
+    return lerpKey(POS_TOP_LEFT, POS_BOTTOM_RIGHT, smooth2);
+  }
+
+  // Other webpages: hover in bottom right corner
+  return POS_BOTTOM_RIGHT;
 }
 
 function integrate(pos: number, vel: number, target: number, dt: number) {
@@ -268,13 +239,98 @@ function placeOnView(
   craft.scale.setScalar(Math.max(0.001, pose.s));
 }
 
+interface RotorRef {
+  group: THREE.Group;
+  axis: THREE.Vector3;
+  dir: number;
+}
+
+const PROPELLER_CENTERS = [
+  new THREE.Vector3(-1.6883, -0.5106, -0.748), // Front Left (Quad 0)
+  new THREE.Vector3(1.553, -0.512, -0.744), // Front Right (Quad 1)
+  new THREE.Vector3(-1.9142, -1.9355, 1.2543), // Rear Left (Quad 2)
+  new THREE.Vector3(1.7592, -1.936, 1.2554), // Rear Right (Quad 3)
+];
+const PROPELLER_AXIS = new THREE.Vector3(0, 0.9428, 0.3335).normalize();
+
+function splitMeshToQuads(mesh: THREE.Mesh, centers: THREE.Vector3[]) {
+  const orig = mesh.geometry;
+  const posAttr = orig.attributes.position;
+  const normAttr = orig.attributes.normal;
+  const uvAttr = orig.attributes.uv;
+  const index = orig.index;
+  if (!posAttr) return [];
+
+  const subMeshes: { q: number; subMesh: THREE.Mesh }[] = [];
+
+  for (let q = 0; q < 4; q++) {
+    const center = centers[q];
+    const newPositions: number[] = [];
+    const newNormals: number[] = [];
+    const newUvs: number[] = [];
+    const newIndices: number[] = [];
+    const oldToNew = new Map<number, number>();
+
+    const triCount = index ? index.count / 3 : posAttr.count / 3;
+
+    for (let t = 0; t < triCount; t++) {
+      const i0 = index ? index.getX(t * 3) : t * 3;
+      const x0 = posAttr.getX(i0);
+      const z0 = posAttr.getZ(i0);
+      const quad = (x0 >= 0 ? 1 : 0) + (z0 >= 0 ? 2 : 0);
+      if (quad !== q) continue;
+
+      for (let k = 0; k < 3; k++) {
+        const oldIdx = index ? index.getX(t * 3 + k) : t * 3 + k;
+        let newIdx = oldToNew.get(oldIdx);
+        if (newIdx === undefined) {
+          newIdx = newPositions.length / 3;
+          oldToNew.set(oldIdx, newIdx);
+          newPositions.push(
+            posAttr.getX(oldIdx) - center.x,
+            posAttr.getY(oldIdx) - center.y,
+            posAttr.getZ(oldIdx) - center.z
+          );
+          if (normAttr) {
+            newNormals.push(normAttr.getX(oldIdx), normAttr.getY(oldIdx), normAttr.getZ(oldIdx));
+          }
+          if (uvAttr) {
+            newUvs.push(uvAttr.getX(oldIdx), uvAttr.getY(oldIdx));
+          }
+        }
+        newIndices.push(newIdx);
+      }
+    }
+
+    if (newIndices.length > 0) {
+      const geom = new THREE.BufferGeometry();
+      geom.setAttribute("position", new THREE.Float32BufferAttribute(newPositions, 3));
+      if (newNormals.length > 0) {
+        geom.setAttribute("normal", new THREE.Float32BufferAttribute(newNormals, 3));
+      }
+      if (newUvs.length > 0) {
+        geom.setAttribute("uv", new THREE.Float32BufferAttribute(newUvs, 2));
+      }
+      geom.setIndex(newIndices);
+      geom.computeBoundingBox();
+      geom.computeBoundingSphere();
+      const subMesh = new THREE.Mesh(geom, mesh.material);
+      subMeshes.push({ q, subMesh });
+    }
+  }
+
+  return subMeshes;
+}
+
 function DroneModel({
+  isHome,
   reduce,
   progressRef,
   layerRef,
   introRef,
   handoffRef,
 }: {
+  isHome: boolean;
   reduce: boolean;
   progressRef: MutableRefObject<number>;
   layerRef: RefObject<HTMLDivElement | null>;
@@ -285,7 +341,7 @@ function DroneModel({
   const flight = useRef<THREE.Group>(null);
   const rig = useRef<THREE.Group>(null);
   const shadowRef = useRef<THREE.Mesh>(null);
-  const spins = useRef<THREE.Object3D[]>([]);
+  const rotors = useRef<RotorRef[]>([]);
   const { camera, size } = useThree();
   const notifyModelReady = useSplashGate().notifyModelReady;
   const spring = useRef({ x: 0, y: 0, s: 0.7, vx: 0, vy: 0, vs: 0, ready: false });
@@ -309,11 +365,45 @@ function DroneModel({
     const box = new THREE.Box3().setFromObject(root);
     const pivot = new THREE.Group();
     pivot.add(root);
-    const found: THREE.Object3D[] = [];
+
+    // Identify the propellers group (SpineB) and separate into 4 rotating rotors
+    const activeRotors: RotorRef[] = [];
     root.traverse((obj) => {
-      if (/spins|propeller|rotor|blade/i.test(obj.name)) found.push(obj);
+      if (/spineb/i.test(obj.name)) {
+        const spineGroup = obj;
+        const rotorGroups = [
+          new THREE.Group(),
+          new THREE.Group(),
+          new THREE.Group(),
+          new THREE.Group(),
+        ];
+        rotorGroups.forEach((g, q) => {
+          g.position.copy(PROPELLER_CENTERS[q]);
+          g.name = `Propeller_${q}`;
+          spineGroup.add(g);
+          activeRotors.push({
+            group: g,
+            axis: PROPELLER_AXIS.clone(),
+            dir: q === 0 || q === 3 ? 1 : -1,
+          });
+        });
+
+        const meshChildren = spineGroup.children.filter(
+          (c): c is THREE.Mesh => (c as THREE.Mesh).isMesh
+        );
+
+        for (const child of meshChildren) {
+          const splits = splitMeshToQuads(child, PROPELLER_CENTERS);
+          for (const { q, subMesh } of splits) {
+            rotorGroups[q].add(subMesh);
+          }
+          spineGroup.remove(child);
+        }
+      }
     });
-    spins.current = found;
+
+    rotors.current = activeRotors;
+
     const footprint = box.getSize(new THREE.Vector3());
     const span = Math.min(footprint.x, footprint.z);
     const shadow = { y: box.min.y + 0.015, w: span * 1.05, d: span * 0.62 };
@@ -350,8 +440,8 @@ function DroneModel({
     }
 
     if (mode === "video") {
-      const k = smooth(blend);
-      const pose = flightTarget(0, mobile, false);
+      const k = THREE.MathUtils.smoothstep(blend, 0, 1);
+      const pose = flightTarget(isHome, 0, false);
       const now = {
         x: THREE.MathUtils.lerp(0, pose.x, k),
         y: THREE.MathUtils.lerp(0.04, pose.y, k),
@@ -369,8 +459,10 @@ function DroneModel({
       body.rotation.y = THREE.MathUtils.damp(body.rotation.y, 0.48, 6, dt);
       body.rotation.x = THREE.MathUtils.damp(body.rotation.x, 0.1, 6, dt);
       body.rotation.z = THREE.MathUtils.damp(body.rotation.z, 0, 6, dt);
-      const step = dt * 52;
-      for (const node of spins.current) node.rotateY(step);
+      const step = dt * 64;
+      for (const r of rotors.current) {
+        r.group.rotateOnAxis(r.axis, step * r.dir);
+      }
       if (layerRef.current) {
         layerRef.current.style.backgroundColor = "transparent";
         layerRef.current.style.opacity = k.toFixed(3);
@@ -380,7 +472,11 @@ function DroneModel({
 
     if (layerRef.current) layerRef.current.style.backgroundColor = "transparent";
 
-    const target = flightTarget(reduce ? 0 : progressRef.current, mobile, reduce);
+    const target = flightTarget(
+      isHome,
+      reduce ? 0 : progressRef.current,
+      reduce
+    );
     const spr = spring.current;
     if (!spr.ready || reduce) {
       spr.x = target.x;
@@ -402,22 +498,28 @@ function DroneModel({
     const bob = reduce ? 0 : Math.sin(state.clock.elapsedTime * 2.6) * (0.012 + 0.03 * idle);
     placeOnView(craft, persp, { x: spr.x, y: spr.y, s: Math.max(0.12, spr.s) }, bob, right, up);
 
-    const roll = reduce ? 0.05 : THREE.MathUtils.clamp(-spr.vx * 0.62, -0.95, 0.95);
-    const pitch = reduce ? 0.12 : THREE.MathUtils.clamp(0.1 - speed * 0.24, -0.5, 0.12);
-    const yaw = reduce ? 0.48 : 0.48 + THREE.MathUtils.clamp(-spr.vx * 0.36, -0.55, 0.55);
+    // Compute direct vector from drone position to camera so the front view looks straight at the user
+    const toCam = new THREE.Vector3().subVectors(persp.position, craft.position).normalize();
+    const restingYaw = Math.atan2(toCam.x, toCam.z);
+    const restingPitch = -Math.asin(THREE.MathUtils.clamp(toCam.y, -1, 1));
+
+    const roll = reduce ? 0 : THREE.MathUtils.clamp(-spr.vx * 0.62, -0.95, 0.95);
+    const pitch = reduce ? restingPitch : THREE.MathUtils.clamp(restingPitch - speed * 0.28, -0.85, 0.1);
+    const yaw = reduce ? restingYaw : restingYaw + THREE.MathUtils.clamp(-spr.vx * 0.36, -0.55, 0.55);
+
     const damp = reduce ? 1 : 8;
     body.rotation.y = THREE.MathUtils.damp(body.rotation.y, yaw, damp, dt);
     body.rotation.x = THREE.MathUtils.damp(body.rotation.x, pitch, damp, dt);
     body.rotation.z = THREE.MathUtils.damp(body.rotation.z, roll, damp, dt);
 
     if (!reduce) {
-      const step = dt * 52;
-      for (const node of spins.current) node.rotateY(step);
+      const step = dt * 64;
+      for (const r of rotors.current) {
+        r.group.rotateOnAxis(r.axis, step * r.dir);
+      }
     }
 
-    const cover = 1 - THREE.MathUtils.smoothstep(Math.abs(spr.x), 0.2, 0.68);
-    const opacity = reduce ? 1 : (1 - cover * 0.42) * contactFade();
-    if (layerRef.current) layerRef.current.style.opacity = opacity.toFixed(3);
+    if (layerRef.current) layerRef.current.style.opacity = "1";
   });
 
   return (
@@ -442,7 +544,9 @@ function markHeroWebgl(on: boolean) {
 }
 
 function HeroCanvas({ reduce }: { reduce: boolean }) {
-  const { intro, finishIntro } = useSplashGate();
+  const { intro, finishIntro, notifyModelReady } = useSplashGate();
+  const [location, setLocation] = useLocation();
+  const isHome = location === "/";
   const layerRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef(0);
   const introRef = useRef(intro);
@@ -450,6 +554,22 @@ function HeroCanvas({ reduce }: { reduce: boolean }) {
   const [hidden, setHidden] = useState(false);
   introRef.current = intro;
   const live = !hidden && intro !== "classic";
+
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth < 768 : false
+  );
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  useEffect(() => {
+    if (isMobile) {
+      notifyModelReady();
+    }
+  }, [isMobile, notifyModelReady]);
 
   useEffect(() => {
     const onVis = () => setHidden(document.hidden);
@@ -462,42 +582,73 @@ function HeroCanvas({ reduce }: { reduce: boolean }) {
     return () => markHeroWebgl(false);
   }, [live]);
 
+  // Page scroll tracking on Home: glides diagonally from top-left to bottom-right
   useEffect(() => {
-    if (reduce || intro !== "none") return;
+    if (reduce || intro !== "none" || isMobile || !isHome) return;
     const trigger = ScrollTrigger.create({
-      trigger: "#sec-hero",
-      start: "top top",
-      endTrigger: "#sec-contact",
-      end: "center center",
-      scrub: 0,
+      start: 0,
+      end: () => Math.max(document.documentElement.scrollHeight - window.innerHeight, 1),
+      scrub: 0.1,
       invalidateOnRefresh: true,
       onUpdate: (self) => {
         progressRef.current = self.progress;
       },
     });
-    const refresh = window.setTimeout(() => ScrollTrigger.refresh(), 400);
+    const refresh = window.setTimeout(() => ScrollTrigger.refresh(), 300);
     return () => {
       window.clearTimeout(refresh);
       trigger.kill();
     };
-  }, [reduce, intro]);
+  }, [reduce, intro, isMobile, isHome]);
 
-  const mobile = typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches;
+  const handleContactClick = () => {
+    if (location !== "/") {
+      setLocation("/");
+      setTimeout(() => {
+        const target = document.getElementById("sec-contact") || document.getElementById("reach-us");
+        if (target) {
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 200);
+    } else {
+      const target = document.getElementById("sec-contact") || document.getElementById("reach-us");
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+  };
+
+  if (isMobile) {
+    return (
+      <>
+        {intro === "video" && <VideoSplash handoffRef={handoffRef} onDone={finishIntro} />}
+        {intro === "reduced" && <ReducedSplash onDone={finishIntro} />}
+      </>
+    );
+  }
+
   const frameloop = !live || reduce ? "demand" : "always";
 
   const canvas = (
-    <div ref={layerRef} className="flight-canvas" aria-hidden="true">
+    <div
+      ref={layerRef}
+      className="flight-canvas pointer-events-none"
+      style={{ pointerEvents: "none" }}
+      aria-hidden="true"
+    >
       <Canvas
-        dpr={mobile ? [1, 1.1] : [1, 1.25]}
+        style={{ pointerEvents: "none" }}
+        dpr={[1, 1.25]}
         frameloop={frameloop}
         camera={{ position: [1.6, 0.9, 2.1], fov: 32, near: 0.05, far: 80 }}
-        gl={{ alpha: true, antialias: !mobile, powerPreference: "high-performance" }}
+        gl={{ alpha: true, antialias: true, powerPreference: "high-performance" }}
         onCreated={({ gl }) => {
           gl.setClearColor(0x000000, 0);
         }}
       >
         <StudioLights />
         <DroneModel
+          isHome={isHome}
           reduce={reduce}
           progressRef={progressRef}
           layerRef={layerRef}
@@ -508,10 +659,26 @@ function HeroCanvas({ reduce }: { reduce: boolean }) {
     </div>
   );
 
+  // The drone itself is the link to the Contact Us section when at bottom-right
+  const droneLink = !isMobile && (
+    <div
+      onClick={handleContactClick}
+      className="fixed z-40 cursor-pointer pointer-events-auto rounded-full"
+      style={{
+        right: "max(12px, calc(9.5vw - 90px))",
+        bottom: "max(12px, calc(13.5vh - 80px))",
+        width: "190px",
+        height: "170px",
+      }}
+      title="Contact Us"
+      aria-label="Click drone to contact Cybotz"
+    />
+  );
+
   return (
     <>
-      <div className="hero-flight-slot" />
       {createPortal(canvas, document.body)}
+      {droneLink && createPortal(droneLink, document.body)}
       {intro === "video" && <VideoSplash handoffRef={handoffRef} onDone={finishIntro} />}
       {intro === "reduced" && <ReducedSplash onDone={finishIntro} />}
     </>
@@ -542,9 +709,25 @@ export function HeroCraft() {
   const reduce =
     typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const [glOk] = useState(() => (typeof window === "undefined" ? false : webglOk()));
-  const { intro, abortToClassic, finishIntro } = useSplashGate();
+  const { intro, abortToClassic, finishIntro, notifyModelReady } = useSplashGate();
 
-  if (!glOk) return <div className="hero-flight-slot" aria-hidden="true" />;
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth < 768 : false
+  );
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  useEffect(() => {
+    if (isMobile) {
+      notifyModelReady();
+    }
+  }, [isMobile, notifyModelReady]);
+
+  if (isMobile || !glOk) return null;
 
   return (
     <HeroErrorBoundary

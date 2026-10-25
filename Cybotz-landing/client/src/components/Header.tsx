@@ -55,11 +55,11 @@ export default function Header() {
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? 'bg-white/95 backdrop-blur-md border-b border-cyan-500/20 shadow-[0_8px_24px_rgba(16,32,51,0.06)]'
-          : 'bg-[#F4F7FB]/92 backdrop-blur-sm border-b border-[#D5E0EA]'
+          ? 'bg-[#0B101D]/90 backdrop-blur-md border-b border-cyan-500/20 shadow-lg'
+          : 'bg-[#0B101D]/70 backdrop-blur-sm border-b border-[#1E293B]'
       }`}
     >
-      <div className="container flex items-center justify-between h-20 px-4 md:px-8">
+      <div className="container flex items-center justify-between h-18 md:h-20 px-4 md:px-8">
         {/* Logo / Brand */}
         <button
           onClick={() => handleNavigation('/')}
@@ -68,9 +68,9 @@ export default function Header() {
           title="Cybotz Robotics & Drone Academy"
         >
           <img
-            src="/logos/cybotz_transparent.png"
+            src="/logos/cybotz_transparent.png?v=4"
             alt="Cybotz"
-            className="h-10 md:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+            className="h-9 sm:h-10 md:h-11 lg:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
           />
         </button>
 
@@ -84,21 +84,21 @@ export default function Header() {
                 onClick={() => handleNavigation(link.href)}
                 className={`relative inline-flex flex-col items-center justify-center text-sm xl:text-base font-semibold font-mono tracking-wider transition-all duration-300 cursor-pointer bg-transparent border-none outline-none select-none p-0 whitespace-nowrap ${
                   isActive
-                    ? 'text-[#0460A9] drop-shadow-[0_0_8px_rgba(5,117,206,0.35)]'
-                    : 'text-[#3E5168] hover:text-[#0460A9] hover:drop-shadow-[0_0_8px_rgba(5,117,206,0.6)]'
+                    ? 'text-cyan-400 drop-shadow-[0_0_10px_rgba(0,240,255,0.8)]'
+                    : 'text-gray-300 hover:text-cyan-400 hover:drop-shadow-[0_0_8px_rgba(0,240,255,0.6)]'
                 }`}
                 aria-current={isActive ? 'page' : undefined}
               >
                 <span>{link.label}</span>
                 {isActive && (
-                  <span className="w-full h-[2px] mt-0.5 bg-cyan-400 rounded-full shadow-[0_0_8px_#0575CE,0_0_14px_rgba(5,117,206,0.8)] pointer-events-none" />
+                  <span className="w-full h-[2px] mt-0.5 bg-cyan-400 rounded-full shadow-[0_0_8px_#00f0ff,0_0_14px_rgba(0,240,255,0.8)] pointer-events-none" />
                 )}
               </button>
             );
           })}
           <button
             onClick={() => handleNavigation('#reach-us')}
-            className="relative inline-flex flex-col items-center justify-center text-sm xl:text-base font-semibold font-mono tracking-wider transition-all duration-300 cursor-pointer text-[#3E5168] hover:text-[#0460A9] hover:drop-shadow-[0_0_8px_rgba(5,117,206,0.6)] bg-transparent border-none outline-none select-none p-0 whitespace-nowrap"
+            className="relative inline-flex flex-col items-center justify-center text-sm xl:text-base font-semibold font-mono tracking-wider transition-all duration-300 cursor-pointer text-gray-300 hover:text-cyan-400 hover:drop-shadow-[0_0_8px_rgba(0,240,255,0.6)] bg-transparent border-none outline-none select-none p-0 whitespace-nowrap"
           >
             <span>Contact</span>
           </button>
@@ -107,7 +107,7 @@ export default function Header() {
         {/* Desktop CTA Button (>= 1024px) */}
         <button
           onClick={() => handleNavigation('#reach-us')}
-          className="hidden lg:flex items-center gap-2 px-5 xl:px-6 py-2.5 bg-[#F97405] text-[#102033] font-bold font-mono text-sm xl:text-base tracking-wider rounded-lg hover:bg-[#ff8614] transition-all duration-300 glow-cyan cursor-pointer whitespace-nowrap flex-shrink-0"
+          className="hidden lg:flex items-center gap-2 px-5 xl:px-6 py-2.5 bg-[#F97405] text-slate-950 font-bold font-mono text-sm xl:text-base tracking-wider rounded-lg hover:bg-[#ff8614] transition-all duration-300 shadow-[0_0_15px_rgba(249,116,5,0.35)] cursor-pointer whitespace-nowrap flex-shrink-0"
           aria-label="Book Consultation"
         >
           <Calendar size={16} /> Book Consultation
@@ -118,7 +118,7 @@ export default function Header() {
           {/* Tablet Consultation Button (visible on tablet screens >= 480px) */}
           <button
             onClick={() => handleNavigation('#reach-us')}
-            className="hidden sm:inline-flex items-center gap-2 px-3.5 py-2 bg-[#F97405] text-[#102033] font-bold font-mono text-xs tracking-wider rounded-lg hover:bg-[#ff8614] transition-all duration-300 glow-cyan cursor-pointer whitespace-nowrap shadow-[0_8px_20px_rgba(249,116,5,0.18)] flex-shrink-0"
+            className="hidden sm:inline-flex items-center gap-2 px-3.5 py-2 bg-[#F97405] text-slate-950 font-bold font-mono text-xs tracking-wider rounded-lg hover:bg-[#ff8614] transition-all duration-300 shadow-[0_0_15px_rgba(249,116,5,0.35)] cursor-pointer whitespace-nowrap flex-shrink-0"
             aria-label="Book Consultation"
           >
             <Calendar size={14} /> Book Consultation
@@ -127,7 +127,7 @@ export default function Header() {
           {/* Hamburger Menu Toggle Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2.5 rounded-lg bg-white/90 border border-[#D5E0EA] text-[#0460A9] hover:text-[#0460A9] hover:border-cyan-500/40 transition-all duration-300 cursor-pointer"
+            className="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800 text-cyan-400 hover:text-cyan-300 hover:border-cyan-500/40 transition-all duration-300 cursor-pointer"
             aria-expanded={mobileMenuOpen}
             aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
           >
@@ -140,11 +140,11 @@ export default function Header() {
       {mobileMenuOpen && (
         <>
           <div
-            className="fixed inset-0 top-20 bg-[#F4F7FB]/60 backdrop-blur-sm z-40 lg:hidden animate-fade-in"
+            className="fixed inset-0 top-20 bg-black/60 backdrop-blur-sm z-40 lg:hidden animate-fade-in"
             onClick={() => setMobileMenuOpen(false)}
             aria-hidden="true"
           />
-          <div className="relative z-50 lg:hidden bg-white/95 backdrop-blur-xl border-t border-cyan-500/20 shadow-2xl animate-fade-in">
+          <div className="relative z-50 lg:hidden bg-[#0B101D]/95 backdrop-blur-xl border-t border-cyan-500/20 shadow-2xl animate-fade-in">
             <nav className="container max-w-lg mx-auto py-5 flex flex-col gap-1.5 px-4 md:px-8" aria-label="Mobile and tablet navigation">
               {NAV_LINKS.map((link) => {
                 const isActive = location === link.href;
@@ -154,27 +154,27 @@ export default function Header() {
                     onClick={() => handleNavigation(link.href)}
                     className={`relative text-left text-sm font-semibold font-mono tracking-wider transition-all duration-200 py-3 px-4 rounded-xl cursor-pointer bg-transparent border-none outline-none select-none flex items-center justify-between ${
                       isActive
-                        ? 'text-[#0460A9] drop-shadow-[0_0_8px_rgba(5,117,206,0.35)] bg-cyan-500/10 border border-cyan-500/30'
-                        : 'text-[#3E5168] hover:text-[#0460A9] hover:bg-[#E7EEF6]/80'
+                        ? 'text-cyan-400 drop-shadow-[0_0_10px_rgba(0,240,255,0.8)] bg-cyan-500/10 border border-cyan-500/30'
+                        : 'text-gray-300 hover:text-cyan-400 hover:bg-slate-900/40'
                     }`}
                     aria-current={isActive ? 'page' : undefined}
                   >
                     <span>{link.label}</span>
                     {isActive && (
-                      <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-none" />
+                      <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#00f0ff]" />
                     )}
                   </button>
                 );
               })}
               <button
                 onClick={() => handleNavigation('#reach-us')}
-                className="text-left text-sm font-semibold font-mono tracking-wider text-[#3E5168] hover:text-[#0460A9] hover:bg-[#E7EEF6]/80 py-3 px-4 rounded-xl cursor-pointer bg-transparent border-none outline-none select-none"
+                className="text-left text-sm font-semibold font-mono tracking-wider text-gray-300 hover:text-cyan-400 hover:bg-slate-900/40 py-3 px-4 rounded-xl cursor-pointer bg-transparent border-none outline-none select-none"
               >
                 Contact
               </button>
               <button
                 onClick={() => handleNavigation('#reach-us')}
-                className="w-full mt-3 flex items-center justify-center gap-2 px-4 py-3.5 bg-[#F97405] text-[#102033] font-bold font-mono tracking-wider rounded-xl hover:bg-[#ff8614] transition-all duration-300 glow-cyan cursor-pointer text-center whitespace-nowrap"
+                className="w-full mt-3 flex items-center justify-center gap-2 px-4 py-3.5 bg-[#F97405] text-slate-950 font-bold font-mono tracking-wider rounded-xl hover:bg-[#ff8614] transition-all duration-300 shadow-[0_0_15px_rgba(249,116,5,0.35)] cursor-pointer text-center whitespace-nowrap"
               >
                 <Calendar size={16} /> Book Consultation
               </button>

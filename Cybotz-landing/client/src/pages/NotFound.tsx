@@ -18,7 +18,7 @@ export default function NotFound() {
   };
 
   return (
-    <div className="relative text-[#102033] min-h-screen flex flex-col font-sans bg-[#F4F7FB]">
+    <div className="relative text-white min-h-screen flex flex-col font-sans bg-[#0F172A]">
       <Header />
 
       <main className="flex-grow flex items-center justify-center px-4 py-20">
@@ -35,7 +35,7 @@ export default function NotFound() {
               viewBox="0 0 200 200"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
-              className="w-full h-full drop-shadow-[0_0_30px_rgba(5,117,206,0.2)] animate-[bounce_4s_ease-in-out_infinite]"
+              className="w-full h-full drop-shadow-[0_0_30px_rgba(0,240,255,0.2)] animate-[bounce_4s_ease-in-out_infinite]"
             >
               {/* Propeller arms */}
               <line x1="60" y1="70" x2="100" y2="100" stroke="#334155" strokeWidth="3" strokeLinecap="round" />
@@ -44,22 +44,22 @@ export default function NotFound() {
               <line x1="140" y1="130" x2="100" y2="100" stroke="#334155" strokeWidth="3" strokeLinecap="round" />
 
               {/* Propeller circles (spinning effect) */}
-              <circle cx="60" cy="70" r="18" stroke="#0575CE" strokeWidth="1.5" fill="none" opacity="0.4" className="animate-spin origin-center" style={{ transformOrigin: "60px 70px" }} />
-              <circle cx="140" cy="70" r="18" stroke="#0575CE" strokeWidth="1.5" fill="none" opacity="0.4" className="animate-spin origin-center" style={{ transformOrigin: "140px 70px" }} />
-              <circle cx="60" cy="130" r="18" stroke="#0575CE" strokeWidth="1.5" fill="none" opacity="0.4" className="animate-spin origin-center" style={{ transformOrigin: "60px 130px" }} />
-              <circle cx="140" cy="130" r="18" stroke="#0575CE" strokeWidth="1.5" fill="none" opacity="0.4" className="animate-spin origin-center" style={{ transformOrigin: "140px 130px" }} />
+              <circle cx="60" cy="70" r="18" stroke="#00F0FF" strokeWidth="1.5" fill="none" opacity="0.4" className="animate-spin origin-center" style={{ transformOrigin: "60px 70px" }} />
+              <circle cx="140" cy="70" r="18" stroke="#00F0FF" strokeWidth="1.5" fill="none" opacity="0.4" className="animate-spin origin-center" style={{ transformOrigin: "140px 70px" }} />
+              <circle cx="60" cy="130" r="18" stroke="#00F0FF" strokeWidth="1.5" fill="none" opacity="0.4" className="animate-spin origin-center" style={{ transformOrigin: "60px 130px" }} />
+              <circle cx="140" cy="130" r="18" stroke="#00F0FF" strokeWidth="1.5" fill="none" opacity="0.4" className="animate-spin origin-center" style={{ transformOrigin: "140px 130px" }} />
 
               {/* Motor hubs */}
-              <circle cx="60" cy="70" r="5" fill="#1e293b" stroke="#0575CE" strokeWidth="1" />
-              <circle cx="140" cy="70" r="5" fill="#1e293b" stroke="#0575CE" strokeWidth="1" />
-              <circle cx="60" cy="130" r="5" fill="#1e293b" stroke="#0575CE" strokeWidth="1" />
-              <circle cx="140" cy="130" r="5" fill="#1e293b" stroke="#0575CE" strokeWidth="1" />
+              <circle cx="60" cy="70" r="5" fill="#1e293b" stroke="#00F0FF" strokeWidth="1" />
+              <circle cx="140" cy="70" r="5" fill="#1e293b" stroke="#00F0FF" strokeWidth="1" />
+              <circle cx="60" cy="130" r="5" fill="#1e293b" stroke="#00F0FF" strokeWidth="1" />
+              <circle cx="140" cy="130" r="5" fill="#1e293b" stroke="#00F0FF" strokeWidth="1" />
 
               {/* Center body */}
-              <rect x="85" y="88" width="30" height="24" rx="6" fill="#1e293b" stroke="#0575CE" strokeWidth="1.5" />
+              <rect x="85" y="88" width="30" height="24" rx="6" fill="#1e293b" stroke="#00F0FF" strokeWidth="1.5" />
 
               {/* Camera / LED eye */}
-              <circle cx="100" cy="100" r="4" fill="#0575CE" opacity="0.8">
+              <circle cx="100" cy="100" r="4" fill="#00F0FF" opacity="0.8">
                 <animate attributeName="opacity" values="0.8;0.3;0.8" dur="2s" repeatCount="indefinite" />
               </circle>
 
@@ -76,16 +76,16 @@ export default function NotFound() {
             <h1 className="text-8xl md:text-9xl font-bold font-mono text-cyan-500/15 select-none">
               404
             </h1>
-            <h1 className="text-8xl md:text-9xl font-bold font-mono text-[#0460A9] absolute inset-0 flex items-center justify-center">
+            <h1 className="text-8xl md:text-9xl font-bold font-mono text-cyan-400 absolute inset-0 flex items-center justify-center">
               404
             </h1>
           </div>
 
-          <h2 className="text-2xl md:text-3xl font-bold font-mono text-[#102033] mb-3 tracking-wider">
+          <h2 className="text-2xl md:text-3xl font-bold font-mono text-white mb-3 tracking-wider">
             Signal Lost
           </h2>
 
-          <p className="text-[#3E5168] mb-8 max-w-md mx-auto leading-relaxed text-sm md:text-base">
+          <p className="text-gray-400 mb-8 max-w-md mx-auto leading-relaxed text-sm md:text-base">
             The page you're looking for has drifted out of range.
             <br />
             Let's get you back on course.
@@ -94,13 +94,13 @@ export default function NotFound() {
           {/* Primary CTA */}
           <button
             onClick={() => handleNavigate("/")}
-            className="px-8 py-3.5 bg-[#F97405] text-[#102033] font-bold font-mono text-sm tracking-wider rounded-lg hover:bg-[#ff8614] transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-[0_10px_24px_rgba(249,116,5,0.2)] cursor-pointer mb-8"
+            className="px-8 py-3.5 bg-[#F97405] text-slate-950 font-bold font-mono text-sm tracking-wider rounded-lg hover:bg-[#ff8614] transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-[0_10px_24px_rgba(249,116,5,0.25)] glow-orange cursor-pointer mb-8"
           >
             ← Return to Mission Control
           </button>
 
           {/* Quick navigation links */}
-          <div className="border-t border-[#D5E0EA] pt-6">
+          <div className="border-t border-slate-800 pt-6">
             <p className="text-xs text-gray-500 font-mono uppercase tracking-wider mb-4">Quick Links</p>
             <div className="flex flex-wrap justify-center gap-3">
               {[
@@ -112,7 +112,7 @@ export default function NotFound() {
                 <button
                   key={link.path}
                   onClick={() => handleNavigate(link.path)}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/80 border border-[#D5E0EA] hover:border-cyan-500/50 text-[#3E5168] hover:text-[#0460A9] text-xs font-mono transition-all duration-300 cursor-pointer"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-800 hover:border-cyan-500/50 text-gray-300 hover:text-cyan-400 text-xs font-mono transition-all duration-300 cursor-pointer"
                 >
                   {link.label} <ArrowRight size={12} />
                 </button>

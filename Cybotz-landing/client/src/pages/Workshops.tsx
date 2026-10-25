@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { RobotHero } from "@/components/ui/robot-hero";
+import { DarkGradientBg } from "@/components/ui/elegant-dark-pattern";
 import {
   Terminal,
   Cpu,
@@ -130,18 +131,18 @@ export default function Workshops() {
   const ActiveIcon = activeTrivia.icon;
 
   return (
-    <div className="relative text-[#102033] min-h-screen flex flex-col font-sans bg-[#F4F7FB]">
+    <div className="relative text-white min-h-screen flex flex-col font-sans bg-black">
       {/* Elegant Dark Gradient Background */}
       <div className="fixed inset-0 z-0 pointer-events-none w-full h-full overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(5,117,206,0.08),transparent_55%),linear-gradient(#F4F7FB,#E7EEF6)]" />
+        <DarkGradientBg className="w-full h-full min-h-full" />
       </div>
 
       {/* 3D RobotHero fixed background (placed on top of DarkGradientBg) */}
       <div className="fixed inset-0 z-[1] pointer-events-none w-full h-full">
         <RobotHero
           showUi={false}
-          color="#0575CE"
-          pantallaColor="#F97405"
+          color="#00f0ff"
+          pantallaColor="#00f0ff"
           transparentBackground={true}
           roughness={0.25}
           metalness={0.2}
@@ -162,31 +163,31 @@ export default function Workshops() {
 
           <div className="container px-4 md:px-8 mx-auto relative z-10">
             <div className="max-w-3xl">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-950/60 sm:bg-transparent border border-cyan-400/40 sm:border-none text-[#0460A9] font-mono text-xs sm:text-sm tracking-widest uppercase mb-2">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-950/60 sm:bg-transparent border border-cyan-400/40 sm:border-none text-cyan-400 font-mono text-xs sm:text-sm tracking-widest uppercase mb-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse sm:hidden" />
                 Cybotz Bootcamps
               </div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-mono tracking-tight sm:tracking-wider text-[#102033] mb-4 sm:mb-6 leading-tight">
-                Drone & Robotics <span className="text-[#0460A9] glow-cyan-text">Training Modules</span>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-mono tracking-tight sm:tracking-wider text-white mb-4 sm:mb-6 leading-tight">
+                Drone & Robotics <span className="text-cyan-400 glow-cyan-text">Training Modules</span>
               </h1>
-              <div className="p-3.5 sm:p-4 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-[#0460A9] font-mono text-xs sm:text-sm md:text-base tracking-wide sm:tracking-wider mb-4 sm:mb-6 max-w-xl backdrop-blur-sm">
+              <div className="p-3.5 sm:p-4 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 font-mono text-xs sm:text-sm md:text-base tracking-wide sm:tracking-wider mb-4 sm:mb-6 max-w-xl backdrop-blur-sm">
                 Over 90% of students successfully build and fly their own drones/robots by the end of the session!
               </div>
-              <p className="text-[#3E5168] sm:text-[#3E5168] text-base sm:text-lg leading-relaxed mb-6">
+              <p className="text-gray-300 sm:text-gray-400 text-base sm:text-lg leading-relaxed mb-6">
                 Step away from the simulator screen. Grab a soldering iron. Let’s build hardware that actually flies.
               </p>
 
               {/* Mobile-Only Feature Chips */}
               <div className="flex sm:hidden flex-wrap gap-2">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/85 border border-[#D5E0EA] text-xs font-mono text-[#0460A9]">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-900/80 border border-slate-800 text-xs font-mono text-cyan-300">
                   <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
                   FPV Drone Piloting
                 </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/85 border border-[#D5E0EA] text-xs font-mono text-[#0460A9]">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-900/80 border border-slate-800 text-xs font-mono text-cyan-300">
                   <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
                   Benchtop Soldering
                 </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/85 border border-[#D5E0EA] text-xs font-mono text-[#0460A9]">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-900/80 border border-slate-800 text-xs font-mono text-cyan-300">
                   <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
                   1-Day Bootcamps
                 </span>
@@ -197,12 +198,12 @@ export default function Workshops() {
         </section>
 
         {/* CURRICULUMS */}
-        <section className="py-20 border-t border-[#D5E0EA]/40 bg-transparent">
+        <section className="py-20 border-t border-[#1E293B]/40 bg-transparent">
           <div className="container px-4 md:px-8 mx-auto">
             <div className="text-center mb-16">
-              <span className="text-sm font-bold font-mono text-[#0460A9] tracking-widest uppercase">Featured Packages</span>
+              <span className="text-sm font-bold font-mono text-cyan-400 tracking-widest uppercase">Featured Packages</span>
               <h2 className="text-3xl md:text-4xl font-bold font-mono tracking-wider mt-2 mb-4">Featured Curriculums</h2>
-              <p className="text-[#3E5168] max-w-2xl mx-auto text-base">
+              <p className="text-gray-400 max-w-2xl mx-auto text-base">
                 Our 1-Day intensive modular curriculums for school workshops and college bootcamps.
               </p>
             </div>
@@ -213,36 +214,36 @@ export default function Workshops() {
                 return (
                   <div
                     key={idx}
-                    className="p-8 rounded-2xl bg-white/80 border border-[#D5E0EA] hover:border-cyan-500/40 backdrop-blur-md transition-all duration-300 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start"
+                    className="p-8 rounded-2xl bg-slate-950/25 border border-slate-800/60 hover:border-cyan-500/40 backdrop-blur-md transition-all duration-300 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start"
                   >
                     {/* Left: Component Details (col-5) */}
                     <div className="lg:col-span-5 flex flex-col gap-4">
-                      <div className="w-12 h-12 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-[#0460A9] flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center">
                         <Icon size={24} />
                       </div>
-                      <h3 className="text-2xl font-bold font-mono text-[#102033] leading-tight">{curr.title}</h3>
-                      <span className="text-xs font-bold font-mono text-[#0460A9] uppercase tracking-widest bg-cyan-500/5 px-2.5 py-1 rounded border border-cyan-500/10 self-start">
+                      <h3 className="text-2xl font-bold font-mono text-white leading-tight">{curr.title}</h3>
+                      <span className="text-xs font-bold font-mono text-cyan-400 uppercase tracking-widest bg-cyan-500/5 px-2.5 py-1 rounded border border-cyan-500/10 self-start">
                         Target: {curr.target}
                       </span>
-                      <p className="text-[#3E5168] text-base leading-relaxed mt-2">
+                      <p className="text-gray-300 text-base leading-relaxed mt-2">
                         {curr.summary}
                       </p>
                     </div>
 
                     {/* Right: Interactive Syllabus Outline (col-7) */}
-                    <div className="lg:col-span-7 rounded-xl border border-[#D5E0EA] bg-white/70 backdrop-blur-sm p-6">
-                      <h4 className="text-xs font-bold font-mono text-[#3E5168] uppercase tracking-wider mb-4 border-b border-[#D5E0EA] pb-2">
+                    <div className="lg:col-span-7 rounded-xl border border-slate-800/60 bg-[#0B101D]/20 backdrop-blur-sm p-6">
+                      <h4 className="text-xs font-bold font-mono text-gray-400 uppercase tracking-wider mb-4 border-b border-slate-800 pb-2">
                         Syllabus Outline
                       </h4>
                       <div className="space-y-4">
                         {curr.syllabus.map((s, sIdx) => (
                           <div key={sIdx} className="flex gap-4 items-start">
-                            <span className="text-xs font-mono text-[#0460A9] bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-0.5 rounded flex-shrink-0 font-bold">
+                            <span className="text-xs font-mono text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-0.5 rounded flex-shrink-0 font-bold">
                               0{sIdx + 1}
                             </span>
                             <div>
-                              <h5 className="font-bold text-[#102033] font-mono text-base">{s.title}</h5>
-                              <p className="text-[#3E5168] text-sm leading-relaxed mt-0.5">{s.desc}</p>
+                              <h5 className="font-bold text-white font-mono text-base">{s.title}</h5>
+                              <p className="text-gray-300 text-sm leading-relaxed mt-0.5">{s.desc}</p>
                             </div>
                           </div>
                         ))}
@@ -256,14 +257,14 @@ export default function Workshops() {
         </section>
 
         {/* SNEAK PEEK GALLERY WINDOW */}
-        <section className="py-16 md:py-24 border-t border-[#D5E0EA] bg-[#E7EEF6]/40 backdrop-blur-sm relative overflow-hidden">
+        <section className="py-16 md:py-24 border-t border-[#1E293B]/60 bg-[#070B14]/40 backdrop-blur-sm relative overflow-hidden">
           <div className="w-full px-2 sm:px-4 md:px-8 max-w-[1440px] mx-auto">
             <div className="text-center mb-8">
-              <span className="text-sm font-bold font-mono text-[#0460A9] tracking-widest uppercase">Action Reel</span>
+              <span className="text-sm font-bold font-mono text-cyan-400 tracking-widest uppercase">Action Reel</span>
               <h2 className="text-3xl md:text-4xl font-bold font-mono tracking-wider mt-2 mb-3">
                 Bootcamp Highlights
               </h2>
-              <p className="text-[#3E5168] max-w-2xl mx-auto text-sm md:text-base">
+              <p className="text-gray-400 max-w-2xl mx-auto text-sm md:text-base">
                 Real student pilot flights, coding marathons, obstacle arenas, and robotics engineering in action.
               </p>
             </div>
@@ -277,12 +278,12 @@ export default function Workshops() {
         </section>
 
         {/* TRIVIA LEDGER (Interactive Dashboard) */}
-        <section className="py-20 bg-transparent border-t border-[#D5E0EA]/40">
+        <section className="py-20 bg-transparent border-t border-[#1E293B]/40">
           <div className="container px-4 md:px-8 mx-auto">
             <div className="text-center mb-16">
-              <span className="text-sm font-bold font-mono text-[#0460A9] tracking-widest uppercase">Information Ledger</span>
+              <span className="text-sm font-bold font-mono text-cyan-400 tracking-widest uppercase">Information Ledger</span>
               <h2 className="text-3xl md:text-4xl font-bold font-mono tracking-wider mt-2 mb-4">Cybotz Trivia Ledger</h2>
-              <p className="text-[#3E5168] max-w-2xl mx-auto text-base">
+              <p className="text-gray-400 max-w-2xl mx-auto text-base">
                 Explore real aeronautical records, computer statistics, and hardware engineering facts.
               </p>
             </div>
@@ -299,15 +300,15 @@ export default function Workshops() {
                       key={t.id}
                       onClick={() => setActiveTriviaId(t.id)}
                       className={`w-full flex items-center justify-between p-4 rounded-lg border font-mono text-sm tracking-wider transition-all duration-300 text-left cursor-pointer bg-transparent ${isActive
-                          ? "border-cyan-500/50 bg-cyan-500/10 text-[#0460A9] font-bold shadow-[0_0_15px_rgba(5,117,206,0.08)]"
-                          : "border-[#D5E0EA] hover:border-cyan-500/20 text-[#3E5168] hover:text-[#0460A9]"
+                          ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400 font-bold shadow-[0_0_15px_rgba(0,240,255,0.08)]"
+                          : "border-slate-800 hover:border-cyan-500/20 text-gray-400 hover:text-cyan-400"
                         }`}
                     >
                       <span className="flex items-center gap-3">
                         <Icon size={16} />
                         {t.title}
                       </span>
-                      <span className={`text-xs ${isActive ? "text-[#0460A9] font-bold" : "text-gray-500"}`}>
+                      <span className={`text-xs ${isActive ? "text-cyan-300 font-bold" : "text-gray-500"}`}>
                         {t.value}
                       </span>
                     </button>
@@ -316,22 +317,22 @@ export default function Workshops() {
               </div>
 
               {/* Right Column: Telemetry Monitor (col-7) */}
-              <div className="lg:col-span-7 p-8 rounded-2xl border border-[#D5E0EA] bg-white/80 backdrop-blur-md flex flex-col justify-between shadow-2xl relative overflow-hidden group">
+              <div className="lg:col-span-7 p-8 rounded-2xl border border-slate-800/60 bg-slate-950/25 backdrop-blur-md flex flex-col justify-between shadow-2xl relative overflow-hidden group">
                 {/* Visual grid decor */}
                 <div className="absolute inset-0 bg-grid-white/[0.01] pointer-events-none" />
                 <div className="absolute top-4 right-4 text-gray-700 font-mono text-[10px]">MONITOR: RX_LINK</div>
 
                 <div className="relative z-10 flex flex-col gap-6">
                   {/* Icon and title header */}
-                  <div className="flex items-center gap-4 border-b border-[#D5E0EA] pb-4">
-                    <div className="w-12 h-12 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-[#0460A9] flex items-center justify-center animate-pulse">
+                  <div className="flex items-center gap-4 border-b border-slate-800 pb-4">
+                    <div className="w-12 h-12 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center animate-pulse">
                       <ActiveIcon size={24} />
                     </div>
                     <div>
-                      <span className="text-xs font-bold font-mono text-[#3E5168] uppercase tracking-widest">
+                      <span className="text-xs font-bold font-mono text-gray-400 uppercase tracking-widest">
                         Selected Ledger Entry
                       </span>
-                      <h4 className="text-xl font-bold font-mono text-[#102033] tracking-wide mt-0.5">
+                      <h4 className="text-xl font-bold font-mono text-white tracking-wide mt-0.5">
                         {activeTrivia.title}
                       </h4>
                     </div>
@@ -339,27 +340,27 @@ export default function Workshops() {
 
                   {/* High neon telemetry value */}
                   <div>
-                    <span className="text-xs font-bold font-mono text-[#3E5168] uppercase block mb-1">
+                    <span className="text-xs font-bold font-mono text-gray-400 uppercase block mb-1">
                       Data Log
                     </span>
-                    <span className="text-4xl md:text-5xl font-extrabold font-mono text-[#0460A9] tracking-wider glow-cyan-text block uppercase">
+                    <span className="text-4xl md:text-5xl font-extrabold font-mono text-cyan-400 tracking-wider glow-cyan-text block uppercase">
                       {activeTrivia.value}
                     </span>
                   </div>
 
                   {/* Fact description */}
                   <div>
-                    <span className="text-xs font-bold font-mono text-[#3E5168] uppercase block mb-2">
+                    <span className="text-xs font-bold font-mono text-gray-400 uppercase block mb-2">
                       Description & Analysis
                     </span>
-                    <p className="text-[#3E5168] text-base md:text-lg leading-relaxed font-medium">
+                    <p className="text-gray-300 text-base md:text-lg leading-relaxed font-medium">
                       {activeTrivia.desc}
                     </p>
                   </div>
                 </div>
 
                 {/* Sub corner telemetry stats */}
-                <div className="relative z-10 flex justify-between text-[11px] font-mono text-slate-400 border-t border-[#D5E0EA] pt-4 mt-8">
+                <div className="relative z-10 flex justify-between text-[11px] font-mono text-slate-400 border-t border-slate-800/80 pt-4 mt-8">
                   <span>CRC_CHECK: [OK]</span>
                   <span>TEL_SPEED: 57600bps</span>
                   <span>FLOW: COMPLETED</span>
@@ -371,23 +372,23 @@ export default function Workshops() {
         </section>
 
         {/* INTERNAL CROSS-LINK: Labs */}
-        <section className="py-16 bg-transparent border-t border-[#D5E0EA]/40">
+        <section className="py-16 bg-transparent border-t border-[#1E293B]/40">
           <div className="container px-4 md:px-8 mx-auto">
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-2xl md:text-3xl font-bold font-mono tracking-wider mb-4">Want Something More Permanent?</h2>
-              <p className="text-[#3E5168] mb-8 text-sm md:text-base">
+              <p className="text-gray-400 mb-8 text-sm md:text-base">
                 Set up a full-scale Drone & Robotics Lab at your campus with ongoing curriculum support and teacher training.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button
                   onClick={() => handleNavigate("/labs")}
-                  className="flex items-center justify-center gap-2 px-6 py-3 bg-[#F97405] text-[#102033] font-bold font-mono text-sm tracking-wider rounded-lg hover:bg-[#ff8614] transition-all duration-300 shadow-[0_8px_20px_rgba(249,116,5,0.18)] cursor-pointer"
+                  className="flex items-center justify-center gap-2 px-6 py-3 bg-[#F97405] text-slate-950 font-bold font-mono text-sm tracking-wider rounded-lg hover:bg-[#ff8614] transition-all duration-300 shadow-[0_8px_20px_rgba(249,116,5,0.25)] glow-orange cursor-pointer"
                 >
                   Explore Lab Setups <ArrowRight size={16} />
                 </button>
                 <button
                   onClick={() => handleNavigate("/")}
-                  className="flex items-center justify-center gap-2 px-6 py-3 border border-cyan-500 text-[#0460A9] font-bold font-mono text-sm tracking-wider rounded-lg hover:bg-cyan-500/10 transition-all duration-300 cursor-pointer"
+                  className="flex items-center justify-center gap-2 px-6 py-3 border border-cyan-500 text-cyan-400 font-bold font-mono text-sm tracking-wider rounded-lg hover:bg-cyan-500/10 transition-all duration-300 cursor-pointer"
                 >
                   Book a Free Trial <ArrowRight size={16} />
                 </button>

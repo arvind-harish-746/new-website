@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, lazy, Suspense } from "react";
 import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -20,6 +20,10 @@ import StudentPortal from "./pages/StudentPortal";
 import { captureUtmParams } from "./lib/utm";
 import { markSplashSeen, shouldPlaySplash, webglAvailable } from "./lib/splash";
 import SplashScreen, { SplashGateProvider, type IntroMode } from "./components/SplashScreen";
+
+const HeroCraft = lazy(() =>
+  import("@/components/home/HeroCraft").then((mod) => ({ default: mod.HeroCraft }))
+);
 
 function Router() {
   return (
@@ -61,9 +65,9 @@ function App() {
   const notifyModelReady = useCallback(() => {
     setIntro((current) => {
       if (current !== "pending") return current;
-      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      return reduce ? "reduced" : "video";
+      return "none";
     });
+    setSuspendBackground(false);
   }, []);
 
   const abortToClassic = useCallback(() => {
@@ -127,17 +131,20 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <ThemeProvider defaultTheme="light">
+      <ThemeProvider defaultTheme="dark">
         <SplashGateProvider
           value={{ suspendBackground, intro, notifyModelReady, finishIntro, abortToClassic }}
         >
           <div className="relative min-h-screen" inert={intro !== "none" ? true : undefined}>
             {isOffline && <OfflineOverlay onRetry={() => setIsOffline(!navigator.onLine)} />}
             <ScrollProgressBar />
-            <MouseEffects showLabel={false} color="#0575CE" effectSize={60} />
+            <MouseEffects showLabel={false} color="#00F0FF" effectSize={60} />
             <Router />
             <ScrollToTop />
             <CookieBanner />
+            <Suspense fallback={null}>
+              <HeroCraft />
+            </Suspense>
           </div>
           {intro === "pending" && (
             <div className="intro-veil" role="dialog" aria-modal="true" aria-label="Loading Cybotz">

@@ -256,6 +256,10 @@ async function startServer() {
   const app = express();
   const server = createServer(app);
 
+  // Trust the first proxy (Nginx) so req.ip reflects the real client IP.
+  // Critical for rate-limiting and IP-based security behind a reverse proxy.
+  app.set("trust proxy", 1);
+
   app.use(helmet({
     contentSecurityPolicy: false,
     crossOriginEmbedderPolicy: false,

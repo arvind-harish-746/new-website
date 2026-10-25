@@ -31,11 +31,11 @@ const AetherFlowHero = ({ showContent = true, densityMultiplier = 2.4, suspended
         };
 
         const cyanPalette = [
-            'rgba(5, 117, 206, 0.55)',
-            'rgba(4, 96, 169, 0.45)',
-            'rgba(61, 143, 212, 0.4)',
-            'rgba(249, 116, 5, 0.42)',
-            'rgba(160, 75, 3, 0.35)'
+            'rgba(0, 240, 255, 0.9)',
+            'rgba(56, 189, 248, 0.85)',
+            'rgba(34, 211, 238, 0.75)',
+            'rgba(14, 165, 233, 0.7)',
+            'rgba(125, 211, 252, 0.8)'
         ];
 
         class Particle {
@@ -72,7 +72,7 @@ const AetherFlowHero = ({ showContent = true, densityMultiplier = 2.4, suspended
                     ctx.save();
                     ctx.beginPath();
                     ctx.arc(this.x, this.y, glowRadius, 0, Math.PI * 2, false);
-                    ctx.fillStyle = 'rgba(5, 117, 206, 0.1)';
+                    ctx.fillStyle = 'rgba(0, 240, 255, 0.15)';
                     ctx.fill();
                     ctx.restore();
                 }
@@ -119,16 +119,16 @@ const AetherFlowHero = ({ showContent = true, densityMultiplier = 2.4, suspended
             
             // Responsive particle density calculation:
             // Mobile screens (< 768px): Maintain rich density (~100-130 particles) so mobile viewport has vibrant depth.
-            // Laptop / Desktop screens (>= 768px): Restored to clean original constellation (~75-135 particles) avoiding dense particle clutter.
+            // Laptop / Desktop screens (>= 768px): Restored to clean original constellation (~180-320 particles).
             const isMobile = canvas.width < 768;
             let numberOfParticles: number;
 
             if (isMobile) {
-                const rawCount = Math.floor(((canvas.height * canvas.width) / 14000) * densityMultiplier);
-                numberOfParticles = Math.min(Math.max(rawCount, 24), 40);
+                const rawCount = Math.floor(((canvas.height * canvas.width) / 3800) * (densityMultiplier / 2));
+                numberOfParticles = Math.min(Math.max(rawCount, 100), 130);
             } else {
-                const rawCount = Math.floor(((canvas.height * canvas.width) / 22000) * densityMultiplier);
-                numberOfParticles = Math.min(Math.max(rawCount, 36), 70);
+                const rawCount = Math.floor((canvas.height * canvas.width) / 7200);
+                numberOfParticles = Math.min(Math.max(rawCount, 180), 320);
             }
 
             for (let i = 0; i < numberOfParticles; i++) {
@@ -160,8 +160,7 @@ const AetherFlowHero = ({ showContent = true, densityMultiplier = 2.4, suspended
         function animate() {
             if (!canvas || !ctx) return;
             animationFrameId = requestAnimationFrame(animate);
-            if (document.documentElement.dataset.heroWebgl === "on") return;
-            ctx.fillStyle = 'rgba(244, 247, 251, 1)';
+            ctx.fillStyle = 'rgba(10, 15, 29, 1)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             for (let i = 0; i < particles.length; i++) {
@@ -172,7 +171,7 @@ const AetherFlowHero = ({ showContent = true, densityMultiplier = 2.4, suspended
 
         function connect() {
             if (!canvas || !ctx) return;
-            const maxConnectDistanceSq = 96 * 96;
+            const maxConnectDistanceSq = 135 * 135;
 
             for (let a = 0; a < particles.length; a++) {
                 // Check connectivity with nearby particles
@@ -183,7 +182,7 @@ const AetherFlowHero = ({ showContent = true, densityMultiplier = 2.4, suspended
 
                     if (distSq < maxConnectDistanceSq) {
                         const ratio = 1 - (distSq / maxConnectDistanceSq);
-                        const opacity = ratio * 0.28;
+                        const opacity = ratio * 0.52;
                         
                         let isNearMouse = false;
                         if (mouse.x !== null && mouse.y !== null) {
@@ -194,10 +193,10 @@ const AetherFlowHero = ({ showContent = true, densityMultiplier = 2.4, suspended
                             }
                         }
 
-                        ctx.strokeStyle = isNearMouse
-                            ? `rgba(249, 116, 5, ${Math.min(opacity * 1.8, 0.55)})`
-                            : `rgba(5, 117, 206, ${opacity})`;
-                        ctx.lineWidth = isNearMouse ? 1.4 : 1;
+                        ctx.strokeStyle = isNearMouse 
+                            ? `rgba(255, 255, 255, ${Math.min(opacity * 1.6, 0.95)})` 
+                            : `rgba(0, 230, 255, ${opacity})`;
+                        ctx.lineWidth = isNearMouse ? 2.0 : 1.35;
                         ctx.beginPath();
                         ctx.moveTo(particles[a].x, particles[a].y);
                         ctx.lineTo(particles[b].x, particles[b].y);

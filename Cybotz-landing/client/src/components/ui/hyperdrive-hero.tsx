@@ -37,7 +37,7 @@ export const StarfieldCanvas: React.FC<StarfieldCanvasProps> = ({
 
     const getStarColorPalette = (): string => {
       if (starColor === "cyan") {
-        return "rgba(5, 117, 206, ALPHA)";
+        return "rgba(0, 240, 255, ALPHA)";
       }
       if (starColor === "white") {
         return "rgba(255, 255, 255, ALPHA)";
@@ -45,7 +45,7 @@ export const StarfieldCanvas: React.FC<StarfieldCanvasProps> = ({
       // "multi" palette: cyberpunk cyan, sky blue, and crisp white
       const rand = Math.random();
       if (rand < 0.55) {
-        return "rgba(5, 117, 206, ALPHA)"; // Electric Cyan
+        return "rgba(0, 240, 255, ALPHA)"; // Electric Cyan
       } else if (rand < 0.8) {
         return "rgba(56, 189, 248, ALPHA)"; // Sky Cyan
       } else {
@@ -66,7 +66,7 @@ export const StarfieldCanvas: React.FC<StarfieldCanvasProps> = ({
           this.y = 0;
           this.z = 1000;
           this.pz = 1000;
-          this.colorTemplate = "rgba(5, 117, 206, ALPHA)";
+          this.colorTemplate = "rgba(0, 240, 255, ALPHA)";
           return;
         }
         this.x = Math.random() * canvas.width - canvas.width / 2;

@@ -8,7 +8,7 @@ gsap.registerPlugin(ScrollTrigger);
  * Scroll motion for the homepage only.
  *
  * GSAP ScrollTrigger ships with the gsap package already used by the splash — no Lenis,
- * no extra three.js scene. Native scrolling stays intact for mid-range phones. Reveals
+ * no extra three.js scenes. Native scrolling stays intact for mid-range phones. Reveals
  * that must stay readable use immediateRender:false so a failed trigger never hides copy.
  * Pins are desktop-only and short; phones get CSS view-timeline fades instead.
  */
@@ -87,17 +87,13 @@ export function useHomeMotion(active: boolean) {
       if (scans.length) {
         const sequence = gsap.timeline({
           scrollTrigger: {
-            trigger: ".services-pin",
-            start: "top 96px",
-            end: "+=65%",
-            pin: true,
-            scrub: 0.4,
-            anticipatePin: 1,
-            invalidateOnRefresh: true,
+            trigger: "#sec-services",
+            start: "top 80%",
+            toggleActions: "play none none none",
           },
         });
         scans.forEach((scan, index) => {
-          sequence.fromTo(scan, { scaleX: 0 }, { scaleX: 1, ease: "none", duration: 0.6 }, index * 0.28);
+          sequence.fromTo(scan, { scaleX: 0 }, { scaleX: 1, ease: "power2.out", duration: 0.6 }, index * 0.2);
         });
       }
 

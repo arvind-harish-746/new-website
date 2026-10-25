@@ -46,3 +46,8 @@ pids
 *~
 .DS_Store
 Thumbs.db
+
+# Sensitive local files
+mail-registrations.png
+proton-recovery-phrase.pdf
+
